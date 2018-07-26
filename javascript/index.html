@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Chessbot controls</h1>
+
+<div><button name="stop">Stop</button>
+<div><button name="forward">forward</button>
+<div><button name="backward">backward</button>
+<div><button name="turnleft">turnleft</button>
+<div><button name="turnright">turnright</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
+<script>
+var socket = io(); //load socket.io-client and connect to the host that serves the page
+window.addEventListener("load", function(){ //when page loads
+    document.querySelectorAll('button').forEach(function(button){
+        console.log('button name: ', button.name);
+        button.addEventListener('click', function() {
+            socket.emit(button.name);
+        })
+    })
+});    
+</script>
+</html>
+</body>
+</html>
