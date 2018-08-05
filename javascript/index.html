@@ -1,25 +1,53 @@
 <!DOCTYPE html>
 <html>
+<style>
+#nfc input {display: block; width: 100%; }
+#nfc button {display: block; width: 100%; }
+</style>
 <body>
-<h1>Chessbot controls</h1>
+    <h1>Chessbot controls</h1>
 
-<div><button name="stop">Stop</button>
-<div><button name="forward">forward</button>
-<div><button name="backward">backward</button>
-<div><button name="turnleft">turnleft</button>
-<div><button name="turnright">turnright</button>
+    <div id="robot_controls">
+        <button name="stop">Stop</button>
+        <button name="forward">forward</button>
+        <button name="backward">backward</button>
+        <button name="turnleft">turnleft</button>
+        <button name="turnright">turnright</button>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
-<script>
+    <div id="nfc">
+        <input type="text" name="input"><button name="send">Save</button>
+        <input type="text" name="value">
+        <input type="text" name="status">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
+    <script>
 var socket = io(); //load socket.io-client and connect to the host that serves the page
 window.addEventListener("load", function(){ //when page loads
-    document.querySelectorAll('button').forEach(function(button){
-        console.log('button name: ', button.name);
+    document.querySelectorAll('#robot_controls > button').forEach(function(button){
         button.addEventListener('click', function() {
             socket.emit(button.name);
         })
     })
-});    
+
+    var button = document.querySelector('#nfc > button[name=send]');
+    button.addEventListener('click', function() {
+        var input = document.querySelector('#nfc > input[name=input]');
+        socket.emit('nfc_write', input.value);
+    });
+
+    socket.on('nfc_read', function(msg){
+        var input = document.querySelector('#nfc > input[name=value]');
+        input.value = msg;
+    });
+  
+    socket.on('nfc_status', function(msg){
+        var input = document.querySelector('#nfc > input[name=status]');
+        input.value = msg;
+    });
+  
+});
 </script>
 </html>
 </body>

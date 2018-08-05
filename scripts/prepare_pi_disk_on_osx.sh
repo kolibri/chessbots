@@ -33,8 +33,16 @@ then
     diskutil unmountDisk /dev/$1
     sudo dd if=$IMG_PATH of=/dev/r$1 bs=1m
     sleep 10 # wait for image mount
+    # enable ssh
     touch /Volumes/boot/ssh
 
+    # raspberry pi config
+    (cat <<EOF
+dtparam=spi=on
+EOF
+    ) > /Volumes/boot/config.txt
+
+    # setup wifi configuration
     if [ -n $WIFI_NAME -a -n $WIFI_PASS ]
     then
         (cat <<EOF
@@ -47,7 +55,7 @@ network={
     psk="$WIFI_PASS"
 }
 EOF
-    ) > /Volumes/boot/wpa_supplicant.conf
+        ) > /Volumes/boot/wpa_supplicant.conf
     fi
 fi
 set +xe
