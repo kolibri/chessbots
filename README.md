@@ -27,7 +27,7 @@ Hardware:
 
 - Rapsberry Pi 3 (because of the built in wifi)
 - RFID-RC522 Module
-- Robot chassis for a three wheeled robot (two wheels controlled by dc motors, one free worning wheel)
+- Robot chassis for a three wheeled robot (two wheels controlled by dc motors, one free turning wheel)
 - L293D motor driver
 - 6 AA accus within a battery holder
 - some cables
