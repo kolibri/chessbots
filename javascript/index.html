@@ -1,54 +1,13 @@
 <!DOCTYPE html>
-<html>
-<style>
-#nfc input {display: block; width: 100%; }
-#nfc button {display: block; width: 100%; }
-</style>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessBots</title>
+    <link  href="dist/client.css" rel="stylesheet">
+    <script src="dist/client.js" type="text/javascript"></script>
+</head>
 <body>
-    <h1>Chessbot controls</h1>
-
-    <div id="robot_controls">
-        <button name="stop">Stop</button>
-        <button name="forward">forward</button>
-        <button name="backward">backward</button>
-        <button name="turnleft">turnleft</button>
-        <button name="turnright">turnright</button>
-    </div>
-
-    <div id="nfc">
-        <input type="text" name="input"><button name="send">Save</button>
-        <input type="text" name="value">
-        <input type="text" name="status">
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
-    <script>
-var socket = io(); //load socket.io-client and connect to the host that serves the page
-window.addEventListener("load", function(){ //when page loads
-    document.querySelectorAll('#robot_controls > button').forEach(function(button){
-        button.addEventListener('click', function() {
-            socket.emit(button.name);
-        })
-    })
-
-    var button = document.querySelector('#nfc > button[name=send]');
-    button.addEventListener('click', function() {
-        var input = document.querySelector('#nfc > input[name=input]');
-        socket.emit('nfc_write', input.value);
-    });
-
-    socket.on('nfc_read', function(msg){
-        var input = document.querySelector('#nfc > input[name=value]');
-        input.value = msg;
-    });
-  
-    socket.on('nfc_status', function(msg){
-        var input = document.querySelector('#nfc > input[name=status]');
-        input.value = msg;
-    });
-  
-});
-</script>
-</html>
+    <div id="client"></div>
 </body>
 </html>
