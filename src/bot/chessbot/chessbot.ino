@@ -10,17 +10,24 @@ const char* password = "humm!ngb!rd31";
 #define MOTOR2_B D4
 #define MOTOR2_PWM D2
 
-char* state = "stop";
 WiFiServer server(80);
 
 void setup() {
     Serial.begin(115200);
-    pinmode(MOTOR1_A, OUTPUT);
-    pinmode(MOTOR1_B, OUTPUT);
-    pinmode(MOTOR1_PWM, OUTPUT);
-    pinmode(MOTOR2_A, OUTPUT);
-    pinmode(MOTOR2_B, OUTPUT);
-    pinmode(MOTOR2_PWM, OUTPUT);
+    pinMode(MOTOR1_A, OUTPUT);
+    pinMode(MOTOR1_B, OUTPUT);
+    pinMode(MOTOR1_PWM, OUTPUT);
+    pinMode(MOTOR2_A, OUTPUT);
+    pinMode(MOTOR2_B, OUTPUT);
+    pinMode(MOTOR2_PWM, OUTPUT);
+
+    digitalWrite(MOTOR1_A, LOW);
+    digitalWrite(MOTOR1_B, LOW);
+    analogWrite(MOTOR1_PWM, 0);
+    digitalWrite(MOTOR2_A, LOW);
+    digitalWrite(MOTOR2_B, LOW);
+    analogWrite(MOTOR2_PWM, 0);
+
 
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -52,62 +59,62 @@ void loop() {
     Serial.println(req);
     client.flush();
 
-    if (req.indexOf("/-255:-255") != -1)
+    if (req.indexOf("/-255:-255") != -1) {
         controlMotor(-255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/255:255") != -1)
+    } else if (req.indexOf("/255:255") != -1) {
         controlMotor(255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/-255:255") != -1)
+    } else if (req.indexOf("/-255:255") != -1) {
         controlMotor(-255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/255:-255") != -1)
+    } else if (req.indexOf("/255:-255") != -1) {
         controlMotor(255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-
-    else if (req.indexOf("/-127:-127") != -1)
+  
+    } else if (req.indexOf("/-127:-127") != -1) {
         controlMotor(-127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/127:127") != -1)
+    } else if (req.indexOf("/127:127") != -1) {
         controlMotor(127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/-127:127") != -1)
+    } else if (req.indexOf("/-127:127") != -1) {
         controlMotor(-127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/127:-127") != -1)
+    } else if (req.indexOf("/127:-127") != -1) {
         controlMotor(127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-
-    else if (req.indexOf("/-64:-64") != -1)
+  
+    } else if (req.indexOf("/-64:-64") != -1) {
         controlMotor(-64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/64:64") != -1)
+    } else if (req.indexOf("/64:64") != -1) {
         controlMotor(64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/-64:64") != -1)
+    } else if (req.indexOf("/-64:64") != -1) {
         controlMotor(-64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/64:-64") != -1)
+    } else if (req.indexOf("/64:-64") != -1) {
         controlMotor(64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-
-    else if (req.indexOf("/-192:-192") != -1)
+ 
+    } else if (req.indexOf("/-192:-192") != -1) {
         controlMotor(-192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/192:192") != -1)
+    } else if (req.indexOf("/192:192") != -1) {
         controlMotor(192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/-192:192") != -1)
+    } else if (req.indexOf("/-192:192") != -1) {
         controlMotor(-192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else if (req.indexOf("/192:-192") != -1)
+    } else if (req.indexOf("/192:-192") != -1) {
         controlMotor(192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(-192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-
-    else if (req.indexOf("/0:0") != -1)
+    
+    } else if (req.indexOf("/0:0") != -1) {
         controlMotor(0, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(0, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    else {
+    } else {
         Serial.println("invalid request");
         client.stop();
         return;
@@ -118,9 +125,7 @@ void loop() {
 // Prepare the response
     String s = "HTTP/1.1 200 OK\r\n";
     s += "Content-Type: application/json\r\n\r\n";
-    s += "{\"state\": \"";
-    s += state;
-    s += "\"}\n";
+    s += "{\"state\": \"ok\"}\n";
 
 // Send the response to the client
     client.print(s);
