@@ -23,10 +23,10 @@ void setup() {
 
     digitalWrite(MOTOR1_A, LOW);
     digitalWrite(MOTOR1_B, LOW);
-    analogWrite(MOTOR1_PWM, 0);
+    //analogWrite(MOTOR1_PWM, 255);
     digitalWrite(MOTOR2_A, LOW);
     digitalWrite(MOTOR2_B, LOW);
-    analogWrite(MOTOR2_PWM, 0);
+    //analogWrite(MOTOR2_PWM, 255);
 
 
     Serial.print("Connecting to ");
@@ -58,62 +58,26 @@ void loop() {
     String req = client.readStringUntil('\r');
     Serial.println(req);
     client.flush();
-
-    if (req.indexOf("/-255:-255") != -1) {
-        controlMotor(-255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/255:255") != -1) {
-        controlMotor(255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/-255:255") != -1) {
-        controlMotor(-255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/255:-255") != -1) {
-        controlMotor(255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-  
-    } else if (req.indexOf("/-127:-127") != -1) {
-        controlMotor(-127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
+    if (req.indexOf("/off") != -1) {
+        digitalWrite(MOTOR1_A, LOW);
+        digitalWrite(MOTOR1_B, LOW);
+        digitalWrite(MOTOR2_A, LOW);
+        digitalWrite(MOTOR2_B, LOW);
+    } else if (req.indexOf("/0:0")     != -1) {
+        controlMotor(0,   MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
+        controlMotor(0,   MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
+    } else if (req.indexOf("/64:64")   != -1) {
+        controlMotor(64,  MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
+        controlMotor(64,  MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
     } else if (req.indexOf("/127:127") != -1) {
         controlMotor(127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/-127:127") != -1) {
-        controlMotor(-127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/127:-127") != -1) {
-        controlMotor(127, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-127, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-  
-    } else if (req.indexOf("/-64:-64") != -1) {
-        controlMotor(-64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/64:64") != -1) {
-        controlMotor(64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/-64:64") != -1) {
-        controlMotor(-64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/64:-64") != -1) {
-        controlMotor(64, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-64, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
- 
-    } else if (req.indexOf("/-192:-192") != -1) {
-        controlMotor(-192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
     } else if (req.indexOf("/192:192") != -1) {
         controlMotor(192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
         controlMotor(192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/-192:192") != -1) {
-        controlMotor(-192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    } else if (req.indexOf("/192:-192") != -1) {
-        controlMotor(192, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(-192, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    
-    } else if (req.indexOf("/0:0") != -1) {
-        controlMotor(0, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
-        controlMotor(0, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
+    } else if (req.indexOf("/255:255") != -1) {
+        controlMotor(255, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
+        controlMotor(255, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
     } else {
         Serial.println("invalid request");
         client.stop();
@@ -137,25 +101,16 @@ void loop() {
 }
 
 void controlMotor(int val, int ma, int mb, int mpwm) {
-    analogWrite(mpwm,val);
-
-    if (0 < val) {
-        digitalWrite(ma,HIGH);
-        digitalWrite(mb,LOW);
-
-        return;
-    }
-
-    if (0 > val) {
-        digitalWrite(ma,LOW);
-        digitalWrite(mb,HIGH);
-
-        return;
-    }
-
+    //analogWrite(mpwm,val);
     digitalWrite(ma,LOW);
     digitalWrite(mb,LOW);
 
-    return;
+    if (127 < val) {
+        digitalWrite(ma,HIGH);
+    }
+
+    if (127 > val) {
+        digitalWrite(mb,HIGH);
+    }
 }
 
