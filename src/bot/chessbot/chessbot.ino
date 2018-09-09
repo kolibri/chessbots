@@ -1,16 +1,29 @@
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
+#include <SPI.h>
+#include <MFRC522.h>
 
 const char* ssid = "Trochilidae";
 const char* password = "humm!ngb!rd31";
+String jsontext = "[]";
 
-#define MOTOR1_A D6
-#define MOTOR1_B D8
-#define MOTOR1_PWM 14
-#define MOTOR2_A D1
-#define MOTOR2_B D4
-#define MOTOR2_PWM 4
+#define MOTOR1_A 10    // SD3
+#define MOTOR1_B 15    // D8
+#define MOTOR1_PWM 0  // D3
+
+#define MOTOR2_A 3     // rx
+#define MOTOR2_B 16     // d0
+#define MOTOR2_PWM 2   // D4
+
+#define SS_PIN 4  //D2
+#define RST_PIN 5 //D1
+
+
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
+int statuss = 0;
+int out = 0;
 
 ESP8266WebServer server(80);
 
@@ -45,10 +58,15 @@ void setup() {
     Serial.println("Wifi connected & Server started");
 
     Serial.println(WiFi.localIP());
+
+    SPI.begin();      // Initiate  SPI bus
+    mfrc522.PCD_Init();   // Initiate MFRC522
+
 }
 
 void loop() {
     server.handleClient();
+    readCard();
 }
 
 void handleRequest() {
@@ -90,3 +108,50 @@ void controlMotor(int val, int ma, int mb, int mpwm) {
         digitalWrite(mb,HIGH);
     }
 }
+
+void readCard() 
+{
+  // Look for new cards
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  //Show UID on serialM monitor
+  Serial.println();
+  Serial.print(" UID tag :");
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(mfrc522.uid.uidByte[i], HEX);
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  content.toUpperCase();
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& tagInfo = jsonBuffer.createObject();
+  tagInfo["id"] = content.substring(1);
+  tagInfo.printTo(jsontext);
+
+  Serial.println(jsontext);
+
+   HTTPClient http;    //Declare object of class HTTPClient
+ 
+   http.begin("http://192.168.178.20:8008/tag");      //Specify request destination
+   http.addHeader("Content-Type", "application/json");  //Specify content-type header
+ 
+   int httpCode = http.POST(jsontext);   //Send the request
+   String payload = http.getString();                  //Get the response payload
+ 
+   Serial.println(httpCode);   //Print HTTP return code
+   Serial.println(payload);    //Print request response payload
+ 
+   http.end();  //Close connection
+} 
