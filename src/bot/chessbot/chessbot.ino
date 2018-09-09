@@ -26,11 +26,10 @@ void setup() {
 
     digitalWrite(MOTOR1_A, LOW);
     digitalWrite(MOTOR1_B, LOW);
-    analogWrite(MOTOR1_PWM, 127);
+    analogWrite(MOTOR1_PWM, 0);
     digitalWrite(MOTOR2_A, LOW);
     digitalWrite(MOTOR2_B, LOW);
-    analogWrite(MOTOR2_PWM, 127);
-
+    analogWrite(MOTOR2_PWM, 0);
 
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -42,12 +41,10 @@ void setup() {
     }
     
     server.on("/sequence", handleRequest); 
-
     server.begin();
     Serial.println("Wifi connected & Server started");
 
     Serial.println(WiFi.localIP());
-
 }
 
 void loop() {
@@ -93,4 +90,3 @@ void controlMotor(int val, int ma, int mb, int mpwm) {
         digitalWrite(mb,HIGH);
     }
 }
-

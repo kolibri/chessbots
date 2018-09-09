@@ -25,7 +25,7 @@ For the prototype you need some things:
 
 Hardware:
 
-- Rapsberry Pi 3 (because of the built in wifi)
+- ESP6288 NodeMCU Module
 - RFID-RC522 Module
 - Robot chassis for a three wheeled robot (two wheels controlled by dc motors, one free turning wheel)
 - L293D motor driver
@@ -35,7 +35,6 @@ Hardware:
 
 Software: 
 - [Fritzing](http://fritzing.org/) To read the wiring schemas
-- [Ansible](http://ansible.com/) To provision the raspberry pi
 
 
 ### Getting the hardware together

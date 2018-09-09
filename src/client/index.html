@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessBots</title>
+    <style>
+    input[type=range][orient=vertical]
+    {
+        writing-mode: bt-lr; /* IE */
+        -webkit-appearance: slider-vertical; /* WebKit */
+        width: 8px;
+        height: 175px;
+        padding: 0 5px;
+    }
+</style>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function ()
+    {
+        function handleChange(event) {
+            event.preventDefault();
+            var body = {
+                "l":  document.getElementById('l').value,
+                "r":  document.getElementById('r').value,
+                "t":  10
+            }
+            console.log(body);
+            var payloadDisplay = document.getElementById('payload');
+            payloadDisplay.innerHTML = JSON.stringify(body);
+
+            sendData(body);
+        }
+
+        function sendData(data) {
+            var url = 'http://' + document.getElementById('ip').value + '/sequence';
+
+            fetch(url, {
+                method: 'POST', // or 'PUT'
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers:{
+                'Content-Type': 'application/json'
+                },
+                mode: 'no-cors'
+            }).then(res => res.json())
+            .then(response => console.log('Success:', JSON.stringify(response)))
+            .catch(error => console.error('Error:', error));
+        }
+
+        document.querySelectorAll('.controls input').forEach(function(game, key){
+            game.addEventListener('change', handleChange)
+        });
+
+        document.getElementById('stop').addEventListener('click', function(){
+            sendData({"l": 0, "r": 0, "t": 10});
+        });
+    });
+</script>
+</head>
+<body>
+    <input type="text" name="remote_ip" id="ip" value="192.168.178.35" />
+    <div class="controls">
+        <button id="stop">STOP</button>
+        <input type="range" min="-1024" value="0" max="1024" name="l" id="l" orient="vertical" />
+        <input type="range" min="-1024" value="0" max="1024" name="r" id="r" orient="vertical" />
+        <pre id="payload"></pre>
+    </div>
+</body>
+</html>
