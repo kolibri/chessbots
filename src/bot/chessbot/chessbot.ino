@@ -4,22 +4,17 @@
 #include <ArduinoJson.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Motor.h>
 
 const char* ssid = "Trochilidae";
 const char* password = "humm!ngb!rd31";
 String jsontext = "[]";
 
-#define MOTOR1_A 10    // SD3
-#define MOTOR1_B 15    // D8
-#define MOTOR1_PWM 0  // D3
-
-#define MOTOR2_A 3     // rx
-#define MOTOR2_B 16     // d0
-#define MOTOR2_PWM 2   // D4
-
 #define SS_PIN 4  //D2
 #define RST_PIN 5 //D1
 
+Motor motorLeft(10, 15, 0);
+Motor motorRight(3, 16, 2);
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 int statuss = 0;
@@ -29,21 +24,6 @@ ESP8266WebServer server(80);
 
 void setup() {
     Serial.begin(115200);
-
-    pinMode(MOTOR1_A, OUTPUT);
-    pinMode(MOTOR1_B, OUTPUT);
-    pinMode(MOTOR1_PWM, OUTPUT);
-    pinMode(MOTOR2_A, OUTPUT);
-    pinMode(MOTOR2_B, OUTPUT);
-    pinMode(MOTOR2_PWM, OUTPUT);
-
-    digitalWrite(MOTOR1_A, LOW);
-    digitalWrite(MOTOR1_B, LOW);
-    analogWrite(MOTOR1_PWM, 0);
-    digitalWrite(MOTOR2_A, LOW);
-    digitalWrite(MOTOR2_B, LOW);
-    analogWrite(MOTOR2_PWM, 0);
-
     Serial.print("Connecting to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
@@ -86,27 +66,13 @@ void handleRequest() {
     }      
 
     int r = sequence["r"];
-    int l = sequence["l"];
     int t = sequence["t"];
+    int l = sequence["l"];
 
-    controlMotor(r, MOTOR2_A, MOTOR2_B, MOTOR2_PWM);
-    controlMotor(l, MOTOR1_A, MOTOR1_B, MOTOR1_PWM);
+    motorLeft.control(l);
+    motorRight.control(r);
 
     server.send(200, "text/plain", "ok");
-}
-
-void controlMotor(int val, int ma, int mb, int mpwm) {
-    analogWrite(mpwm,abs(val));
-    digitalWrite(ma,LOW);
-    digitalWrite(mb,LOW);
-
-    if (0 < val) {
-        digitalWrite(ma,HIGH);
-    }
-
-    if (0 > val) {
-        digitalWrite(mb,HIGH);
-    }
 }
 
 void readCard() 
