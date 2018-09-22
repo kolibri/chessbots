@@ -20,10 +20,16 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 int statuss = 0;
 int out = 0;
 
+String sequences[32];
+
 ESP8266WebServer server(80);
 
 void setup() {
     Serial.begin(115200);
+
+    motorLeft.setup();
+    motorRight.setup();
+
     Serial.print("Connecting to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
@@ -55,6 +61,25 @@ void handleRequest() {
 
         return;
     }
+    /*
+        Body structure:
+        [
+            {
+                "targetTagId": [
+                    {
+                        "l": 100 ,
+                        "r": -100 ,
+                        "t": 42 
+                    },
+                    {
+                        "l": -100 ,
+                        "r": 100 ,
+                        "t": 24 
+                    }
+                ]
+           }
+        ]
+    */
 
     StaticJsonBuffer<200> jsonBuffer;
 
@@ -66,14 +91,16 @@ void handleRequest() {
     }      
 
     int r = sequence["r"];
-    int t = sequence["t"];
     int l = sequence["l"];
+    int t = sequence["t"];
 
-    motorLeft.control(l);
     motorRight.control(r);
+    motorLeft.control(l);
 
     server.send(200, "text/plain", "ok");
 }
+
+//void appendSequence()
 
 void readCard() 
 {
