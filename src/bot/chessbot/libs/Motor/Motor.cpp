@@ -14,13 +14,6 @@ void Motor::setup(){
   digitalWrite(_pinA, LOW);
   digitalWrite(_pinB, LOW);
   analogWrite(_pinPwm, 0);
-
-  Serial.println("A: ");
-  Serial.println(_pinA);
-  Serial.println("A: ");
-  Serial.println(_pinB);
-  Serial.println("A: ");
-  Serial.println(_pinPwm);
 }
 
 void Motor::control(int val)

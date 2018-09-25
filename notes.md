@@ -17,21 +17,32 @@ static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 */
 
+# Request Body format
 
-//        Body structure:
-//        [
-//            {
-//                "targetTagId": [
-//                    {
-//                        "l": 100 ,
-//                        "r": -100 ,
-//                        "t": 42 
-//                    },
-//                    {
-//                        "l": -100 ,
-//                        "r": 100 ,
-//                        "t": 24 
-//                    }
-//                ]
-//           }
-//        ]
+```json
+[
+    {
+        "tag": "04 3E CB BA 62 5A 81",
+        "sequence": [
+            {
+                "l": 100 ,
+                "r": -100 ,
+                "t": 42 
+            },
+            {
+                "l": -100 ,
+                "r": 100 ,
+                "t": 24 
+            }
+        ]
+   }
+]
+```
+
+Tag ids:
+
+1: 04 3E CB BA 62 5A 81
+2: 04 36 CB BA 62 5A 81
+3: 04 2E CB BA 62 5A 81
+4: 04 26 CB BA 62 5A 81
+5: 04 1E CB BA 62 5A 81

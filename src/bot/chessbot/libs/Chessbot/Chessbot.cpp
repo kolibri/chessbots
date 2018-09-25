@@ -73,20 +73,39 @@ void Chessbot::handleRequest() {
         return;
     }
 
-    StaticJsonBuffer<200> jsonBuffer;
-    JsonObject& sequence = jsonBuffer.parseObject(_server.arg("plain"));
 
-    if (!sequence.success()) {
+    StaticJsonBuffer<2000> jsonBuffer;
+    JsonObject& request = jsonBuffer.parseObject(_server.arg("plain"));
+
+    if (!request.success()) {
         Serial.println("parseObject() failed");
         return;
     }
 
-    int r = sequence["r"];
-    int l = sequence["l"];
-    int t = sequence["t"];
+    String jsonString;
+    request.printTo(jsonString);
+    Serial.print(jsonString);
 
-    Sequence newSequence(l, r, t);
-    _sequenceQueue.add(millis(), newSequence);
 
+    JsonArray& sequences = request["sequence"];
+
+    sequences.printTo(jsonString);
+    Serial.print(jsonString);
+
+
+    for(auto sequence: sequences) {
+        int r = sequence["r"];
+        int l = sequence["l"];
+        int t = sequence["t"];
+        Serial.println("Add new sequence");
+        Serial.print(l);
+        Serial.print(":");
+        Serial.print(r);
+        Serial.print(":");
+        Serial.print(t);
+
+        Sequence newSequence(l, r, t);
+        _sequenceQueue.add(millis(), newSequence);
+    }
     _server.send(200, "text/plain", "ok");
 }

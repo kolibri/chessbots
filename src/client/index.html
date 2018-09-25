@@ -17,20 +17,6 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function ()
     {
-        function handleChange(event) {
-            event.preventDefault();
-            var body = {
-                "l":  document.getElementById('l').value,
-                "r":  document.getElementById('r').value,
-                "t":  3000
-            }
-            console.log(body);
-            var payloadDisplay = document.getElementById('payload');
-            payloadDisplay.innerHTML = JSON.stringify(body);
-
-            sendData(body);
-        }
-
         function sendData(data) {
             var url = 'http://' + document.getElementById('ip').value + '/sequence';
 
@@ -46,45 +32,36 @@
             .catch(error => console.error('Error:', error));
         }
 
-        function handleSequence(event) {
-            event.preventDefault();
-            var data = {
-                "l": event.target.dataset.left,
-                "r": event.target.dataset.right,
-                "t": event.target.dataset.duration
-            };
-            console.log(data)
-            sendData(data);
-        }
-
-        document.querySelectorAll('.controls input').forEach(function(game, key){
-            game.addEventListener('change', handleChange)
+        document.getElementById('form').addEventListener('submit', function(e){
+            e.preventDefault();
+            var payload = document.getElementById('payload').value;
+            sendData(JSON.parse(payload));
         });
 
-        document.querySelectorAll('.controls .sequence').forEach(function(game, key){
-            game.addEventListener('click', handleSequence)
-        });
-
-        document.getElementById('stop').addEventListener('click', function(){
-            sendData({"l": 0, "r": 0, "t": 3000});
-        });
     });
 </script>
 </head>
 <body>
-    <input type="text" name="remote_ip" id="ip" value="192.168.178.35" />
-    <div class="controls">
-        <button id="stop">STOP</button>
 
-        <button class="sequence" data-left="0" data-right="0" data-duration="0">0:0:0</button>
-        <button class="sequence" data-left="1000" data-right="0" data-duration="3000">1000:0:3000</button>
-        <button class="sequence" data-left="0" data-right="1000" data-duration="3000">0:1000:3000</button>
-        <button class="sequence" data-left="-1000" data-right="0" data-duration="3000">-1000:0:3000</button>
-        <button class="sequence" data-left="0" data-right="-1000" data-duration="3000">0:-1000:3000</button>
+    <form action="" id="form">
+        <input type="text" name="remote_ip" id="ip" value="192.168.178.35" />
+        <button type="submit">send</button>
+     
+        <textarea id="payload" row="15" cols="15" style="width: 15em; height: 15em;"">
+{
+"tag": "04 3E CB BA 62 5A 81","sequence":
+[{
+"l": 1000,
+"r": 1000,
+"t": 2000
+},{
+"l": -1000,
+"r": -1000,
+"t": 2000
+}]
+} 
+        </textarea>
 
-        <input type="range" min="-1024" value="0" max="1024" name="l" id="l" orient="vertical" />
-        <input type="range" min="-1024" value="0" max="1024" name="r" id="r" orient="vertical" />
-        <pre id="payload"></pre>
-    </div>
+    </form>
 </body>
 </html>
