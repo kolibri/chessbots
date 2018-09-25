@@ -1,4 +1,5 @@
 build/*
-libs/*
-!libs/Motor/
+libs/ArduinoJson/*
+libs/MFRC522/*
+libs/QueueArray/*
 packages/*

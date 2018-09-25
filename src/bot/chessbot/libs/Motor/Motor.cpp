@@ -1,13 +1,11 @@
-#include <ESP8266WiFi.h>
+#include <Arduino.h>
 #include "Motor.h"
 
-Motor::Motor(int pinA, int pinB, int pinPwm)
-{
-  _pinA = pinA;
-  _pinB = pinB;
-  _pinPwm = pinPwm;
-}
-
+/*
+Motor::Motor(int pinA, int pinB, int pinPwm):
+_pinA(pinA), _pinB(pinB), _pinPwm(pinPwm)
+{}
+*/
 void Motor::setup(){
   pinMode(_pinA, OUTPUT);
   pinMode(_pinB, OUTPUT);
@@ -16,6 +14,13 @@ void Motor::setup(){
   digitalWrite(_pinA, LOW);
   digitalWrite(_pinB, LOW);
   analogWrite(_pinPwm, 0);
+
+  Serial.println("A: ");
+  Serial.println(_pinA);
+  Serial.println("A: ");
+  Serial.println(_pinB);
+  Serial.println("A: ");
+  Serial.println(_pinPwm);
 }
 
 void Motor::control(int val)

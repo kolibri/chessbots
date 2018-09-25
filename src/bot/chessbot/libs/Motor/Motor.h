@@ -6,7 +6,9 @@
 class Motor
 {
   public:
-    Motor(int pinA, int pinB, int pinPwm);
+    Motor(int pinA, int pinB, int pinPwm):
+        _pinA(pinA), _pinB(pinB), _pinPwm(pinPwm) {};
+
     void setup();
     void control(int val);
   private:
