@@ -1,4 +1,7 @@
 #!/bin/bash
+# copied ./arduino15/packages into ./packages
+# currently no way to move installation of packages outside of arduino ide
+# seems to be hardcoded to dotfiles
 
 set -x
 
@@ -10,6 +13,7 @@ arduino-builder \
   -hardware /usr/share/arduino/hardware \
   -hardware ./packages \
   -tools ./packages \
+  -libraries ./external_libs \
   -libraries ./libs \
   -fqbn=esp8266:esp8266:nodemcuv2:CpuFrequency=80,VTable=flash,FlashSize=4M1M,LwIPVariant=v2mss536,Debug=Disabled,DebugLevel=None____,FlashErase=none,UploadSpeed=115200 \
   -ide-version=10805 \

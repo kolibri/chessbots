@@ -1,5 +1,0 @@
-build/*
-libs/ArduinoJson/*
-libs/MFRC522/*
-libs/QueueArray/*
-packages/*
