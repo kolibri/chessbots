@@ -17,7 +17,7 @@ class Chessbot
     String jsontext = "[]";
     SequenceQueue _sequenceQueue;
     int _nextChangeMillis;
-
+    String _expectedTag;
 
 public:
     Chessbot(

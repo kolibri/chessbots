@@ -25,7 +25,8 @@ _cardReader(pinSS, pinRst),
 _server(serverPort),
 _wifiSsid(wifiSsid),
 _wifiPass(wifiPass),
-_nextChangeMillis(0)
+_nextChangeMillis(0),
+_expectedTag("")
 {}
 
 void Chessbot::setup() {
@@ -52,7 +53,7 @@ void Chessbot::setup() {
 void Chessbot::loop()
 {
     _server.handleClient();
-    _cardReader.loop();
+    String tagId = _cardReader.readCard();
 
     int speedLeft = 0;
     int speedRight = 0;
@@ -60,7 +61,36 @@ void Chessbot::loop()
     if(_sequenceQueue.hasItems(millis())) {
       speedLeft = _sequenceQueue.current()._speedLeft;
       speedRight = _sequenceQueue.current()._speedRight;
+    } else if(_sequenceQueue.isFinished(millis())) {
+      if (_expectedTag == "") {
+        Serial.println("no expected target (init state)");
+        // do nothing, wait for sequence income
+        return;
+      }
+
+      if (tagId == "") {
+//        Serial.println("lost");
+        // drive forward until new tag
+      }
+
+      if (tagId == _expectedTag) {
+        Serial.print("right at: ");
+        return;
+      }
+
+      Serial.print("wrong at: ");
+      // send request with tagId to get new sequence
     }
+
+    Serial.print("'");
+    Serial.print(tagId);
+    Serial.print("'");
+    Serial.println();
+    Serial.print("Should be at ");
+    Serial.print("'");
+    Serial.print(_expectedTag);
+    Serial.print("'");
+    Serial.println();
 
     _motorLeft.control(speedLeft);
     _motorRight.control(speedRight);
@@ -81,17 +111,10 @@ void Chessbot::handleRequest() {
         Serial.println("parseObject() failed");
         return;
     }
-
-    String jsonString;
-    request.printTo(jsonString);
-    Serial.print(jsonString);
-
-
+    const char* targetTag = request["tag"];
+    _expectedTag = targetTag;
+//    _expectedTag = request["tag"];
     JsonArray& sequences = request["sequence"];
-
-    sequences.printTo(jsonString);
-    Serial.print(jsonString);
-
 
     for(auto sequence: sequences) {
         int r = sequence["r"];

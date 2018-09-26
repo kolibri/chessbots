@@ -13,8 +13,7 @@ public:
         int pinRst
     );
     void setup();
-    void loop();
-    void readCard();
+    String readCard();
 };
 
 #endif

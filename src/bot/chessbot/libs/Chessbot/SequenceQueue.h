@@ -12,6 +12,7 @@ class SequenceQueue
     SequenceQueue(){};
     void add(int, Sequence);
     Sequence current();
+    bool isFinished(int);
     bool hasItems(int);
 };
 
