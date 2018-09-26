@@ -3,6 +3,9 @@
 [Analog pins on NodeMCU ESP8266](https://i1.wp.com/henrysbench.capnfatz.com/wp-content/uploads/2016/12/Lolin-Node-MCU-IO-Pin-Map-Arduino-IDE.png)
 [NodeMCU Pinout](https://www.teachmemicro.com/nodemcu-pinout/)
 
+# Notes
+
+## Pin int values
 /*
 static const uint8_t D0   = 16;
 static const uint8_t D1   = 5;
@@ -17,32 +20,31 @@ static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 */
 
-# Request Body format
+## Request Body format
 
 ```json
-[
-    {
-        "tag": "04 3E CB BA 62 5A 81",
-        "sequence": [
-            {
-                "l": 100 ,
-                "r": -100 ,
-                "t": 42 
-            },
-            {
-                "l": -100 ,
-                "r": 100 ,
-                "t": 24 
-            }
-        ]
-   }
-]
+{
+    "tag": "04 3E CB BA 62 5A 81",
+    "sequence": [
+        {
+            "l": 1000,
+            "r": 1000,
+            "t": 2000
+        },
+        {
+            "l": -1000,
+            "r": -1000,
+            "t": 2000
+        }
+    ]
+}```
+
+## Tag ids:
+
 ```
-
-Tag ids:
-
 1: 04 3E CB BA 62 5A 81
 2: 04 36 CB BA 62 5A 81
 3: 04 2E CB BA 62 5A 81
 4: 04 26 CB BA 62 5A 81
 5: 04 1E CB BA 62 5A 81
+```
