@@ -4,7 +4,7 @@
 #include <Motor.h>
 #include <ESP8266WebServer.h>
 #include <CardReader.h>
-#include <SequenceQueue.h>
+#include <Sequence.h>
 
 class Chessbot
 {
@@ -15,7 +15,7 @@ class Chessbot
     char* _wifiSsid;
     char* _wifiPass;
     String jsontext = "[]";
-    SequenceQueue _sequenceQueue;
+    Sequence _sequence;
     int _nextChangeMillis;
     String _expectedTag;
 

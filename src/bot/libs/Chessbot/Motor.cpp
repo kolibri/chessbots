@@ -1,11 +1,6 @@
 #include <Arduino.h>
 #include "Motor.h"
 
-/*
-Motor::Motor(int pinA, int pinB, int pinPwm):
-_pinA(pinA), _pinB(pinB), _pinPwm(pinPwm)
-{}
-*/
 void Motor::setup(){
   pinMode(_pinA, OUTPUT);
   pinMode(_pinB, OUTPUT);
