@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 #include <CardReader.h>
 #include <Motor.h>
-#include <SequenceQueue.h>
+#include <Sequence.h>
 
 Chessbot::Chessbot(
     int pinMotorLeftA,
@@ -58,10 +58,10 @@ void Chessbot::loop()
     int speedLeft = 0;
     int speedRight = 0;
 
-    if(_sequenceQueue.hasItems(millis())) {
-      speedLeft = _sequenceQueue.current()._speedLeft;
-      speedRight = _sequenceQueue.current()._speedRight;
-    } else if(_sequenceQueue.isFinished(millis())) {
+    if(_sequence.hasItems(millis())) {
+      speedLeft = _sequence.current()._speedLeft;
+      speedRight = _sequence.current()._speedRight;
+    } else if(_sequence.isFinished(millis())) {
       if (_expectedTag == "") {
         Serial.println("no expected target (init state)");
         // do nothing, wait for sequence income
@@ -127,8 +127,8 @@ void Chessbot::handleRequest() {
         Serial.print(":");
         Serial.print(t);
 
-        Sequence newSequence(l, r, t);
-        _sequenceQueue.add(millis(), newSequence);
+        SequenceItem sequenceItem(l, r, t);
+        _sequence.add(millis(), sequenceItem);
     }
     _server.send(200, "text/plain", "ok");
 }

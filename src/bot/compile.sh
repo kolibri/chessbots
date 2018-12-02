@@ -24,7 +24,7 @@ arduino-builder \
   -prefs=runtime.tools.esptool.path=./packages/esp8266/tools/esptool/0.4.13 \
   -prefs=runtime.tools.mkspiffs.path=./packages/esp8266/tools/mkspiffs/0.2.0 \
   -prefs=runtime.tools.xtensa-lx106-elf-gcc.path=./packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2 \
-  chessbot.ino
+  bot.ino
 #  -verbose \
 
 set +x
