@@ -2,7 +2,7 @@
 
 Chessbot chessbot(
     3, 16, 2,
-    10, 15, 0,
+    15, 10, 0,
     4, 5, 
     80,
     "Trochilidae", "humm!ngb!rd31"
