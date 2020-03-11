@@ -1,0 +1,13 @@
+board_manager:
+  additional_urls:
+    - https://arduino.esp8266.com/stable/package_esp8266com_index.json
+daemon:
+  port: "50051"
+directories:
+  data: ./.arduino15
+  downloads: ./.arduino15/staging
+  user: ./src/bot/
+logging:
+  file: ""
+  format: text
+  level: info
