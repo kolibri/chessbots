@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="bot-overview">
+        {% for bot in bots %}
+        <p>{{ bot.ipAddress }}</p>
+        {% endfor %}
+    </div>
+{% endblock %}
