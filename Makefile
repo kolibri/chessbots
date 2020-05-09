@@ -13,6 +13,7 @@ bot-compile:
 	arduino-cli compile --fqbn esp8266:esp8266:generic src/bot
 
 bot-upload:
+	sudo chmod a+rw $(BOT_UPLOAD_DEVICE)
 	arduino-cli upload -p $(BOT_UPLOAD_DEVICE) --fqbn esp8266:esp8266:generic src/bot
 
 bot-screen:

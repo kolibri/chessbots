@@ -3,7 +3,7 @@
 Chessbot chessbot(
     "Trochilidae",
     "humm!ngb!rd31",
-    "http://192.168.178.36:8000/bot/register"
+    "http://192.168.178.34:8000/bot/register"
 );
 
 void setup() {
