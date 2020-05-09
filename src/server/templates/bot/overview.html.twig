@@ -3,7 +3,13 @@
 {% block body %}
     <div id="bot-overview">
         {% for bot in bots %}
-        <p>{{ bot.ipAddress }}</p>
+        <p>
+            {{ bot.id }}: {{ bot.ipAddress }}
+            <a href="{{ path('app_bot_updatetags', {'id':  bot.id}) }}">tags</a>
+            left: {{ bot.leftTag }}
+            right: {{ bot.rightTag }}
+        </p>
+
         {% endfor %}
     </div>
 {% endblock %}
