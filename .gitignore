@@ -6,3 +6,4 @@ proto.tgz
 *.elf
 src/bot/libraries/*
 !src/bot/libraries/Chessbot
+src/bot_master/*

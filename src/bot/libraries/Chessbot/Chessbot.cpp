@@ -2,19 +2,29 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
+#include <CardReader.h>
 
 Chessbot::Chessbot(
   char* wifiSsid,
   char* wifiPass,
-  char* serverUrl
+  char* serverUrl,
+  int cardReaderRstPin,
+  int cardReaderLeftSSPin,
+  int cardReaderRightSSPin
   ):
 _wifiSsid(wifiSsid),
 _wifiPass(wifiPass),
 _serverUrl(serverUrl),
-_server(80)
+_server(80),
+cardReaderLeft(cardReaderLeftSSPin, cardReaderRstPin),
+cardReaderRight(cardReaderRightSSPin, cardReaderRstPin)
 {}
 
 void Chessbot::setup() {
+  cardReaderLeft.setup();
+  cardReaderRight.setup();
+
+
   Serial.print("Connecting to ");
   Serial.println(_wifiSsid);
   WiFi.begin(_wifiSsid, _wifiPass);
@@ -40,6 +50,17 @@ void Chessbot::setup() {
 void Chessbot::loop()
 {
       _server.handleClient();
+
+
+  String tagLeft = cardReaderLeft.readCard();
+  String tagRight = cardReaderRight.readCard();
+
+  //Serial.print("Tag left");
+  //Serial.println(tagLeft);
+
+  //Serial.print("Tag right");
+  //Serial.println(tagRight);
+
 }
 
 void Chessbot::registerBot() {
@@ -62,6 +83,7 @@ void Chessbot::registerBot() {
 
 
 void Chessbot::handleTagsRequest() {
-  Serial.println("Reqestd tags");
+  Serial.println("Reqested tags");
+
   _server.send(200, "application/json", "{\"left_tag\": \"left_tag\",\"right_tag\": \"right_tag\" }");
 }
