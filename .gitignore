@@ -1,6 +1,6 @@
 .arduino15/*
 raspbian_lite_latest.*
-.env
+./.env
 proto.tgz
 *.bin
 *.elf
