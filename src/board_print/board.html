@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>board</title>
+	<!--
+		Welcome to creating a board print.
+		Only thing, you should do is change the 
+		`let boardSize = 200;` variable at javascripts beginning part.
+		2000 is the current production value. 
+		For 2 meters, so 20cm fields with 2cm captcha fields:
+
+
+	//-->
+	<style type="text/css">
+		body, *{
+			margin: 0;
+			padding: 0;
+		}
+		.white {
+			color: #aaa;
+			background-color: white;
+
+		}
+		.black {
+			color: #666;
+			background-color: black;
+		}
+		.captcha {
+			width: 20mm;
+			height: 20mm;
+			float: left;
+			/*outline:1px solid skyblue;*/
+			/*background-color: #abc;*/
+		}
+		.id-letter {
+			width: 5mm;
+			height: 5mm;
+			line-height: 5mm;
+			float: left;
+			display: inline-block;
+			text-align: center;
+			vertical-align: middle;
+			/*background-color: #fda;*/
+			/*outline:1px solid limegreen;*/
+		}
+		.captcha .id-letter:nth-child(6) {
+			box-shadow: 0 -1px 0 #888;
+		}
+		.captcha .id-letter:nth-child(7) {
+			box-shadow: -1px -1px 0 #888;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="board"></div>
+</body>
+
+
+<script type="text/javascript">
+	let boardSize = 200;
+	let captchaSize = 20;
+	let fieldCount = 10;
+	let idStringLength = 16;
+
+	let captchasInField = boardSize / fieldCount / captchaSize;
+	let captchaCount = (boardSize / captchaSize * boardSize / captchaSize);
+	let maxId = (captchaCount >>> 0).toString(2);
+
+	console.log({
+		"captchasInField": captchasInField, 
+		"captchaCount": captchaCount,
+		"maxId": maxId,
+		"maxId.length": maxId.length,
+	})
+
+
+	document.body.onload = createBoard;
+
+	function createBoard () {
+		let board = document.getElementById("board");
+		board.style.width = boardSize + "mm";
+
+		for(let row = 0; row < boardSize / captchaSize; row++){
+			let rowDiv = createElementWithClass('div', 'row');
+
+			for(let col = 0; col < boardSize / captchaSize; col++){
+				rowDiv.appendChild(createCaptcha(row, col));
+			}
+
+			board.appendChild(rowDiv);
+		}
+
+		function createCaptcha(row, col)
+		{
+				let captchaDiv = createElementWithClass('div', 'captcha');
+				captchaDiv.classList.add(getFieldColor(row, col));
+
+				appendLetters(captchaDiv, idString(row, col));
+
+				return captchaDiv;
+		}
+
+		function getFieldColor(row, col) {
+			let isWhite = 0 == (Math.floor(col/captchasInField))%2;
+			isWhite = 0 == (Math.floor(row/captchasInField))%2 ? isWhite : !isWhite;
+
+			return isWhite ? 'white': 'black';
+		}
+
+		function idString(row, col) {
+			let idDec = row * boardSize / captchaSize + col;
+			let idBin = (idDec >>> 0).toString(2);
+
+			return String(idBin).padStart(idStringLength,0);
+		}
+
+		function appendLetters(captchaDiv, idString) {
+			for(let letter = 0; letter < idStringLength; letter++){
+				let letterSpan = createElementWithClass('span', 'id-letter');
+
+				letterSpan.appendChild(document.createTextNode(
+					"1" == idString.substring(letter, letter+1) ? 
+					'x': 
+					'o'
+				));
+
+				captchaDiv.appendChild(letterSpan);
+			}
+		}
+
+		function createElementWithClass(type, classname)
+		{
+			let element = document.createElement(type);
+			element.classList.add(classname);
+
+			return element;
+		}
+	}
+</script>
+</html>
