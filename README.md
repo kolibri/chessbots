@@ -9,30 +9,27 @@ You probably have seen something like this:
 
 My idea is, to make the pieces movable. You play a game on your mobile phone or any other device that has a webbrowser, and the real pieces on the street will also make every move you and your opponent will make.
 
-So, we are talking about 32 individual robots, each one is a chesspiece and you can play with them.
+So, we are talking about 32 individual robots, each one is a selfmoving chesspiece, that play our game.
 
 ## Current state of the project
 
-This is a very early project state. I'm prototyping the general concepts of how to move, how to keep track of movements, how to power each robot long enough for at least one game, and so on.
+This is a very early project state.  I'm prototyping the general concepts of how to move, how to keep track of movements, how to power each robot long enough for at least one game, and so on.
 
 You may contact me (have a look at my github profile, or leave an issue), if you are interested in this project or want to contribute. There are plenty of issues, that are not solved yet. (languages I understand: german and english)
 
-## Getting started
+## Languages
 
-### Parts
+Currently: Arduino with C, rest mostly HTML+Javascript, OpenCV-Research with python
 
-For the prototype you need some things:
+Goal: All with python.
 
-Hardware:
+# Devblog 
 
-- ESP6288 NodeMCU Module
-- RFID-RC522 Module
-- Robot chassis for a three wheeled robot (two wheels controlled by dc motors, one free turning wheel)
-- L293D motor driver
-- 6 AA accus within a battery holder
-- some cables
-- breadboard or stripboard (depending on how permament you wan't to build this ;))
+## (aka, where the real `README` is)
 
-Software: 
-- [Fritzing](http://fritzing.org/) To read the wiring schemas
+newest first
 
+- [2022-04-26 complete restart with python](devblog/2022-04-26-the_case_with_snakes.md)
+- [2018-09-26 independent from arduino ide](devblog/2018-09-26-independent-from-arduino-ide.md)
+- [2018-08-05 soldered motor board and nfc testing](devblog/2018-08-05-soldered-motor-board-and-nfc-testing.md)
+- [2018-06-26 controlling wheels](devblog/2018-06-26-controlling-wheels.md)

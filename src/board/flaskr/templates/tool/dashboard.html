@@ -1,0 +1,45 @@
+{% extends 'index.html' %}
+
+{% block title %}{{ super() }} - dashboard{% endblock %}
+
+{% block main %}
+<main>
+    <h1>Dashoard</h1>
+
+    <h2>Register Bots</h2>
+    <form action="{{ url_for('bots.post_register') }}" method="post" id="post-json">
+        <textarea name="data">
+[
+    "http://0.0.0.0:8037",
+    "http://0.0.0.0:8031/tools/mockbot/01"
+    "http://0.0.0.0:8031/tools/mockbot/02"
+    "http://0.0.0.0:8031/tools/mockbot/03"
+    "http://0.0.0.0:8031/tools/mockbot/04"
+]
+        </textarea>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Filter Bots</h2>
+    <form action="{{ url_for('bots.get_index') }}" id="bot-filter">
+        <label for="filter">Filter</label>
+        <input name="filter" id="filter"/>
+        <button type="submit">Submit</button>
+    </form>
+</main>
+{% endblock %}
+
+{% block nav %}
+{{ super() }}
+<nav>
+    <ul>
+        <li>Mockbots:
+            <pre><a href="{{ url_for('tools.mockbot', name='01') }}">01</a></pre>
+            <pre><a href="{{ url_for('tools.mockbot', name='02') }}">02</a></pre>
+            <pre><a href="{{ url_for('tools.mockbot', name='03') }}">03</a></pre>
+            <pre><a href="{{ url_for('tools.mockbot', name='04') }}">04</a></pre>
+        </li>
+        <li><a href="{{ url_for('tools.board_print') }}">Board print</a></li>
+    </ul>
+</nav>
+{% endblock %}
