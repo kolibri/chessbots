@@ -1,0 +1,12 @@
+textarea { width:40em; height: 10em; display: block; }
+
+nav pre {
+    display: inline;
+}
+
+form#bot-filter pre {
+  width: 40em;
+  outline:1px solid blue;
+  height: 6em;
+  overflow-wrap: anywhere;
+}

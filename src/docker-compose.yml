@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  ocv:
+    build: ./opencv_research
+    volumes:
+      - ./opencv_research:/app
+    working_dir: /app

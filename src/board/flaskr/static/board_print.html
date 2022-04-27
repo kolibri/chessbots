@@ -6,9 +6,9 @@
 	<title>board</title>
 	<!--
 		Welcome to creating a board print.
-		Only thing, you should do is change the 
+		Only thing, you should do is change the
 		`let boardSize = 200;` variable at javascripts beginning part.
-		2000 is the current production value. 
+		2000 is the current production value.
 		For 2 meters, so 20cm fields with 2cm captcha fields:
 
 
@@ -70,7 +70,7 @@
 	let maxId = (captchaCount >>> 0).toString(2);
 
 	console.log({
-		"captchasInField": captchasInField, 
+		"captchasInField": captchasInField,
 		"captchaCount": captchaCount,
 		"maxId": maxId,
 		"maxId.length": maxId.length,
@@ -122,8 +122,8 @@
 				let letterSpan = createElementWithClass('span', 'id-letter');
 
 				letterSpan.appendChild(document.createTextNode(
-					"1" == idString.substring(letter, letter+1) ? 
-					'x': 
+					"1" == idString.substring(letter, letter+1) ?
+					'x':
 					'o'
 				));
 

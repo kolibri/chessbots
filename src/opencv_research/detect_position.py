@@ -39,6 +39,7 @@ def getPosition(imagePath):
 
     cv2.imwrite('out/' + imagePath, img)
 
+
 def findMatchesByAlignbar(img, marker, matches):
     tolerance = 3
     field_size = img.shape[0] / 2
@@ -58,6 +59,7 @@ def findMatchesByAlignbar(img, marker, matches):
         ):
           filtered.append(match)  
     return filtered
+
 
 def findMatches(img, matchPaths):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -81,7 +83,7 @@ def drawOutline(img, point1, point2, color):
     cv2.rectangle(img, point1, point2, color, 1)
 
     
-getPosition('board_snippet_001.png')
-#getPosition('board_snippet_002.png')
+getPosition('board_snippet_002.png')
+#getPosition('board_snippet_004.png')
 #getPosition('board_snippet_003.png')
 #getPosition('board_snippet_004.png')

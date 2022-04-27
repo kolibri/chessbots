@@ -1,0 +1,7 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - Flaskr</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+<body>
+  {% block body %}{% endblock %}
+</body>
