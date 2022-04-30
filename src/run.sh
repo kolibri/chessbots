@@ -22,7 +22,8 @@ run_action () {
 
   elif [[ "board-run" = $ACTION ]]
   then
-    cd ./board && FLASK_APP=flaskr flask run -p 8031 --reload
+    docker-compose up board -d
+#    cd ./board && FLASK_APP=flaskr flask run -p 8031 --reload
 
   elif [[ "board-clean" = $ACTION ]]
   then

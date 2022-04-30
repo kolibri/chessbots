@@ -1,6 +1,14 @@
 version: "3.9"
 
 services:
+  board:
+    build: ./board
+    volumes:
+      - ./board:/app
+    ports:
+        - "8031:8031"
+    working_dir: /app
+
   ocv:
     build: ./opencv_research
     volumes:
