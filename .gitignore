@@ -2,3 +2,4 @@ raspbian_lite_latest.*
 .env
 proto.tgz
 .idea
+__pycache__/
