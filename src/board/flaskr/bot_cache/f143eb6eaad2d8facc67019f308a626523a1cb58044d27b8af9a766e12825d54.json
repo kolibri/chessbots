@@ -1,1 +1,0 @@
-{"id": "herzbube", "motors": {"left": {"pins": {"pinA": "0", "pinB": "0", "pinPwm": "0"}}, "right": {"pins": {"pinA": "0", "pinB": "0", "pinPwm": "0"}}}, "piece": "wk", "position_image": "http://0.0.0.0:8031/tools/mockbot/position_image.png", "state": "online", "url": "http://0.0.0.0:8031/tools/mockbot"}

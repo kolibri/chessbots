@@ -1,3 +1,8 @@
+img {
+    width: 100%;
+    height: 100%;
+}
+
 textarea { width:40em; height: 10em; display: block; }
 
 nav pre {
@@ -5,8 +10,77 @@ nav pre {
 }
 
 form#bot-filter pre {
-  width: 40em;
   outline:1px solid blue;
-  height: 6em;
   overflow-wrap: anywhere;
+  padding: 0.4em;
+  display: block;
+}
+
+form#bot-filter pre {
+  outline:1px solid blue;
+  overflow-wrap: anywhere;
+  padding: 0.4em;
+  display: block;
+}
+
+.debug-bots-list {
+    border: 1px solid black;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 0.8em;
+
+}
+
+.debug-bots-list > div {
+    border: 1px solid black;
+    display: inline-block;
+    width: 12.5%;
+}
+
+.debug-bots-list > div h3{
+    border: 1px solid black;
+    text-overflow: clip;
+    overflow: hidden
+}
+
+.debug-bots-list > div dl {
+    border: 1px solid black;
+}
+
+.debug-bots-list > div dl dt{
+    border: 1px solid blue;
+    overflow: hidden;
+}
+
+.debug-bots-list > div dl dt[data-state='0']{
+    background-color: #abc;
+}
+.debug-bots-list > div dl dt[data-state='1']{
+    background-color: #def;
+}
+
+
+.debug-bots-list > div dl dd{
+    overflow: hidden;
+    border: 1px solid green;
+    display: none;
+    margin-inline-start: 0px;
+}
+.debug-bots-list > div dl dd.state-offline{
+    background-color: #d44;
+}
+
+.debug-bots-list > div dl .hide {
+    display: hidden;
+}
+.debug-bots-list > div dl .show {
+    display: block;
+}
+
+.debug-bots-list > div dl dt{
+    border: 1px solid blue;
+    overflow: hidden;
+}
+
+.debug-bots-list .actions a {
+    display: block;
 }

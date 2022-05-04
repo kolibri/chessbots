@@ -3,3 +3,4 @@ raspbian_lite_latest.*
 proto.tgz
 .idea
 __pycache__/
+devblog.md

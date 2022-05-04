@@ -1,9 +1,9 @@
-FROM python:3
+FROM jjanzic/docker-python3-opencv
 
 ADD . /app
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip install flask requests Pillow matplotlib
 
 EXPOSE 8031
 
