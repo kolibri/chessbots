@@ -1,12 +1,24 @@
+import io
+
 from flask import (
-    Blueprint, render_template, jsonify, url_for, send_from_directory
+    Blueprint, render_template, jsonify, url_for, send_from_directory, send_file
 )
+from .board.print import Print
+
+
 bp = Blueprint('tools', __name__, url_prefix='/tools')
 
 
 @bp.route('/board_print', methods=['GET'])
 def board_print():
-    return send_from_directory('static', 'board_print.html')
+    print = Print()
+    img = print.render()
+    img_io = io.BytesIO()
+    img.save(img_io, 'PNG')
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/png')
+
+#    return send_from_directory('static', 'board_print.html')
 
 
 @bp.route('/mockbot/<string:name>', methods=['GET'])
