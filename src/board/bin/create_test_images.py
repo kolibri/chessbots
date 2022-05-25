@@ -51,8 +51,8 @@ class TestBoard:
         p = int(self.tile_size / 4)  # position helper. (p,p): top left corner, (p*2, p*2): center of field
         color = get_foreground_color(is_white_field)
 
-        draw.line((int(p*1.75), int(p*1.75), int(p * 2.25), int(p*1.75)), fill=color, width=self.stroke_width)  # horizontal line
-        draw.line((int(p * 2), int(p *1.75), int(p * 2), int(p * 2.25)), fill=color, width=self.stroke_width)  # vertical line
+        #draw.line((int(p*1.75), int(p*1.75), int(p * 2.25), int(p*1.75)), fill=color, width=self.stroke_width)  # horizontal line
+        #draw.line((int(p * 2), int(p *1.75), int(p * 2), int(p * 2.25)), fill=color, width=self.stroke_width)  # vertical line
 
         return tile
 
