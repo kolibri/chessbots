@@ -1,6 +1,6 @@
 import os
 from flask import (
-    Flask, render_template
+    Flask, render_template, send_from_directory
 )
 from . import bots
 from . import tools
@@ -33,6 +33,10 @@ def create_app(test_config=None):
     @app.route("/")
     def index():
         return render_template('index.html')
+
+    @app.route("/favicon.png")
+    def favicon():
+        return send_from_directory('static', 'favicon.png')
 
     @app.route("/hc")
     def health_check():
