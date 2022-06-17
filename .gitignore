@@ -3,3 +3,6 @@ raspbian_lite_latest.*
 proto.tgz
 .idea
 __pycache__/
+devblog.md
+src/board/flaskr/static/images/*
+src/board/flaskr/bot_cache/*

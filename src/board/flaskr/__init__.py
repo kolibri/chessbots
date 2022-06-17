@@ -4,6 +4,7 @@ from flask import (
 )
 from . import bots
 from . import tools
+from . import scripts
 
 
 def create_app(test_config=None):
@@ -19,11 +20,22 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    app.config.update(
+        STATIC_DIR='flaskr/static/images/',
+        BOTCACHE_DIR='flaskr/bot_cache/',
+        BOARD_SIZE_IN_CAPTCHAS=10
+    )
+
     app.register_blueprint(bots.bp)
     app.register_blueprint(tools.bp)
+    app.register_blueprint(scripts.bp)
 
     @app.route("/")
     def index():
         return render_template('index.html')
+
+    @app.route("/hc")
+    def health_check():
+        return 'ok'
 
     return app

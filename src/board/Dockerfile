@@ -1,10 +1,10 @@
-FROM python:3
+FROM jjanzic/docker-python3-opencv
 
 ADD . /app
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip install flask requests Pillow matplotlib pytest
 
 EXPOSE 8031
 
-CMD FLASK_APP=flaskr flask run -p 8031 -h 0.0.0.0 --reload
+# CMD flask run -p 8031 -h 0.0.0.0 --reload

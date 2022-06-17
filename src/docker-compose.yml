@@ -8,9 +8,6 @@ services:
     ports:
         - "8031:8031"
     working_dir: /app
-
-  ocv:
-    build: ./opencv_research
-    volumes:
-      - ./opencv_research:/app
-    working_dir: /app
+    environment:
+      FLASK_APP: flaskr
+    command: 'flask run -p 8031 -h 0.0.0.0 --reload'
