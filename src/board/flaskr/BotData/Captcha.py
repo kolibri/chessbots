@@ -61,7 +61,7 @@ class Captcha:
         return [None, []]
 
     def find_matches(self) -> [[[int, int], int]]:  # [[img_x, img_y], marker]
-        print(self.img_path)
+        print(self.img_path, self.__templates)
         img = cv2.imread(self.img_path)
         print(img)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

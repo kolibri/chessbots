@@ -15,7 +15,7 @@ run_action () {
     if [[ "run" == $ACTION ]]; then
       time run_board_cmd ${@:3}
     elif [[ "up" == $ACTION ]]; then
-      docker-compose up board -d
+      docker-compose up -d board
     else
       echo "targets: run, up"
     fi

@@ -6,17 +6,19 @@ from ..Board import Board, txt_to_matrix
 
 
 class PositionDataCollector:
-    def __init__(self, cache_path):
+    def __init__(self, cache_path, pattern_path):
         self.cache_path = cache_path
+        self.pattern_path = pattern_path
+
     def get_data(self, bot: Bot):
         # print(bot.data)
         if 'position_local_filename' not in bot.data.keys():
             return bot.data
         captcha = Captcha(bot.data['position_local_filename'], [
-            [self.cache_path + 'pattern_WO.png', 0],
-            [self.cache_path + 'pattern_WX.png', 1],
-            [self.cache_path + 'pattern_BO.png', 0],
-            [self.cache_path + 'pattern_BX.png', 1]
+            [self.pattern_path + 'pattern_WO.png', 0],
+            [self.pattern_path + 'pattern_WX.png', 1],
+            [self.pattern_path + 'pattern_BO.png', 0],
+            [self.pattern_path + 'pattern_BX.png', 1]
         ])
 
         data = bot.data

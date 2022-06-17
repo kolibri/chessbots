@@ -22,7 +22,7 @@ def create_app(test_config=None):
 
     app.config.update(
         STATIC_DIR='flaskr/static/images/',
-        BOTCACHE_DIR='flaskr/static/bot_cache/'
+        BOTCACHE_DIR='flaskr/bot_cache/'
     )
 
     app.register_blueprint(bots.bp)

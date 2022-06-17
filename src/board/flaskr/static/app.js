@@ -28,9 +28,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return false;
     }
 
-    function update() {
-    }
-
     function send_bot_action(method, action, filter) {
         var xhr = new XMLHttpRequest();
 
@@ -155,17 +152,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
         var actions = document.createElement('div')
         actions.classList.add('actions')
-        var reregister = document.createElement('a')
-        reregister.appendChild(document.createTextNode('re-register'))
-        reregister.addEventListener('click', function(event){
+        var re_register = document.createElement('a')
+        re_register.appendChild(document.createTextNode('re-register'))
+        re_register.addEventListener('click', function(event){
             event.preventDefault()
             register('["' + bot.url + '"]')
         });
 
-
-        actions.appendChild(reregister)
-
-
+        actions.appendChild(re_register)
         container.appendChild(title);
         container.appendChild(data);
         container.appendChild(actions);

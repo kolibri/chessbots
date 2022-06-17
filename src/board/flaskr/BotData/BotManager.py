@@ -23,6 +23,7 @@ class Bots:
             for c in self.collectors:
                 bot = Bot(bot.host_name, c.get_data(bot))
             bots.append(bot)
+            bot.save(self.cache_dir)
         return bots
 
     def filter(self, filters: "MultiDict[str, str]") -> [Bot]:

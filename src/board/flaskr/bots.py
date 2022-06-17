@@ -10,12 +10,14 @@ bp = Blueprint('bots', __name__, url_prefix='/bots')
 app = Flask(__name__)
 
 
-def get_bots(cache_path: str) -> Bots:
+def get_bots(app) -> Bots:
+    cache_path = app.config['BOTCACHE_DIR']
+    static_path = app.config['STATIC_DIR']
     return Bots(
         cache_path,
         [
             RobotSensorsCollector(cache_path),
-            PositionDataCollector(cache_path)
+            PositionDataCollector(cache_path, static_path)
         ]
     )
 
@@ -29,7 +31,7 @@ e.g.:
 '''
 @bp.route('/', methods=['GET'])
 def get_index():
-    bots = get_bots(current_app.config['BOTCACHE_DIR'])
+    bots = get_bots(current_app)
     return jsonify([bot.data for bot in bots.filter(request.args)])
 
 '''
@@ -41,7 +43,7 @@ e.g.:
 '''
 @bp.route('/update', methods=['POST'])
 def post_update():
-    bots = get_bots(current_app.config['BOTCACHE_DIR'])
+    bots = get_bots(current_app)
     return jsonify([bot.data for bot in bots.update(request.args)])
 
 
@@ -51,7 +53,7 @@ json payload:
 '''
 @bp.route('/register', methods=['POST'])
 def post_register():
-    bots = get_bots(current_app.config['BOTCACHE_DIR'])
+    bots = get_bots(current_app)
     bots.add(request.json)
     return 'bot registered'
 
