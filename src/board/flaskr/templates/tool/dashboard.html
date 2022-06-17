@@ -35,7 +35,7 @@
             <span data-filter="state=offline">state=offline</span>
         </span>
         <button type="submit" data-method="get" data-action="{{ url_for('bots.get_index') }}">filter</button>
-        <button type="submit" data-method="post" data-action="{{ url_for('bots.post_update') }}">update</button>
+        <button type="submit" data-method="patch" data-action="{{ url_for('bots.post_update') }}">update</button>
     </form>
 
     <h2>Register Bots</h2>

@@ -13,7 +13,10 @@ run_action () {
   if [[ "board" = $APP ]]; then
     ACTION=$2
     if [[ "run" == $ACTION ]]; then
-      time run_board_cmd ${@:3}
+      time run_board_cmd flask script ${@:3}
+    elif [[ "test" == $ACTION ]]; then
+      time run_board_cmd pytest
+      docker-compose up -d board
     elif [[ "up" == $ACTION ]]; then
       docker-compose up -d board
     else
@@ -35,7 +38,7 @@ run_action () {
 }
 
 run_board_cmd () {
-    docker-compose run board flask script $@
+    docker-compose run board $@
 }
 
 run_action $@

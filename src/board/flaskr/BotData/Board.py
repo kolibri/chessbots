@@ -3,14 +3,6 @@ import numpy as np
 from .PointHelper import *
 
 
-def matrix_to_txt(m):
-    return '\n'.join([''.join(r) for r in m])
-
-
-def txt_to_matrix(t):
-    return [list(snr) for snr in t.split('\n')]
-
-
 class Board:
     def __init__(self, matrix):
         self.matrix = matrix
@@ -36,6 +28,9 @@ class Board:
     def rotate(self) -> Board:
         return Board(np.rot90(self.matrix))
 
+    def mirror(self) -> Board:
+        return Board(np.flip(self.matrix, 1))
+
     def find_matches(self, snapshot: Board):
         board = self.matrix
         matches = []
@@ -44,9 +39,9 @@ class Board:
             for y in range(0, snapshot.size()[1]-1):
                 for x in range(0, snapshot.size()[0]-1):
                     cp = add_points(pos, (x, y))
-                    if snapshot.matrix[y][x] == -1:
+                    if snapshot.matrix[y][x] not in ['0', '1']:
                         continue
-                    if self.matrix[cp[1]][cp[0]] == -1:
+                    if self.matrix[cp[1]][cp[0]] not in ['0', '1']:
                         continue
                     if snapshot.matrix[y][x] != self.matrix[cp[1]][cp[0]]:
                         return False
@@ -54,8 +49,18 @@ class Board:
 
         for y in range(0, len(board) - snapshot.size()[1] - 1):
             for x in range(0, len(board[y]) - snapshot.size()[0] - 1):
-                for r in (90, 180, 270, 0):
-                    if match_position((x, y), snapshot.rotate()):
+                for r in (0, 90, 180, 270):
+                    if match_position((x, y), snapshot):
                         matches.append(((x, y), r))
+                    snapshot = snapshot.rotate()
 
         return matches
+
+
+def matrix_to_txt(m):
+    return '\n'.join([''.join(r) for r in m])
+
+
+def txt_to_matrix(t):
+    return [list(snr) for snr in t.split('\n') if len(snr) > 0]
+

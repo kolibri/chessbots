@@ -6,22 +6,27 @@ from .Bot import Bot
 
 
 class Bots:
-    def __init__(self, dir, collectors):
-        self.cache_dir = dir
+    def __init__(self, cache_dir, collectors):
+        self.cache_dir = cache_dir
         self.bots = self.__load(self.cache_dir)
         self.collectors = collectors
 
-    def add(self, urls: [str]):
+    def add(self, urls: [str]) -> [Bot]:
         bots = [Bot(url, {}) for url in urls]
         # self.bots = self.bots + bots
         for bot in bots:
             bot.save(self.cache_dir)
+        return bots
 
     def update(self, filters: "MultiDict[str, str]") -> [Bot]:
         bots = []
         for bot in self.filter(filters):
             for c in self.collectors:
-                bot = Bot(bot.host_name, c.get_data(bot))
+                try:
+                    bot = Bot(bot.host_name, c.get_data(bot))
+                # @todo: Yes, the ugly stuff right here. DataCollectors are maybe available
+                except:
+                    pass
             bots.append(bot)
             bot.save(self.cache_dir)
         return bots

@@ -22,7 +22,8 @@ def create_app(test_config=None):
 
     app.config.update(
         STATIC_DIR='flaskr/static/images/',
-        BOTCACHE_DIR='flaskr/bot_cache/'
+        BOTCACHE_DIR='flaskr/bot_cache/',
+        BOARD_SIZE_IN_CAPTCHAS=10
     )
 
     app.register_blueprint(bots.bp)

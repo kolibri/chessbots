@@ -27,13 +27,18 @@ form#bot-filter pre {
     border: 1px solid black;
     font-family: "Lucida Console", "Courier New", monospace;
     font-size: 0.8em;
-
 }
 
 .debug-bots-list > div {
     border: 1px solid black;
     display: inline-block;
     width: 12.5%;
+}
+
+.debug-bots-list > div.big{
+    border: 1px solid black;
+    display: inline-block;
+    width: 100%;
 }
 
 .debug-bots-list > div h3{

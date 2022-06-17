@@ -1,5 +1,3 @@
-import json
-import os
 import requests
 
 from ..Bot import Bot
@@ -11,9 +9,11 @@ class RobotSensorsCollector:
 
     def get_data(self, bot: Bot):
         try:
+            print(requests.get(bot.host_name).json())
             data = requests.get(bot.host_name).json()
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             data = {'state': 'offline', 'url': bot.host_name}
+            print('error', data, e)
 
         if 'live_image' in data:
             img_cache_path = self.cache_path + bot.id + '_position.png'
