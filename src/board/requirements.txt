@@ -1,4 +1,0 @@
-flask
-requests
-Pillow
-matplotlib

@@ -26,14 +26,16 @@
     <h1>Dashoard</h1>
 
     <h2>Filter Bots</h2>
-    <form action="{{ url_for('bots.get_index') }}" id="bot-filter">
+    <form action="#" id="bot-filter">
         <label for="filter">Filter</label>
         <input name="filter" id="filter" />
         <span id="bot-filter-presets">
-            <span>state=online</span>
-            <span>state=offline</span>
+            <span data-filter="">all</span>
+            <span data-filter="state=online">state=online</span>
+            <span data-filter="state=offline">state=offline</span>
         </span>
-        <button type="submit">Submit</button>
+        <button type="submit" data-method="get" data-action="{{ url_for('bots.get_index') }}">filter</button>
+        <button type="submit" data-method="post" data-action="{{ url_for('bots.post_update') }}">update</button>
     </form>
 
     <h2>Register Bots</h2>

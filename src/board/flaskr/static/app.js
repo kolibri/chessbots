@@ -28,15 +28,19 @@ document.addEventListener("DOMContentLoaded", function() {
         return false;
     }
 
-    function get_bots(filter) {
+    function update() {
+    }
+
+    function send_bot_action(method, action, filter) {
         var xhr = new XMLHttpRequest();
 
-        xhr.open('GET', filter_form.action + '?' + filter)
+        xhr.open(method, action + '?' + filter)
         xhr.send();
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 filter_form.reset();
+                filter_form.querySelector('input[name="filter"]').value = filter;
 
                 var msgBox = document.createElement('pre');
                 msgBox.appendChild(document.createTextNode(xhr.status + ": " + xhr.response))
@@ -45,34 +49,35 @@ document.addEventListener("DOMContentLoaded", function() {
                 new_response = debug_bots_list(data)
                 response_box.innerHTML = ''
                 response_box.appendChild(new_response)
+
 //                filter_form.replaceChild(new_response, response_box)
                 //console.log(xhr.status, xhr.responseText)
             }
         }
         return false;
-
     }
 
     filter_form.append(response_box);
-    filter_form.onsubmit = function(event){
+    filter_form.onsubmit = function(event) {
         event.preventDefault();
+        var action = event.submitter.dataset.action
+        var method = event.submitter.dataset.method
         var filter = filter_form.querySelector('input[name="filter"]').value;
-        get_bots(filter)
+        console.log(action, method, filter)
+        send_bot_action(method, action, filter)
     }
 
-    get_bots('state=online')
+    send_bot_action('get', '/bots', '')
 
     var filter_presets = document.getElementById('bot-filter-presets')
     selector = "#bot-filter-presets span"
     elementList = document.querySelectorAll(selector)
     elementList.forEach(function(node, idx) {
-        console.log(node, idx)
+//        console.log(node, idx)
 
         node.addEventListener('click', function(event){
             event.preventDefault()
-            console.log(event.srcElement.textContent)
-            get_bots(event.srcElement.textContent)
-
+            send_bot_action('get', '/bots', event.srcElement.dataset.filter)
         })
     });
 
@@ -114,8 +119,6 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             var value = document.createElement('dd')
-
-            console.log(bot[key])
 
             if(key.endsWith('_image')) {
                 var link = document.createElement('a')
