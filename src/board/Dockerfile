@@ -3,7 +3,7 @@ FROM jjanzic/docker-python3-opencv
 ADD . /app
 WORKDIR /app
 
-RUN pip install flask requests Pillow matplotlib
+RUN pip install flask requests Pillow matplotlib pytest
 
 EXPOSE 8031
 
