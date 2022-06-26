@@ -168,4 +168,4 @@ module base_body(){
 
 //translate([0,0,bottom_height+esp_camara_heigt+esp_middle_height])
 //top();
-bottom();
+//bottom();
