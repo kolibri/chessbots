@@ -14,3 +14,7 @@ class BoardPositionCollector:
         data['board_matches'] = matches
 
         return data
+
+    # def get_position(self, matches):
+
+

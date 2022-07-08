@@ -48,10 +48,12 @@ document.addEventListener("DOMContentLoaded", function () {
         var output = document.getElementById('xhr_result')
         xhr.onreadystatechange = function () {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                console.log(method, path, data, xhr.status, xhr.responseText)
+                // console.log(method, path, data, xhr.status, xhr.responseText)
                 var row_txt = method + ' ' + path + ' - ' + xhr.status + ": " + xhr.response
                 output.append(createElement('pre', {txt: row_txt}))
-                handler(xhr)
+                if (handler) {
+                    handler(xhr)
+                }
             }
         }
     }

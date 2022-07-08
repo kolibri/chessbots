@@ -1,4 +1,3 @@
-import hashlib
 from flask import (Blueprint, render_template, jsonify, url_for, send_from_directory)
 
 bp = Blueprint('tools', __name__, url_prefix='/tools')
@@ -42,7 +41,7 @@ def mockbot(name: str):
 
 @bp.route('/mockbot/<string:name>/position.jpeg', methods=['GET'])
 def mockbot_picture(name: str):
-    return send_from_directory('static/images', 'mockbot_' + name + '.jpeg')
+    return send_from_directory('static/images/mockbot', 'mockbot_' + name + '.jpeg')
 
 
 # @bp.route('/mockbot/<string:name>/', methods=['POST'])
@@ -51,5 +50,5 @@ def mockbot_picture(name: str):
 
 @bp.route('/test_board', methods=['GET'])
 def view_test_board():
-    return send_from_directory('static/images', 'test_board.png')
+    return send_from_directory('static/images/mockbot', 'test_board.png')
 

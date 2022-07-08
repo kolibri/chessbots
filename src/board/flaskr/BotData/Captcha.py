@@ -18,7 +18,7 @@ class Captcha:
 
     def get_img_grid(self):
         grid = self.__find_grid()
-        print([g[1][0] for g in grid])
+        # print([g[1][0] for g in grid])
         return self.__mark_positions([g[1][0] for g in grid])
 
     def get_img_matches(self):
