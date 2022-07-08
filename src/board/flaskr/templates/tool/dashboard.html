@@ -1,46 +1,32 @@
 {% extends 'index.html' %}
 
-{% block nav %}
-{{ super() }}
-<nav>
-    <ul>
-        <li>Mockbots:
-            <pre><a href="{{ url_for('tools.mockbot', name='01') }}">00</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='01') }}">01</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='02') }}">02</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='03') }}">03</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='04') }}">04</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='05') }}">05</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='06') }}">06</a></pre>
-            <pre><a href="{{ url_for('tools.mockbot', name='07') }}">07</a></pre>
-        </li>
-        <li><a href="{{ url_for('tools.view_test_board') }}">Board print</a></li>
-    </ul>
-</nav>
-{% endblock %}
-
 {% block title %}{{ super() }} - dashboard{% endblock %}
 
 {% block main %}
-<main>
+<main id="dashboard">
     <h1>Dashoard</h1>
-
-    <h2>Filter Bots</h2>
-    <form action="#" id="bot-filter">
-        <label for="filter">Filter</label>
-        <input name="filter" id="filter" />
-        <span id="bot-filter-presets">
-            <span data-filter="">all</span>
-            <span data-filter="state=online">state=online</span>
-            <span data-filter="state=offline">state=offline</span>
-        </span>
-        <button type="submit" data-method="get" data-action="{{ url_for('bots.get_index') }}">filter</button>
-        <button type="submit" data-method="patch" data-action="{{ url_for('bots.post_update') }}">update</button>
-    </form>
-
-    <h2>Register Bots</h2>
-    <form action="{{ url_for('bots.post_register') }}" method="post" id="post-json">
-        <textarea name="data">
+    <nav>
+        <a href="#bots">Bots</a>
+        <a href="#register">Register</a>
+    </nav>
+    <section id="bots" data-show="1">
+        <h2>Filter Bots</h2>
+        <form action="#" id="bot-filter">
+            <label for="filter">Filter</label>
+            <input name="filter" id="filter"/>
+            <span id="bot-filter-presets">
+                <span data-filter="">all</span>
+                <span data-filter="state=online">state=online</span>
+                <span data-filter="state=offline">state=offline</span>
+            </span>
+            <button type="submit" data-method="get" data-action="{{ url_for('bots.get_index') }}">filter</button>
+            <button type="submit" data-method="patch" data-action="{{ url_for('bots.post_update') }}">update</button>
+        </form>
+    </section>
+    <section id="register" data-show="0">
+        <h2>Register Bots</h2>
+        <form action="{{ url_for('bots.post_register') }}" method="post" id="register_form">
+            <textarea name="data">
 [
     "http://192.168.178.193/",
     "http://0.0.0.0:8037",
@@ -52,10 +38,10 @@
     "http://0.0.0.0:8031/tools/mockbot/06",
     "http://0.0.0.0:8031/tools/mockbot/07"
 ]
-        </textarea>
-        <button type="submit">Submit</button>
-    </form>
-
+            </textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </section>
 </main>
 {% endblock %}
 
