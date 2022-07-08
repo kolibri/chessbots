@@ -72,10 +72,26 @@ def cleanup():
 @bp.cli.command('boardprint')
 def boardprint():
     base_path = current_app.config['STATIC_DIR']
+    pc = PrintCreator(2000, 10)
+    pc.save_img(base_path + 'prints/print_board.jpeg')
+
+
+@bp.cli.command('mockimages')
+def mockimages():
+    base_path = current_app.config['STATIC_DIR']
     # clean_directory(base_path)
-    # tb = TestImageCreator()
-    pc = PrintCreator()
-    pc.save_img(base_path)
+    tb = TestImageCreator()
     # tb.write_board_print_file(base_path)
-    # tb.write_pattern_files(base_path)
-    # tb.write_test_files(base_path)
+    tb.write_pattern_files(base_path)
+    tb.write_test_files(base_path,[
+            ['00', 3, 1, 37],
+            ['01', 0, 0, 0],
+            ['02', 2, 3, 90],
+            ['03', 3, 2, 180],
+            ['04', 1, 5, 270],
+            ['05', 1, 7, 123],
+            ['06', 7, 3, 10],
+            ['07', 3, 1, 222],
+            ['08', 4, 9, 300],
+            ['09', 2, 5, 115]
+        ])

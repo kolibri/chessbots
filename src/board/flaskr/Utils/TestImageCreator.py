@@ -7,9 +7,9 @@ def create_path(filename: str):
     return 'flaskr/static/images/' + filename
 
 
-def get_field_color(index: int) -> bool:
-    row_length = 100
-    segments = 10
+def get_field_color(index: int, row_length: int = 100, segments: int = 10) -> bool:
+    # row_length = 100
+    # segments = 10
 
     x = (index % row_length) // segments
     y = index // (row_length * segments)
@@ -27,36 +27,34 @@ def get_background_color(is_white_field: bool) -> tuple[int, int, int]:
 
 
 class PrintCreator:
-    def __init__(self):
-        size_mm = 2000
-        dpi = 10
+    def __init__(self, size: int, dpi: int):
+        size_mm = size
+        dpi = dpi
         # self.size = int((size_mm / 25.4) * dpi)
         self.size = size_mm * dpi
         self.tile_size = int(self.size / 100)
         self.stroke_width = 2
 
-    def save_img(self, base_path) -> Image:
-        board = self.render()
-        board.save(base_path + 'print_board.png')
+    def save_img(self, file_path) -> Image:
+        # board = self.render()
+        # board.save(file_path)
 
-        i = 5
-
-        sn_size = int(self.size / i)
-        img = cv2.imread(base_path + 'test_board.png')
-        for x in range(0, i):
-            for y in range(0, i):
-                x1 = x * sn_size
-                x2 = (x+1) * sn_size
-                y1 = y * sn_size
-                y2 = (y+1) * sn_size
-                tmp = img[x1:x2, y1:y2]
-
-                cv2.imwrite(base_path + 'print_part' + str(x) + 'x' + str(y) + '.png', tmp)
-                # tmp.save(base_path + 'print_part' + str(x) + 'x' + str(y) + '.png')
-
+        # i = 5
+        # sn_size = int(self.size / i)
+        # img = cv2.imread(file_path)
+        # for x in range(0, i):
+        #     for y in range(0, i):
+        #         x1 = x * sn_size
+        #         x2 = (x+1) * sn_size
+        #         y1 = y * sn_size
+        #         y2 = (y+1) * sn_size
+        #         tmp = img[x1:x2, y1:y2]
+        #
+        #         cv2.imwrite(file_path + 'print_part' + str(x) + 'x' + str(y) + '.jpeg', tmp)
+        #         # tmp.save(base_path + 'print_part' + str(x) + 'x' + str(y) + '.jpeg')
         # rotated[y1:y2, x1:x2]
 
-        self.render().save(base_path + 'print_board.png')
+        self.render().convert('RGB').save(file_path)
 
     def render(self) -> Image:
         img = Image.new('RGBA', (self.size, self.size), 'green')
@@ -108,9 +106,6 @@ class PrintCreator:
 
 class TestImageCreator:
     def __init__(self):
-        size_mm = 200
-        dpi = 300
-        # self.size = int(size_mm / 25.4 * dpi)
         self.size = 2000
         self.tile_size = int(self.size / 10)
         self.stroke_width = 2
@@ -124,11 +119,19 @@ class TestImageCreator:
         row:    i // 10 (rounded down the result of division by 10)
         Then multiply field position with tile_size to get position in the pixel grid
         '''
+        # for i in range(0, 100):
+        #     tile = self.render_tile(i, get_field_color(i))
+        #     img.paste(tile, (i % 10 * self.tile_size, i // 10 * self.tile_size))
+
+        # return img
+
+
         for i in range(0, 100):
-            tile = self.render_tile(i, get_field_color(i))
+            tile = self.render_tile(i, get_field_color(i, 10, 1))
             img.paste(tile, (i % 10 * self.tile_size, i // 10 * self.tile_size))
 
         return img
+
 
     def render_tile(self, identifier: int, is_white: bool) -> Image:
         tile = self.draw_empty_tile_with_align_bar(is_white)
@@ -181,11 +184,11 @@ class TestImageCreator:
         for d in data:
             self.draw_digit(d[1], d[2], True).\
                 crop((digit_size, digit_size, digit_size * 3, digit_size * 3)).\
-                save(base_path + 'pattern_' + str(d[0]) + '.png')
+                convert('RGB').save(base_path + 'pattern_' + str(d[0]) + '.jpeg')
 
-    def write_test_files(self, base_path: str):
+    def write_test_files(self, base_path: str, data):
         def create_rotated_crop(x, y, deg):
-            img = cv2.imread(base_path + 'test_board.png')
+            img = cv2.imread(base_path + 'test_board.jpeg')
             cs = int(img.shape[0] / 10)
             vp = 2
             image_center = tuple(np.array(img.shape[1::-1]) / 2)
@@ -197,20 +200,8 @@ class TestImageCreator:
             y2 = int(y1 + cs * vp)
             return rotated[y1:y2, x1:x2]
 
-        self.render().save(base_path + 'test_board.png')
-        data = [
-            ['00', 3, 1, 37],
-            ['01', 0, 0, 0],
-            ['02', 2, 3, 90],
-            ['03', 3, 2, 180],
-            ['04', 1, 5, 270],
-            ['05', 1, 7, 123],
-            ['06', 7, 3, 10],
-            ['07', 3, 1, 222],
-            ['08', 4, 9, 300],
-            ['09', 2, 5, 115]
-        ]
+        self.render().convert('RGB').save(base_path + 'test_board.jpeg')
 
         for d in data:
-            cv2.imwrite(base_path + 'mockbot_' + d[0] + '.png', create_rotated_crop(d[1], d[2], d[3]))
+            cv2.imwrite(base_path + 'mockbot_' + d[0] + '.jpeg', create_rotated_crop(d[1], d[2], d[3]))
 
