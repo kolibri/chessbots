@@ -4,5 +4,6 @@ proto.tgz
 .idea
 __pycache__/
 devblog.md
-src/board/flaskr/static/images/*
+src/board/flaskr/static/images/**/*.jpeg
+src/board/flaskr/static/images/**/*.png
 src/board/flaskr/bot_cache/*

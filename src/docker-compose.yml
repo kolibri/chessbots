@@ -11,13 +11,3 @@ services:
     environment:
       FLASK_APP: flaskr
     command: 'flask run -p 8031 -h 0.0.0.0 --reload'
-  server:
-    build: ./server
-    volumes:
-      - ./server:/app
-    ports:
-        - "8037:8037"
-    working_dir: /app
-    environment:
-      FLASK_APP: flaskr
-    command: 'flask run -p 8037 -h 0.0.0.0 --reload'

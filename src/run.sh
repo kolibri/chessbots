@@ -3,8 +3,9 @@
 set -e
 
 helptext () {
-  echo "# ./run.sh board up        # runs board flask app"
-  echo "# ./run.sh board run cmd   # runs board flask command"
+  echo "# ./run.sh board up        # run board flask app"
+  echo "# ./run.sh board run cmd   # run board flask command"
+  echo "# ./run.sh board test      # run board tests"
   echo "# ./run.sh docker-build    # build containers with args"
 }
 
@@ -16,25 +17,11 @@ run_action () {
       time run_cmd board flask script ${@:3}
     elif [[ "test" == $ACTION ]]; then
       time run_cmd board pytest
-      docker-compose up -d board
     elif [[ "up" == $ACTION ]]; then
       docker-compose up -d board
     else
       echo "targets: run, up, test"
     fi
-  elif [[ "server" = $APP ]]; then
-    ACTION=$2
-    if [[ "run" == $ACTION ]]; then
-      time run_cmd server flask script ${@:3}
-    elif [[ "test" == $ACTION ]]; then
-      time run_cmd server pytest
-      docker-compose up -d board
-    elif [[ "up" == $ACTION ]]; then
-      docker-compose up -d server
-    else
-      echo "targets: run, up, test"
-    fi
-
 
   elif [[ "docker-build" = $APP ]]; then
     docker-compose build ${@:2}
