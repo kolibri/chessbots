@@ -64,3 +64,21 @@ x0 - 110 special 6
 00 - 100 special 4
 
 ```
+
+
+
+0010
+0111
+0001
+0000
+
+
+## Micropython
+
+https://lemariva.com/blog/2019/09/micropython-how-about-taking-photo-esp32
+
+```bash
+export MICROPYTHON=$PWD
+. venv/bin/activate
+pip3 install pyserial pyparsing
+```

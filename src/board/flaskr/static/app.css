@@ -67,6 +67,13 @@ form#bot-filter pre {
     background-color: #def;
 }
 
+.debug-bots-list > div dl dd[data-key='motors']{
+}
+.debug-bots-list > div dl dd[data-key='motors'] input {
+    width: 3em;
+    display: inline;
+}
+
 
 .debug-bots-list > div dl dd{
     overflow: hidden;

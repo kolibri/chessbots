@@ -52,6 +52,24 @@ document.addEventListener("DOMContentLoaded", function() {
         return false;
     }
 
+    function send_bot_move(action, data) {
+        console.log('move', action, data)
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', action)
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(data);
+        console.log(xhr)
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                console.log('move response', xhr.response)
+                //data = JSON.parse(xhr.response);
+            }
+        }
+        return false;
+    }
+
+
     filter_form.append(response_box);
     filter_form.onsubmit = function(event) {
         event.preventDefault();
@@ -85,6 +103,60 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         return container
+    }
+
+    function create_motor_controls(bot){
+        var mtrl = document.createElement('form')
+        var data = document.createElement('textarea')
+        data.name = 'data'
+        data.appendChild(document.createTextNode('[[-1,-1,1],[-1,1,1]]'))
+//        var left = create_motor_select('left')
+//        var right = create_motor_select('right')
+//        var steps = document.createElement('input')
+//        steps.value = 1
+//        steps.name = steps
+//        steps.type = 'number'
+//        steps.min = '1'
+//        steps.max = '100'
+        var submit = document.createElement('button')
+        submit.appendChild(document.createTextNode('move'))
+        submit.type = 'submit'
+
+        mtrl.action = bot['url']
+        mtrl.method = 'post'
+
+        mtrl.onsubmit = function(event) {
+            event.preventDefault();
+            form = event.target
+            var formData = new FormData(form);
+            var action = form.action
+            console.log(data.innerHTML)
+            send_bot_move(action, Array.from(formData.values()))
+        }
+
+
+
+
+        mtrl.appendChild(data)
+//        mtrl.appendChild(left)
+//        mtrl.appendChild(right)
+//        mtrl.appendChild(steps)
+        mtrl.appendChild(submit)
+
+        return mtrl
+    }
+
+    function create_motor_select(name){
+        var select = document.createElement('select')
+        select.name = name
+        for (c of ["-1", "0", "+1"]) {
+            var option = document.createElement('option')
+            option.appendChild(document.createTextNode(c))
+            option.value = c
+            select.appendChild(option)
+        }
+
+        return select
     }
 
     function transform_bot_to_debug_view(bot) {
@@ -154,6 +226,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 link.setAttribute('target', '_blank')
                 link.appendChild(document.createTextNode(JSON.stringify(bot[key])))
                 value.appendChild(link)
+            } else if ('motors' == key) {
+                mtrl = create_motor_controls(bot)
+                value.appendChild(mtrl)
             } else if ('state' == key) {
                 if(bot[key] == "offline") {
                     value.classList.add('state-offline')

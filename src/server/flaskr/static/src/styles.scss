@@ -1,0 +1,83 @@
+$field-bg-black: grey;
+$field-bg-white: white;
+$field-bg-to: #73FDFF;
+$field-bg-from: #00FA92;
+$field-bg-selected: #00FA92;
+$moves-bg-current: #73FDFF;
+
+.game,
+.pgn {
+    > div {
+        height: 100%;
+
+        > .board {
+            width: 100%;
+            height: 100%;
+            border: black solid 1px;
+            font-family: "Courier New", Courier, monospace;
+
+            .field {
+                display: inline-block;
+                width: 12.5%;
+                height: 12.5%;
+                margin: 0;
+                padding: 0;
+                position: relative;
+                float: left;
+                text-align: center;
+                font-size: 12vw;
+            }
+            .a1, .a3, .a5, .a7, .b2, .b4, .b6, .b8,
+            .c1, .c3, .c5, .c7, .d2, .d4, .d6, .d8,
+            .e1, .e3, .e5, .e7, .f2, .f4, .f6, .f8,
+            .g1, .g3, .g5, .g7, .h2, .h4, .h6, .h8
+            { background-color: $field-bg-black; }
+
+            .a2, .a4, .a6, .a8, .b1, .b3, .b5, .b7,
+            .c2, .c4, .c6, .c8, .d1, .d3, .d5, .d7,
+            .e2, .e4, .e6, .e8, .f1, .f3, .f5, .f7,
+            .g2, .g4, .g6, .g8, .h1, .h3, .h5, .h7
+            { background-color: $field-bg-white; }
+
+            .field.to {
+                background-color: $field-bg-to !important;
+            }
+            .field.from {
+                background-color: $field-bg-from !important;
+            }
+            .field.selected {
+                background-color: $field-bg-selected !important;
+            }
+        }
+
+        > div {
+            button {
+                width: 25%;
+                height: 15vw;
+            }
+        }
+
+        > .info {
+            dt {
+                width: 4em;
+                float: left;
+            }
+        }
+
+        > .moves {
+            li {
+                span {
+                    cursor: pointer;
+                    margin-right: 0.5em;
+                }
+                span.current {
+                    background-color: $moves-bg-current;
+                }
+
+                span:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+}

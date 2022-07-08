@@ -3,7 +3,7 @@ import shutil
 from flask import Blueprint
 from flask import current_app
 from .Utils.BoardUtils import *
-from .Utils.PrintCreator import *
+from .Utils.TestImageCreator import *
 
 
 bp = Blueprint('script', __name__)
@@ -72,7 +72,10 @@ def cleanup():
 @bp.cli.command('boardprint')
 def boardprint():
     base_path = current_app.config['STATIC_DIR']
-    clean_directory(base_path)
-    tb = PrintCreator()
-    tb.write_pattern_files(base_path)
-    tb.write_test_files(base_path)
+    # clean_directory(base_path)
+    # tb = TestImageCreator()
+    pc = PrintCreator()
+    pc.save_img(base_path)
+    # tb.write_board_print_file(base_path)
+    # tb.write_pattern_files(base_path)
+    # tb.write_test_files(base_path)

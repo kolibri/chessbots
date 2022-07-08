@@ -39,11 +39,17 @@ def mockbot(name: str):
     )
 
 
-@bp.route('/mockbot/<string:name>/position.png', methods=['GET'])
+@bp.route('/mockbot/<string:name>/position.jpeg', methods=['GET'])
 def mockbot_picture(name: str):
-    return send_from_directory('static/images', 'mockbot_' + name + '.png')
+    return send_from_directory('static/images', 'mockbot_' + name + '.jpeg')
+
+
+@bp.route('/mockbot/<string:name>/', methods=['POST'])
+def mockbot_move(name: str):
+    return send_from_directory('static/images', 'mockbot_' + name + '.jpeg')
 
 
 @bp.route('/test_board', methods=['GET'])
 def view_test_board():
     return send_from_directory('static/images', 'test_board.png')
+

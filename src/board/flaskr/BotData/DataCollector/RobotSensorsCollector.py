@@ -16,7 +16,7 @@ class RobotSensorsCollector:
             print('error', data, e)
 
         if 'live_image' in data:
-            img_cache_path = self.cache_path + bot.id + '_position.png'
+            img_cache_path = self.cache_path + bot.id + '_position.jpeg'
             try:
                 r = requests.get(data.get('live_image'))
                 open(img_cache_path, 'wb').write(r.content)

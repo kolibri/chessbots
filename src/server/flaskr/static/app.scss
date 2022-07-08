@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+main {
+    font-family: "Courier New", Courier, monospace;
+
+    > h1 {
+        margin: 0;
+        padding: 0;
+        font-size: 10vw;
+    }
+
+
+}
+
+.pgn {
+    width: 99vw;
+    height: 99vw;
+    display: block;
+
+    button {
+        text-indent: -9999px;
+        line-height: 0; /* Collapse the original line */
+    }
+    button::after {
+        font-size: 7vw;
+        font-weight: bold;
+        text-indent: 0;
+        display: block;
+        margin: 0;
+        padding: 0;
+        line-height: initial; /* New content takes up original line height */
+    }
+    button[data-action="back"]::after {
+        content: '<';
+    }
+    button[data-action="next"]::after {
+        content: '>';
+    }
+    button[data-action="start"]::after {
+        content: '<<';
+    }
+    button[data-action="end"]::after {
+        content: '>>';
+    }
+    button[data-action="turn"]::after {
+        content: '<->';
+    }
+}
