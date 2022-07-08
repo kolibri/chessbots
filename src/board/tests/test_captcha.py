@@ -7,10 +7,10 @@ from ..flaskr.BotData.Board import *
 def test_captcha():
     def assert_snippet_is_board(snippet_path: str, board_txt: str, rotation: float):
         templates = [
-            ['flaskr/static/images/pattern_WO.png', 0],
-            ['flaskr/static/images/pattern_WX.png', 1],
-            ['flaskr/static/images/pattern_BO.png', 0],
-            ['flaskr/static/images/pattern_BX.png', 1]
+            ['flaskr/static/images/pattern/pattern_WO.jpeg', 0],
+            ['flaskr/static/images/pattern/pattern_WX.jpeg', 1],
+            ['flaskr/static/images/pattern/pattern_BO.jpeg', 0],
+            ['flaskr/static/images/pattern/pattern_BX.jpeg', 1]
         ]
         captcha = Captcha(snippet_path, templates)
         expected_board = Board(txt_to_matrix(board_txt))
@@ -21,7 +21,7 @@ def test_captcha():
 
     tests = [
         [
-            'flaskr/static/images/mockbot_01.png',
+            'flaskr/static/images/mockbot/mockbot_01.jpeg',
             '\n'.join([
                 '00000000',
                 '00000000',
@@ -34,7 +34,7 @@ def test_captcha():
             ]), 0
         ],
         [
-            'flaskr/static/images/mockbot_02.png',
+            'flaskr/static/images/mockbot/mockbot_02.jpeg',
             '\n'.join([
                 '00100000',
                 '00010010',

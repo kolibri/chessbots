@@ -2,6 +2,7 @@ import cv2
 from ..flaskr import create_app
 from ..flaskr.BotData.Captcha import Captcha
 from ..flaskr.BotData.Board import *
+from ..flaskr.BotData.DataCollector.CaptchaDataCollector import *
 
 
 def test_config():
@@ -54,3 +55,16 @@ def test_bots(client, runner):
          "captcha_img_matches": "flaskr/bot_cache/811c9d06_matches.png"}
     ]
     '''
+
+'''
+def test_captcha_collector(client, runner):
+    bot_path = '../flaskr/bot_cache'
+    image_path = '../flaskr/static/images'
+
+    sut = CaptchaDataCollector(bot_path, image_path)
+
+    bot = sut.get_data(Bot(
+        'http://0.0.0.0:8031/tools/mockbot/01',
+        {'position_local_filename': '../flaskr/static/images/mockbot/mockbot_01.jpeg'}
+    ))
+'''

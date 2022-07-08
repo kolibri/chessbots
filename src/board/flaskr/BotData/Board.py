@@ -36,8 +36,8 @@ class Board:
         matches = []
 
         def match_position(pos: [int, int], snapshot: Board):
-            for y in range(0, snapshot.size()[1]-1):
-                for x in range(0, snapshot.size()[0]-1):
+            for y in range(0, snapshot.size()[1] - 1):
+                for x in range(0, snapshot.size()[0] - 1):
                     cp = add_points(pos, (x, y))
                     if snapshot.matrix[y][x] not in ['0', '1']:
                         continue
@@ -56,6 +56,10 @@ class Board:
 
         return matches
 
+    def matches_to_fields(self, snapshot: Board, board_size):
+        return [((int(m[0][0] / 4 / (board_size / 10)), int(m[0][1] / 4 / (board_size / 10))), m[1]) for m in
+                self.find_matches(snapshot)]
+
 
 def matrix_to_txt(m):
     return '\n'.join([''.join(r) for r in m])
@@ -63,4 +67,3 @@ def matrix_to_txt(m):
 
 def txt_to_matrix(t):
     return [list(snr) for snr in t.split('\n') if len(snr) > 0]
-
