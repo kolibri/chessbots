@@ -1,188 +1,201 @@
-document.addEventListener("DOMContentLoaded", function() {
-    function register(data) {
+document.addEventListener("DOMContentLoaded", function () {
+    function createElement(type, options) {
+        var element = document.createElement(type)
+        if (options) {
+            if (options['attributes'] !== undefined) {
+                for (name in options.attributes) {
+                    element.setAttribute(name, options.attributes[name])
+                }
+            }
+            if (options['classes'] !== undefined) {
+                for (c of options.classes) {
+                    element.classList.add(c);
+                }
+            }
+            if (options['id'] !== undefined) {
+                element.id = options.id
+            }
+            if (options['txt'] !== undefined) {
+                element.appendChild(document.createTextNode(options.txt))
+            }
+            if (options['src'] !== undefined) {
+                element.src = options.src
+            }
+            if (options['dataset'] !== undefined) {
+                for (d in options.dataset) {
+                    element.dataset[d] = options.dataset[d]
+                }
+            }
+            if (options['click'] !== undefined) {
+                element.addEventListener('click', options.click)
+            }
+            if (options['children'] !== undefined) {
+                for (child of options.children) {
+                    element.appendChild(child)
+                }
+            }
+        }
+
+        return element
+    }
+
+    function make_request(method, path, data, handler) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action)
+        xhr.open(method, path)
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(data);
 
-        xhr.onreadystatechange = function() {
+        var output = document.getElementById('xhr_result')
+        xhr.onreadystatechange = function () {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                form.reset();
-
-                var msgBox = document.createElement('pre');
-                msgBox.appendChild(document.createTextNode(xhr.status + ": " + xhr.response))
-                form.append(msgBox)
-                console.log(xhr.status, xhr.responseText)
+                console.log(method, path, data, xhr.status, xhr.responseText)
+                var row_txt = method + ' ' + path + ' - ' + xhr.status + ": " + xhr.response
+                output.append(createElement('pre', {txt: row_txt}))
+                handler(xhr)
             }
         }
     }
 
-    var form = document.getElementById('post-json');
-    var filter_form = document.getElementById('bot-filter');
-    var response_box = document.createElement('div');
-
-    form.onsubmit = function(event){
-        event.preventDefault();
-        var formData = form.querySelector('textarea[name="data"]').value;
-        register(formData)
-        return false;
+    function post_register(data) {
+        var form = document.getElementById('register_form');
+        make_request('POST', form.action, data)
     }
 
     function send_bot_action(method, action, filter) {
-        var xhr = new XMLHttpRequest();
-        xhr.open(method, action + '?' + filter)
-        xhr.send();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == XMLHttpRequest.DONE) {
-                filter_form.reset();
-                filter_form.querySelector('input[name="filter"]').value = filter;
-
-                var msgBox = document.createElement('pre');
-                msgBox.appendChild(document.createTextNode(xhr.status + ": " + xhr.response))
-
-                data = JSON.parse(xhr.response);
-                new_response = debug_bots_list(data)
-                response_box.innerHTML = ''
-                response_box.appendChild(new_response)
-
-//                filter_form.replaceChild(new_response, response_box)
-                //console.log(xhr.status, xhr.responseText)
-            }
-        }
-        return false;
-    }
-
-    filter_form.append(response_box);
-    filter_form.onsubmit = function(event) {
-        event.preventDefault();
-        var action = event.submitter.dataset.action
-        var method = event.submitter.dataset.method
-        var filter = filter_form.querySelector('input[name="filter"]').value;
-//        console.log(action, method, filter)
-        send_bot_action(method, action, filter)
-    }
-
-    send_bot_action('get', '/bots', '')
-
-    var filter_presets = document.getElementById('bot-filter-presets')
-    selector = "#bot-filter-presets span"
-    elementList = document.querySelectorAll(selector)
-    elementList.forEach(function(node, idx) {
-//        console.log(node, idx)
-
-        node.addEventListener('click', function(event){
-            event.preventDefault()
-            send_bot_action('get', '/bots', event.srcElement.dataset.filter)
+        var filter_form = document.getElementById('bot-filter');
+        make_request(method, action + '?' + filter, null, function (xhr) {
+            var response_box = filter_form.querySelector('#bots')
+            response_box.innerHTML = ''
+            response_box.appendChild(create_bots_list(JSON.parse(xhr.response)))
         })
-    });
+    }
 
-    function debug_bots_list(bots) {
-        var container = document.createElement('div')
-        container.classList.add('debug-bots-list');
-
+    function create_bots_list(bots) {
+        var container = createElement('div', {classes: ['debug-bots-list']})
         for (bot of bots) {
             container.append(transform_bot_to_debug_view(bot))
         }
-
         return container
     }
 
     function transform_bot_to_debug_view(bot) {
-        var id = bot.name ? bot.name : bot.id
-//        console.log(id)
-        var container = document.createElement('div')
-        container.dataset.botid = id
-        var title = document.createElement('h3')
-        title.dataset.state = 0
-        title.appendChild(document.createTextNode(id))
-        title.addEventListener('click', function(event){
-//            console.log(event)
-//            console.log(event.srcElement.textContent)
-//            console.log(event.srcElement.dataset.state)
-            node = event.srcElement
-            state = event.srcElement.dataset.state
-
-            if (state == 0) {
-
-                node.parentElement.classList.add('big')
-                event.srcElement.dataset.state = 1
-            }
-            else
-            {
-                node.parentElement.classList.remove('big')
-                event.srcElement.dataset.state = 0
-            }
-        })
-
-        var data = document.createElement('dl')
-        for (key in bot) {
-            var label = document.createElement('dt')
-            label.appendChild(document.createTextNode(key))
-            label.dataset.state = 0
-            label.addEventListener('click', function(event){
-                event.preventDefault()
-                name = event.target.textContent
-                state = event.target.dataset.state
-                event.target.dataset.state = 0 == state ? 1 : 0
-                selector = "dd[data-key='" + name + "']"
-                elementList = document.querySelectorAll(selector)
-                elementList.forEach(function(node, idx) {
-                    old_class = (0 != state ? 'show' : 'hide');
-                    new_class = (0 == state ? 'show' : 'hide');
-                    node.classList.add(new_class)
-                    node.classList.remove(old_class)
-                });
-            });
-
-            var value = document.createElement('dd')
-
-            if(key.endsWith('_image')) {
-                var link = document.createElement('a')
-                link.setAttribute('href', bot[key])
-                link.setAttribute('target', '_blank')
-                link.appendChild(document.createTextNode(JSON.stringify(bot[key])))
-
-                var img = document.createElement('img')
-                img.src = bot[key]
-                link.appendChild(img)
-
-                value.appendChild(link)
-
-            } else if ('url' == key || key.endsWith('_url')) {
-                var link = document.createElement('a')
-                link.setAttribute('href', bot[key])
-                link.setAttribute('target', '_blank')
-                link.appendChild(document.createTextNode(JSON.stringify(bot[key])))
-                value.appendChild(link)
-            } else if ('state' == key) {
-                if(bot[key] == "offline") {
-                    value.classList.add('state-offline')
+        function createListItem(key, value) {
+            var label = createElement('dt', {
+                txt: key,
+                dataset: {show: 0},
+                click: function (event) {
+                    event.preventDefault()
+                    var state = event.target.dataset.show
+                    event.target.dataset.show = 0 == state ? 1 : 0
                 }
-                value.appendChild(document.createTextNode(JSON.stringify(bot[key])))
+            })
+
+            var data = {dataset: {key: key}}
+            if ('id' == key) {
+                data.txt = JSON.stringify(value)
+                data.click = function (event) {
+                    send_bot_action('get', '/bots', 'id=' + value)
+                }
+
+            } else if (key.endsWith('_image')) {
+                data.children = [
+                    createElement('a', {
+                        attributes: {'href': value, 'target': '_blank'},
+                        txt: JSON.stringify(value),
+                        children: [createElement('img', {src: value})]
+                    })]
+            } else if ('url' == key || key.endsWith('_url')) {
+                data.children = [createElement('a', {
+                    attributes: {'href': value, 'target': '_blank'},
+                    txt: JSON.stringify(value)
+                })]
+            } else if ('motors' == key) {
+                data.txt = JSON.stringify(value)
             } else {
-                value.appendChild(document.createTextNode(JSON.stringify(bot[key])))
+                data.txt = value
             }
-
-            value.dataset.key = key
-
-            data.appendChild(label);
-            data.appendChild(value);
+            return [label, createElement('dd', data)]
         }
 
-        var actions = document.createElement('div')
-        actions.classList.add('actions')
-        var re_register = document.createElement('a')
-        re_register.appendChild(document.createTextNode('re-register'))
-        re_register.addEventListener('click', function(event){
-            event.preventDefault()
-            register('["' + bot.url + '"]')
-        });
+        var id = bot.name ? bot.name : bot.id
+        var list_items = []
+        for (key in bot) {
+            list_items.push(...createListItem(key, bot[key]))
+        }
 
-        actions.appendChild(re_register)
-        container.appendChild(title);
-        container.appendChild(data);
-        container.appendChild(actions);
-
+        var container = createElement('div', {
+            dataset: {botid: id, big: 0},
+            children: [
+                createElement('h3', {txt: id}),
+                createElement('dl', {children: list_items}),
+                createElement('div', {
+                    classes: ['actions'],
+                    children: [createElement('button', {
+                        txt: 're-register',
+                        click: function (event) {
+                            event.preventDefault()
+                            post_register('["' + bot.url + '"]')
+                        }
+                    })]
+                })
+            ]
+        })
         return container;
     }
+
+    function attach_register_handler() {
+        var form = document.getElementById('register_form');
+        form.onsubmit = function (event) {
+            event.preventDefault();
+            var formData = form.querySelector('textarea[name="data"]').value;
+            post_register(formData)
+            return false;
+        }
+    }
+
+    function attach_filter_handler() {
+        var filter_form = document.getElementById('bot-filter');
+        filter_form.appendChild(createElement('div', {id: 'bots'}))
+        filter_form.onsubmit = function (event) {
+            event.preventDefault();
+            var action = event.submitter.dataset.action
+            var method = event.submitter.dataset.method
+            var filter = filter_form.querySelector('input[name="filter"]').value;
+            send_bot_action(method, action, filter)
+        }
+
+        var elementList = document.querySelectorAll("#bot-filter-presets span")
+        elementList.forEach(function (node, idx) {
+            node.addEventListener('click', function (event) {
+                event.preventDefault()
+                send_bot_action('get', '/bots', event.srcElement.dataset.filter)
+            })
+        });
+
+        send_bot_action('get', '/bots', '')
+    }
+
+    function attach_xhr() {
+        container = document.getElementById('dashboard')
+        container.appendChild(createElement('div', {id: 'xhr_result'}))
+    }
+
+    function attach_dashboard_tabs() {
+        var nav_links = document.querySelectorAll('#dashboard > nav a');
+        nav_links.forEach(function (link, idx) {
+            link.addEventListener('click', function (event) {
+                var sections = document.querySelectorAll('#dashboard > section[data-show]');
+                sections.forEach(function (section, idx) {
+                    section.dataset.show = '0'
+                });
+
+                document.querySelector('#dashboard > section' + link.attributes.href.value).dataset.show = '1';
+            })
+        });
+    }
+
+    attach_xhr()
+    attach_dashboard_tabs()
+    attach_register_handler()
+    attach_filter_handler()
 });
