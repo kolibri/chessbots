@@ -1,27 +1,4 @@
-import cv2
-from ..flaskr import create_app
-from ..flaskr.BotData.Captcha import Captcha
-from ..flaskr.BotData.Board import *
-from ..flaskr.BotData.DataCollector.CaptchaDataCollector import *
-
-
-def test_config():
-    assert not create_app().testing
-    assert create_app({'TESTING': True}).testing
-
-
-def test_health_check(client):
-    response = client.get('/hc')
-    assert response.status_code == 200
-    assert response.data == b'ok'
-
-
-def test_index(client):
-    response = client.get('/')
-    assert response.status_code == 200
-
-
-def test_bots(client, runner):
+def test_bots_register(client, runner):
     result = runner.invoke(args=["script", "cleanup"])
     response = client.get('/bots/')
     assert response.status_code == 200
