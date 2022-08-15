@@ -15,8 +15,7 @@ class Chessbot:
         self.wifi_ssid = config.wifi['ssid']
         self.wifi_pass = config.wifi['pass']
         self.data = config.bot
-        self.sequence = []
-        # self.motors = Motors(config.motors)
+        self.motors = Motors(config.motors)
 
     def boot(self):
         connection = self.connect_wifi()
@@ -39,8 +38,9 @@ class Chessbot:
         raw = raw.decode('UTF-8')
         sequence = json.loads(raw)
 
+        self.motors.move(sequence)
+
         print('gise', sequence)
-        self.sequence = sequence
         print('sese', self.sequence)
 
     def picture(self):
@@ -76,30 +76,32 @@ class Motor:
         print(pins)
         self.pin_a = machine.Pin(pins[0], machine.Pin.OUT)
         self.pin_b = machine.Pin(pins[1], machine.Pin.OUT)
-        self.pin_a.on()
-        self.pin_b.on()
+        self.pin_a.off()
+        self.pin_b.off()
 
     def set_state(self, state: int):
         self.pin_a.off()
-        self.pin_a.off()
+        self.pin_b.off()
         if -1 == state:
             self.pin_a.on()
         elif 1 == state:
-            self.pin_a.off()
+            self.pin_b.on()
 
 
 class Motors:
     def __init__(self, config):
         self.left = Motor(config['left'])
         self.right = Motor(config['right'])
-        # self.speed = machine.PWM(machine.Pin(config['speed']))
+        self.speed = machine.Pin(config['speed'], machine.Pin.OUT)
+        self.speed.on()
+        #self.speed = machine.PWM(machine.Pin(config['speed']))
         self.interval_duration = 5
 
     def move(self, sequence):
         for s in sequence:
             self.set_state(s[0], s[1])
             time.sleep(s[2] * self.interval_duration)
-            self.set_state(0, 0)
+        self.set_state(0, 0)
 
     def set_state(self, lv, rv):
         self.left.set_state(lv)

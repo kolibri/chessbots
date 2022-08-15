@@ -9,7 +9,7 @@ bot = {
 }
 
 motors = {
-    'left': [13, 1],
+    'left': [13, 15],
     'right': [14, 2],
-    'speed': 5,
+    'speed': 12,
 }

@@ -1,14 +1,27 @@
-def add_points(point_a: [int, int], point_b: [int, int]) -> [int, int]:
-    return [point_a[0] + point_b[0], point_a[1] + point_b[1]]
+import math
+from collections import namedtuple
 
 
-def sub_points(point_a: [int, int], point_b: [int, int]) -> [int, int]:
-    return add_points(point_a, [point_b[0] * -1, point_b[1] * -1])
+Point = namedtuple('Point', 'x y')
+PointImg = namedtuple('PointImg', 'x y')
+PointGrid = namedtuple('PointGrid', 'x y')
 
 
-def mult_point(point_a: [int, int], factor) -> [int, int]:
-    return [point_a[0] * factor, point_a[1] * factor]
+def add_points(point_a: Point, point_b: Point) -> Point:
+    return Point(point_a.x + point_b.x, point_a.y + point_b.y)
 
 
-def point_in_area(point: [int, int], area: [[int, int], [int, int]]) -> bool:
-    return area[0][0] < point[0] < area[1][0] and area[0][1] < point[1] < area[1][1]
+def sub_points(point_a: Point, point_b: Point) -> Point:
+    return add_points(point_a, Point(point_b.x * -1, point_b.y * -1))
+
+
+def abs_point(p: Point) -> Point:
+    return Point(abs(p.x), abs(p.y))
+
+
+def mult_point(point_a: Point, factor) -> Point:
+    return Point(point_a.x * factor, point_a.y * factor)
+
+
+def point_in_area(point: Point, area: [Point, Point]) -> bool:
+    return area[0].x < point[0] < area[1].x and area[0].y < point[1] < area[1].y

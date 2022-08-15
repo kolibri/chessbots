@@ -196,8 +196,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function attach_botrc_handler() {
+        var rc_form = document.getElementById('botrc');
+        rc_form.onsubmit = function (event) {
+            event.preventDefault();
+            var action = rc_form.querySelector('input[name="bot_address"]').value;
+            var method = 'post'
+            var data = rc_form.querySelector('textarea[name="sequence"]').value;
+            make_request(method, action, data)
+        }
+    }
+
     attach_xhr()
     attach_dashboard_tabs()
-    attach_register_handler()
     attach_filter_handler()
+    attach_register_handler()
+    attach_botrc_handler()
 });

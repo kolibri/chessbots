@@ -25,8 +25,6 @@ Goal: All with python.
 
 # Devblog 
 
-## (aka, where the real `README` is)
-
 newest first
 
 - [2022-04-26 complete restart with python](devblog/2022-04-26-the_case_with_snakes.md)

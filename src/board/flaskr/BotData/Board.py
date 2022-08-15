@@ -13,14 +13,14 @@ class Board:
     def size(self) -> (int, int):
         return len(self.matrix[0]), len(self.matrix)
 
-    def create_snapshot(self, position, size) -> Board:
+    def create_snapshot(self, position: Point, size) -> Board:
         res = []
         for y in range(0, size[1]):
-            if position[1] + y < self.size()[1]:
+            if position.y + y < self.size()[1]:
                 row = []
                 for x in range(0, size[0]):
-                    if position[0] + x < self.size()[0]:
-                        row.append(self.matrix[position[1] + y][position[0] + x])
+                    if position.x + x < self.size()[0]:
+                        row.append(self.matrix[position.y + y][position.x + x])
                 if 0 < len(row):
                     res.append(row)
         return Board(res)
@@ -35,10 +35,10 @@ class Board:
         board = self.matrix
         matches = []
 
-        def match_position(pos: [int, int], snapshot: Board):
+        def match_position(pos: Point, snapshot: Board):
             for y in range(0, snapshot.size()[1] - 1):
                 for x in range(0, snapshot.size()[0] - 1):
-                    cp = add_points(pos, (x, y))
+                    cp = add_points(pos, Point(x, y))
                     if snapshot.matrix[y][x] not in ['0', '1']:
                         continue
                     if self.matrix[cp[1]][cp[0]] not in ['0', '1']:
@@ -50,8 +50,8 @@ class Board:
         for y in range(0, len(board) - snapshot.size()[1] - 1):
             for x in range(0, len(board[y]) - snapshot.size()[0] - 1):
                 for r in (0, 90, 180, 270):
-                    if match_position((x, y), snapshot):
-                        matches.append(((x, y), r))
+                    if match_position(Point(x, y), snapshot):
+                        matches.append((Point(x, y), r))
                     snapshot = snapshot.rotate()
 
         return matches

@@ -19,8 +19,7 @@ class CaptchaDataCollector:
         data = bot.data
         print('cdc:', data)
         captcha = Captcha(data['position_local_filename'], self.templates)
-        angle, board = captcha.resolve()
-        data['captcha_angle'] = angle
-        data['captcha_board'] = board.txt()
+        data['captcha_angle'] = captcha.get_captcha_angel()
+        data['captcha_board'] = captcha.get_board().txt()
 
         return data

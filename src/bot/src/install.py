@@ -32,5 +32,5 @@ def connect_wifi(config):
 connect_wifi(config.wifi)
 
 upip.install('picoweb')
-#upip.install('bot-ulogging')
+upip.install('micropython-ulogging')
 upip.install('uasyncio')
