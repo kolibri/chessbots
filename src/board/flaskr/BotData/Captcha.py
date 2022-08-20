@@ -1,6 +1,10 @@
 import math
 import cv2
+import numpy as np
+import random
+
 from .Board import *
+from collections import namedtuple
 
 
 def in_tolerance(value, target: int, tolerance: int):
@@ -11,29 +15,42 @@ class AngelCalculator:
     @staticmethod
     def get_angle(a: PointImg, b: PointImg, c: PointImg) -> float:
         ang = math.degrees(math.atan2(c.y - b.y, c.x - b.x) - math.atan2(a.y - b.y, a.x - b.x))
-        return ang + 360 if ang < 0 else ang
+        ang = ang + 360 if ang < 0 else ang
+        return 360 - ang if ang > 180 else ang
 
     @staticmethod
     def find_angel_points(markers: [[PointImg, int]]) -> [PointImg, PointImg, PointImg]:
-        # sort by distance, return the first three PointImg only
+        points = AngelCalculator.get_nearest_to_center(markers)
+
+        # return in the right order, center of 90° in the middle
+        if in_tolerance(AngelCalculator.get_angle(points[0], points[1], points[2]), 90, 10):
+            return [points[0], points[1], points[2]]
+        if in_tolerance(AngelCalculator.get_angle(points[1], points[2], points[0]), 90, 10):
+            return [points[1], points[2], points[0]]
+        if in_tolerance(AngelCalculator.get_angle(points[2], points[0], points[1]), 90, 10):
+            return [points[2], points[0], points[1]]
+        print(AngelCalculator.get_angle(points[0], points[1], points[2]))
+        print(AngelCalculator.get_angle(points[1], points[2], points[0]))
+        print(AngelCalculator.get_angle(points[2], points[0], points[1]))
+
+        raise RuntimeError('Could not find three dots with 90 degree angle o_O')
+
+    @staticmethod  # this method mainly is not inlined, because we want to display found points in test images
+    def get_nearest_to_center(markers):
         sm = sorted(markers, key=lambda x: x[2])
         sm = sm[0:3]
-        points = [m[0] for m in sm]
-        # return in the right order, center of 90° in the middle
-        if in_tolerance(AngelCalculator.get_angle(points[0], points[1], points[2]), 90, 2):
-            return [points[0], points[1], points[2]]
-        if in_tolerance(AngelCalculator.get_angle(points[1], points[2], points[0]), 90, 2):
-            return [points[1], points[2], points[0]]
-        if in_tolerance(AngelCalculator.get_angle(points[2], points[0], points[1]), 90, 2):
-            return [points[2], points[0], points[1]]
-        raise RuntimeError('Could not find three dots with 90 degree angle o_O')
+        return [m[0] for m in sm]
+
+
+Mark = namedtuple('Mark', 'point marker dist')
 
 
 class MarkerFinder:
-    def __init__(self, templates: [[str, int]]):
+    def __init__(self, templates: [[str, int]], tolerance):
         self.__templates = templates
+        self.__tolerance = tolerance
 
-    def find_markers(self, img) -> [[PointImg, int, float, Point]]:  # foundAt, marker, distance, size
+    def find_markers(self, img) -> [Mark]:
         center = mult_point(PointImg(img.shape[0], img.shape[1]), 0.5)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         matches = []
@@ -41,60 +58,64 @@ class MarkerFinder:
             template = cv2.imread(tt[0], 0)
             w, h = template.shape[::-1]
             res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-            threshold = 0.8
+            threshold = 0.6
             loc = np.where(res >= threshold)
 
             for pt in zip(*loc[::-1]):
                 # p1, p2, mark, distance to center
                 p = PointImg(pt[0], pt[1])
-                matches.append([
+                matches.append(Mark(
                     p,
                     tt[1],
                     math.sqrt((center.x - p.x) ** 2 + (center.y - p.y) ** 2)
-                ])
-        return MarkerFinder.filter_overlapping(matches, [])
+                ))
+        # return matches
+        return self.filter_overlapping(matches, [])
 
-    @staticmethod
     def filter_overlapping(
+            self,
             markers: [[PointImg, int, float, Point]],
-            carry: [[PointImg, int, float, Point]] = []
+            carry: [[PointImg, int, float, Point]]
     ) -> [
-        [PointImg, int, float, Point]
+        [Mark]
     ]:
         if not markers:
             return carry
-        tol_p = PointImg(5, 5)
+        tol_p = PointImg(self.__tolerance, self.__tolerance)
         current = markers.pop(0)
         area = PointImg(sub_points(current[0], tol_p), add_points(current[0], tol_p))
         carry.append(current)
         markers_new = [m for m in markers if not point_in_area(m[0], area)]
-        return MarkerFinder.filter_overlapping(markers_new, carry)
+        return self.filter_overlapping(markers_new, carry)
+
+
+GridPoint = namedtuple('GridPoint', 'grid, mark')
 
 
 class GridResolver:
     @staticmethod
-    def resolve_grid(markers: [[PointImg, int]], area_max: PointImg) -> [[PointGrid, [PointImg, int]]]:
-        def create_grid_point(point: PointImg, haystack: [[PointImg, int]]) -> [PointImg, int]:
+    def resolve_grid(markers: [Mark], area_max: PointImg) -> [GridPoint]:
+        def create_grid_point(point: PointImg, markers: [Mark]) -> [PointImg, int]:
             tol_point = PointImg(13, 13)
-            for hay in haystack:
+            for marker in markers:
                 area = [sub_points(point, tol_point), add_points(point, tol_point)]
-                if point_in_area(hay[0], area):
-                    return hay
-            return [point, 2]  # here we set the value for "not found"
+                if point_in_area(marker.point, area):
+                    return marker
+            return Mark(point, 2, 0)  # here we set the value for "not found"
 
         # this might be not so good, as we did not check for the middle angle(?)
         angle = AngelCalculator.find_angel_points(markers)
         grid_max = 16
         result = []
-        print('hereee', angle, area_max, '#', abs_point(sub_points(angle[1], angle[2])),
-              abs_point(sub_points(angle[1], angle[0])), markers)
+        # print('hereee', angle, area_max, '#', abs_point(sub_points(angle[1], angle[2])),
+        #       abs_point(sub_points(angle[1], angle[0])), markers)
         for x in range(-grid_max, grid_max):
             for y in range(-grid_max, grid_max):
                 mod_x = mult_point(abs_point(sub_points(angle[1], angle[2])), x)
                 mod_y = mult_point(abs_point(sub_points(angle[1], angle[0])), y)
                 expected_pos = add_points(angle[1], add_points(mod_x, mod_y))
                 if area_max.x >= expected_pos.x >= 0 and area_max.y >= expected_pos.y >= 0:
-                    result.append([PointGrid(x, y), create_grid_point(expected_pos, markers), expected_pos])
+                    result.append(GridPoint(PointGrid(x, y), create_grid_point(expected_pos, markers)))
         return result
 
     @staticmethod
@@ -120,6 +141,9 @@ class GridResolver:
         return res
 
 
+ResolvedCaptcha = namedtuple('ResolvedCaptcha', 'board angle')
+
+
 class Captcha:
     def __init__(self, img_path: str, templates: [[str, int]]):
         self.img_path = img_path
@@ -127,8 +151,11 @@ class Captcha:
         self.__templates = templates
         self.finder = MarkerFinder(self.__templates)
 
-    # this gives the angel of the captcha, ignoring rotation
-    # you need to add this to the rotation result from board
+    def resolve(self):
+        return ResolvedCaptcha(self.get_board(), self.get_captcha_angel())
+
+    # this gives the angel of the captcha, ignoring its orientation
+    # you need to add this to the orientation result from board
     def get_captcha_angel(self) -> float:
         markers = self.finder.find_markers(self.img)
         angle_points = AngelCalculator.find_angel_points(markers)
@@ -137,22 +164,25 @@ class Captcha:
 
     def get_board(self) -> Board:
         markers = self.finder.find_markers(self.img)
-        grid_txt = GridResolver.grid_to_txt(GridResolver.resolve_grid(markers, PointImg(self.img.shape[0], self.img.shape[1])))
+        grid_txt = GridResolver.grid_to_txt(
+            GridResolver.resolve_grid(markers, PointImg(self.img.shape[0], self.img.shape[1])))
         return Board(txt_to_matrix(grid_txt))
 
-    # def __mark_positions(self, pos: [PointImg]):
-    #     img = cv2.imread(self.img_path)  # create new image
-    #     color = (255, 0, 255)
-    #     for p in pos:
-    #         print(p)
-    #         # img = cv2.rectangle(img, sub_points(p, [3, 3]), add_points(p, [3, 3]), color, 2)
-    #         # todo: cv2.rectangle should work with (img, p1, p2, ...) according to docs o_O
-    #         # todo: but without, color is wrong...
-    #         img = cv2.rectangle(
-    #             img,
-    #             [list(sub_points(p, [3, 3])), list(add_points(p, [3, 3]))],
-    #             list(color),
-    #             2
-    #         )
-    #
-    #     return img
+
+
+# def __mark_positions(self, pos: [PointImg]):
+#     img = cv2.imread(self.img_path)  # create new image
+#     color = (255, 0, 255)
+#     for p in pos:
+#         print(p)
+#         # img = cv2.rectangle(img, sub_points(p, [3, 3]), add_points(p, [3, 3]), color, 2)
+#         # todo: cv2.rectangle should work with (img, p1, p2, ...) according to docs o_O
+#         # todo: but without, color is wrong...
+#         img = cv2.rectangle(
+#             img,
+#             [list(sub_points(p, [3, 3])), list(add_points(p, [3, 3]))],
+#             list(color),
+#             2
+#         )
+#
+#     return img

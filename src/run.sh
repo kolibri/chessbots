@@ -7,9 +7,9 @@ run_action () { ## run with $ ./run.sh +
   if [[ "board" = $APP ]]; then ## 'board' actions:
     ACTION=$2
     if [[ "run" == $ACTION ]]; then ## 'run' command
-      time run_cmd board flask script ${@:3}
+      run_cmd board flask script ${@:3}
     elif [[ "test" == $ACTION ]]; then ## 'test' o_O
-      time run_cmd board pytest ${@:3}
+      run_cmd board pytest ${@:3}
     elif [[ "up" == $ACTION ]]; then ## start'up' webserver
       docker-compose up -d board
     else
@@ -33,7 +33,10 @@ run_action () { ## run with $ ./run.sh +
 }
 
 run_cmd () {
-    docker-compose run $@
+#    docker-compose run $@
+    docker-compose run --rm --user "$(id -u):$(id -g)" $@
+
 }
 
-run_action $@
+time run_action $@
+#sudo chown ko:ko -R ./

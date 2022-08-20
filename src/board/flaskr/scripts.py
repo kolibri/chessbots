@@ -78,7 +78,7 @@ def boardprint():
 @bp.cli.command('mockimages')
 def mockimages():
     base_path = current_app.config['STATIC_DIR']
-    pc = BoardImageCreator(2000, 10)
+    pc = BoardImageCreator(20000, 10)
     pc.save_img(base_path + 'print_board.jpeg')
     pc.save_pattern_files(base_path + 'pattern/')
     pc.save_mockbot_files(base_path + 'mockbot/', [
@@ -92,4 +92,24 @@ def mockimages():
         ['07', 3, 1, 222],
         ['08', 4, 9, 300],
         ['09', 2, 5, 115]
+    ])
+
+
+@bp.cli.command('testimages')
+def testimages():
+    base_path = 'tests/images/source/'
+    pc = BoardImageCreator(20000, 10)
+    pc.save_img(base_path + 'print_board.jpeg')
+    pc.save_pattern_files(base_path)
+    pc.save_mockbot_files(base_path, [
+        ['0', 0, 0, 0],
+        ['1', 2, 3, 90],
+        ['2', 3, 2, 180],
+        ['3', 1, 5, 270],
+        ['4', 1, 7, 123],
+        ['5', 7, 3, 10],
+        ['6', 3, 1, 222],
+        ['7', 4, 9, 300],
+        ['8', 4, 9, 30],
+        ['9', 2, 5, 115]
     ])

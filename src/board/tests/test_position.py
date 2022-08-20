@@ -1,6 +1,3 @@
-import cv2
-from ..flaskr import create_app
-from ..flaskr.BotData.Captcha import Captcha
 from ..flaskr.BotData.Board import *
 from ..flaskr.Utils.BoardUtils import *
 
@@ -11,7 +8,11 @@ def test_position():
         assert board.find_matches(given) == position
         assert board.matches_to_fields(given, 10) == field
 
+
     board = Board(txt_to_matrix(create_txt_board_4x4_bin(10)))
+
+    print(board.txt())
+    # assert False
 
     tests = [
         [
@@ -45,3 +46,4 @@ def test_position():
     ]
     for test in tests:
         assert_board_finds_position(board, test[0], test[1], test[2])
+

@@ -29,7 +29,7 @@ class BoardImageCreator:
         self.size = pixels_per_side
         self.tiles_per_side = tiles_per_side
         self.tile_size = int(self.size / tiles_per_side)
-        self.stroke_width = 1
+        self.stroke_width = int((self.size / 2000))
 
     def save_img(self, file_path) -> Image:
         self.render().convert('RGB').save(file_path)
