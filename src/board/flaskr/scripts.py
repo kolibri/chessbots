@@ -113,3 +113,17 @@ def testimages():
         ['8', 4, 9, 30],
         ['9', 2, 5, 115]
     ])
+
+
+@bp.cli.command('ubm')
+def ubm():
+    base_path = 'tests/images/source/'
+    pc = UltimateBoardImageMaker(
+        600,
+        Inch(80),
+        Inch(0.1),
+        8
+    )
+
+    #pc.part_to_file('tests/images/source/test.jpg', (0, 0), (2, 2))
+    pc.all_parts_to_files('tests/images/source', 10)
