@@ -3,7 +3,7 @@ import shutil
 from flask import Blueprint
 from flask import current_app
 from .Utils.BoardUtils import *
-from .Utils.BoardImageCreator import *
+from chessbots.board.image_creation import UltimateBoardImageMaker, BoardImageCreator
 
 bp = Blueprint('script', __name__)
 

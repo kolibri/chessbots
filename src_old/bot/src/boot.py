@@ -40,8 +40,8 @@ class Chessbot:
 
         self.motors.move(sequence)
 
-        print('gise', sequence)
-        print('sese', self.sequence)
+        # print('gise', sequence)
+        # print('sese', self.sequence)
 
     def picture(self):
         return camera.capture()
@@ -94,7 +94,7 @@ class Motors:
         self.right = Motor(config['right'])
         self.speed = machine.Pin(config['speed'], machine.Pin.OUT)
         self.speed.on()
-        #self.speed = machine.PWM(machine.Pin(config['speed']))
+        # self.speed = machine.PWM(machine.Pin(config['speed']))
         self.interval_duration = 5
 
     def move(self, sequence):

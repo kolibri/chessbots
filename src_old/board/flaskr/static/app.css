@@ -1,0 +1,73 @@
+img {
+    width: auto;
+    height: 100%;
+    display: block;
+}
+
+#dashboard > nav a:active {
+    color: #000;
+}
+#dashboard > nav a {
+    font-size: 1.5em;
+}
+
+#dashboard > section[data-show='1'] {
+    display: block;
+}
+
+#dashboard > section[data-show='0'] {
+    display: none;
+}
+
+#register_form textarea { width:40em; height: 10em; display: block; }
+
+.debug-bots-list {
+    outline: 1px solid black;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 0.8em;
+    display: flex;
+    gap: 3px 3px;
+    flex-wrap: wrap;
+}
+
+.debug-bots-list > div {
+    outline: 1px solid black;
+    height: auto;
+    flex: 1 20%;
+}
+.debug-bots-list > div > * {
+    margin: 0;
+}
+
+.debug-bots-list > div > h3 {
+    text-overflow: clip;
+    overflow: hidden;
+    background-color: #bcd;
+}
+
+.debug-bots-list > div > dl > dt,
+.debug-bots-list > div > dl > dd {
+    overflow: hidden;
+    margin-inline-start: 0px;
+    outline: 1px solid blue;
+
+}
+
+.debug-bots-list > div > dl > dt[data-show='0'] {
+    background-color: #abc;
+}
+.debug-bots-list > div > dl > dt[data-show='1'] {
+    background-color: #def;
+}
+
+.debug-bots-list > div > dl > dd {
+    display: none;
+}
+
+.debug-bots-list > div > dl > dt[data-show='0'] + dd {
+    display: none;
+}
+
+.debug-bots-list > div > dl > dt[data-show='1'] + dd {
+    display: block;
+}

@@ -8,3 +8,4 @@ src/board/flaskr/static/images/**/*.jpeg
 src/board/flaskr/static/images/**/*.png
 src/board/flaskr/bot_cache/*
 src/board/tests/images/result/*
+build/*
