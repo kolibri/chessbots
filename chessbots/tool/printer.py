@@ -18,6 +18,9 @@ class PatternPrinter:
     def create_image(self, pattern: Pattern):
         return self._render(pattern)
 
+    def calculate_size(self, pattern: Pattern):
+        return [i*self.point_size for i in pattern.size()]
+
     def save_to_file(self, pattern: Pattern, path: str):
         self._render(pattern).convert('RGB').save(path)
 

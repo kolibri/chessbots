@@ -24,5 +24,4 @@ def get_show(name: str):
 
 @bp.route('/<string:name>/position.jpeg', methods=['GET'])
 def get_picture(name: str):
-    return send_from_directory('/app/build/mockbot', 'mockbot_01.jpeg')
-    # return send_from_directory('/app/build/mockbot', 'mockbot_' + name + '.jpeg')
+    return send_from_directory('/app/build/mockbot', 'mockbot_' + name + '.jpg')

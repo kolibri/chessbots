@@ -1,8 +1,9 @@
 from dependency_injector import containers, providers
 from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
+from chessbots.tool.mockbot import *
 from chessbots.lib.print_units import *
-from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector
+from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
 
 
 class Container(containers.DeclarativeContainer):
@@ -18,6 +19,9 @@ class Container(containers.DeclarativeContainer):
         },
         'bots': {
             'cache_dir': 'build/bots'
+        },
+        'mockbot': {
+            'cache_dir': 'build/mockbot'
         }
     }
 
@@ -33,11 +37,18 @@ class Container(containers.DeclarativeContainer):
 
     )
 
+    mockbot_picture_creator = providers.Factory(
+        MockbotPictureCreator,
+        path=config['mockbot']['cache_dir'],
+        printer=pattern_printer
+    )
+
     pattern_creator = providers.Factory(Pattern8x8With4DataFields)
     collector = providers.Factory(
         ChainDataCollector,
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
+            CaptchaReaderCollector(config['bots']['cache_dir'], config['bots']['cache_dir'])
         ]
     )
 

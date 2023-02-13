@@ -4,7 +4,7 @@ from werkzeug.datastructures import MultiDict
 import os
 import hashlib
 from chessbots.lib.filesystem import read_json, dump_json
-
+from chessbots.lib.captcha.captcha_reader import CaptchaReader
 
 class Bot:
     def __init__(self, host_name, data=None):
@@ -60,9 +60,7 @@ class BotManager:
             return True
 
         if 0 == len(filters):
-            print('0000', self.bots)
             return self.bots
-        print('1111')
         return [bot for bot in self.bots if (compare(bot, filters))]
 
     @staticmethod
@@ -99,11 +97,34 @@ class RobotApiCollector(BotDataCollector):
             print('robot sensor: failed to load bot info', data, e)
 
         if 'live_image' in data:
-            img_cache_path = self.cache_path + bot.id + '_position.jpeg'
+            img_cache_path = os.path.join(self.cache_path, bot.id + '_position.jpeg')
             try:
                 r = requests.get(data.get('live_image'))
                 open(img_cache_path, 'wb').write(r.content)
                 data['position_local_filename'] = img_cache_path
             except requests.exceptions.RequestException as e:
                 print('robot sensor: failed to load image: ', data['live_image'])
+        return data
+
+
+class CaptchaReaderCollector(BotDataCollector):
+    def __init__(self, cache_path, pattern_path):
+        self.cache_path = cache_path
+        self.pattern_path = pattern_path
+        self.templates = [
+            [self.pattern_path + 'pattern/pattern_WO.jpeg', 0],
+            [self.pattern_path + 'pattern/pattern_WX.jpeg', 1],
+            [self.pattern_path + 'pattern/pattern_BO.jpeg', 0],
+            [self.pattern_path + 'pattern/pattern_BX.jpeg', 1]
+        ]
+
+    def get_data(self, bot: Bot):
+        if 'position_local_filename' not in bot.data.keys():
+            return bot.data
+        data = bot.data
+        captcha_reader = CaptchaReader(data['position_local_filename'], self.templates)
+        captcha = captcha_reader.resolve()
+        data['captcha_angle'] = captcha.angle
+        data['captcha_board'] = captcha.board.txt()
+
         return data

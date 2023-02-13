@@ -6,6 +6,7 @@ Pillow~=9.4.0
 matplotlib
 pytest
 opencv-python
+opencv-contrib-python
 dependency-injector
 pyyaml
 Werkzeug~=2.2.2
