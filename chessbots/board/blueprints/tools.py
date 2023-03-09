@@ -51,5 +51,5 @@ def test_captcha_to_txt(
     for bot in MockBots().bots:
         path = os.path.join('build/mockbot/', bot.picture())
         board, angle = captcha_reader.resolve(path)
-        print(board.txt())
-        print(angle)
+        # print(board.txt())
+        # print(angle)

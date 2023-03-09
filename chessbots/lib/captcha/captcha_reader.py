@@ -21,6 +21,7 @@ class Drawable(NamedTuple):
 
 class GridPoint(NamedTuple):
     grid_pos: Point
+    expected_pos: Point
     raw: Drawable
 
 
@@ -92,14 +93,16 @@ class MarkerFinder:
 
 class GridResolver:
     def __init__(self):
-        self.tolerance = Point(16, 16)
+        self.tolerance = 16
+        self.t_point = Point(self.tolerance, self.tolerance)
 
-    def resolve(self, markers: [Drawable]) -> [str, float, [GridPoint]]:
+    def resolve(self, markers: [Drawable]) -> [str, float, [GridPoint], [Point, Point, Point]]:
         def resolve_grid(markers: [Drawable]) -> [GridPoint]:
             def find_angel_points(markers: [Drawable]) -> [PointImg, PointImg, PointImg]:
                 with_distance = [[mark, get_distance(mark.pos, center)] for mark in markers]
                 sorted_markers = sorted(with_distance, key=lambda x: x[1])
                 points = [m[0].pos for m in sorted_markers[0:3]]
+                # print('points', points)
                 if in_tolerance(get_angle(points[0], points[1], points[2]), 90, 10):
                     return [points[0], points[1], points[2]]
                 if in_tolerance(get_angle(points[1], points[2], points[0]), 90, 10):
@@ -110,11 +113,11 @@ class GridResolver:
 
             def create_grid_point(grid_point: Point, position: PointImg, markers: [Drawable]) -> GridPoint:
                 for marker in markers:
-                    area = [sub_points(position, self.tolerance), add_points(position, self.tolerance)]
+                    area = [sub_points(position, self.t_point), add_points(position, self.t_point)]
                     if point_in_area(marker.pos, area):
-                        return GridPoint(grid_pos=grid_point, raw=marker)
-                return GridPoint(grid_point, Drawable(pos=Point(0, 0), size=0, color=(0, 0, 0),
-                                                      value='2'))  # here we set the value for "not found"
+                        return GridPoint(grid_pos=grid_point, expected_pos=position, raw=marker)
+                return GridPoint(grid_point, position, Drawable(pos=Point(0, 0), size=0, color=(0, 0, 0),
+                                                                value='2'))  # here we set the value for "not found"
 
             width = max([d.pos.x for d in markers])
             height = max([d.pos.y for d in markers])
@@ -124,15 +127,19 @@ class GridResolver:
             angle = find_angel_points(markers)
             grid_max = 16
             result = []
+            base_mod_x = sub_points(angle[1], angle[0])
+            base_mod_y = sub_points(angle[1], angle[2])
+            # print(('angle', angle, base_mod_x, base_mod_y))
 
             for x in range(-grid_max, grid_max):
                 for y in range(-grid_max, grid_max):
-                    mod_x = mult_point(abs_point(sub_points(angle[1], angle[2])), x)
-                    mod_y = mult_point(abs_point(sub_points(angle[1], angle[0])), y)
+                    mod_x = mult_point(base_mod_x, x)
+                    mod_y = mult_point(base_mod_y, y)
                     expected_pos = add_points(angle[1], add_points(mod_x, mod_y))
+                    # print('ep', x, y, mod_x, mod_y, expected_pos)
                     if area_max.x >= expected_pos.x >= 0 and area_max.y >= expected_pos.y >= 0:
                         result.append(create_grid_point(Point(x, y), expected_pos, markers))
-            return result, get_angle(angle[0], angle[1], Point(angle[0].x, angle[1].y))
+            return result, get_angle(angle[0], angle[1], Point(angle[0].x, angle[1].y)), angle
 
         def grid_to_txt(grid: [GridPoint]):
             max_x = max([g.grid_pos.x for g in grid]) + 1
@@ -146,7 +153,7 @@ class GridResolver:
                     if PointGrid(x, y) in [g.grid_pos for g in grid]:
                         index = [g.grid_pos for g in grid].index(PointGrid(x, y))
                         cell = grid[index]
-                        res = res + str(cell[1].value)
+                        res = res + str(cell.raw.value)
                     else:
                         # print('TWO', PointGrid(x, y), max_x, max_y, min_x, min_y, grid )
                         res = res + '2'
@@ -157,9 +164,9 @@ class GridResolver:
         height = max([d.pos.y for d in markers])
         center = Point(int(width / 2), int(height / 2))
 
-        grid, angle = resolve_grid(markers)
+        grid, angle, angle_points = resolve_grid(markers)
         grid_txt = grid_to_txt(grid)
-        return grid_txt, angle, grid
+        return grid_txt, angle, grid, angle_points
 
 
 class CaptchaReader:
@@ -172,12 +179,13 @@ class CaptchaReader:
         def debug_marks(img, name: str, marks: [Drawable]):
             marked = draw_positions(img, marks)
             cv2.imwrite(name, marked)
+
         img = cv2.imread(filename)
         markers = self.marker_finder.find_markers(img)
         if self.debug:
             debug_marks(img, filename + '_marked.jpg', markers)
 
-        grid, angle, grid_ = self.grid_resolver.resolve(markers)
+        grid, angle, grid_, angle_points = self.grid_resolver.resolve(markers)
 
         # print(angle)
         if self.debug:
@@ -190,6 +198,14 @@ class CaptchaReader:
             m = [Drawable(pos=d.raw.pos, size=d.raw.size, color=d.raw.color,
                           value=d.raw.value) for d in grid_]
             debug_marks(img, filename + '_solved.jpg', m)
+            m = [Drawable(pos=d.expected_pos, size=self.grid_resolver.tolerance, color=d.raw.color,
+                          value=str(d.expected_pos.x) + 'x' + str(d.expected_pos.y)) for d in grid_]
+            debug_marks(img, filename + '_expect.jpg', m)
+            m = [Drawable(pos=d, size=3, color=(123, 123, 123),
+                          value=str(d.x) + 'x' + str(d.y)) for d in angle_points]
+            print(angle_points)
+            debug_marks(img, filename + '_angle.jpg', m)
+
             # print(m)
             with open(filename + '_board.txt', 'w') as f:
                 f.write(grid)
