@@ -35,10 +35,11 @@ class MockBot:
 class MockBots:
     def __init__(self):
         self.bots = [
-            MockBot('hk', 'k', Point(253, 613), Point(8, 8), 276),
-            MockBot('pk', 'Q', Point(16, 16), Point(8, 8), 210),
-            MockBot('pq', 'R', Point(42, 13), Point(8, 8), 60),
-            MockBot('mj', '', Point(117, 306), Point(8, 8), 112),
+            MockBot('hk', 'k', Point(253, 613), Point(16, 16), 276),
+            MockBot('pk', 'Q', Point(16, 16), Point(16, 16), 210),
+            MockBot('pq', 'R', Point(42, 13), Point(16, 16), 60),
+            MockBot('pj', 'b', Point(0, 0), Point(16, 16), 0),
+            MockBot('mj', '', Point(117, 306), Point(16, 16), 112),
         ]
 
     def has(self, name: str) -> bool:

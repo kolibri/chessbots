@@ -31,8 +31,7 @@ def draw_positions(img, positions: [Drawable]):
     for pos in positions:
         color = pos.color
         cv2.circle(output, pos.pos, pos.size, color, 2)
-
-        cv2.putText(output, pos.value, add_points(pos.pos, Point(2, 2)), cv2.FONT_ITALIC, 0.6, color)
+        cv2.putText(output, pos.value, add_points(pos.pos, Point(2, 2)), cv2.FONT_ITALIC, 0.4, color)
 
     return output
 
@@ -43,11 +42,7 @@ class MarkerFinder:
         self.inner_range = inner_range
 
     def find_markers(self, img):
-        def find_with_size(img, min_size: int, max_size: int):
-            def fits_size(marker) -> bool:
-                box = marker[1]
-                return min_size < box[2] < max_size and min_size < box[3] < max_size
-
+        def find_circles_between(img, min_val: int, max_val: int):
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             ret, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
             contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
@@ -56,19 +51,33 @@ class MarkerFinder:
                 contours_poly = cv2.approxPolyDP(i, 3, True)
                 box = cv2.boundingRect(contours_poly)
                 pos, radius = cv2.minEnclosingCircle(contours_poly)
+                # print('f', pos, int(radius), box)
                 found.append([
                     Point(int(pos[0]), int(pos[1])),
                     box,  # do not remove, needed for size check
                     int(radius),
                 ])
-
-            return [m for m in found if fits_size(m)]
+            return [m for m in found if min_val < m[2] < max_val]
 
         def get_mark_value(mark):
-            x1, y1, x2, y2 = mark[1]
-            snapshot = img[x1:x1 + x2, y1:y1 + y2]
-            # print(x1, y1, x2, y2, snapshot)
-            sn_marks = find_with_size(snapshot, self.inner_range[0], self.inner_range[1])
+            # x1, y1, x2, y2 = mark[1]
+            # snapshot = img[x1:x1 + x2, y1:y1 + y2]
+            tolerance = 2
+            def not_negative(val: int):
+                if 0 > val:
+                    return 0
+                return val
+            x1 = not_negative(mark[0].x - mark[2] + tolerance)
+            y1 = not_negative(mark[0].y - mark[2] + tolerance)
+            x2 = not_negative(mark[0].x + mark[2] - tolerance)
+            y2 = not_negative(mark[0].y + mark[2] - tolerance)
+            snapshot = img[y1:y2, x1:x2]
+            if 0 == len(snapshot):
+                return '2'
+            print('gmv', x1, y1, x2, y2, mark)
+
+            sn_marks = find_circles_between(snapshot, *self.inner_range)
+
             if 0 == len(sn_marks):
                 return '0'
             return '1'
@@ -85,10 +94,9 @@ class MarkerFinder:
                 value=value,
                 color=color
             )
-            # print(dra)
             return dra
 
-        return [create_drawable(m) for m in find_with_size(img, self.outer_range[0], self.outer_range[1])]
+        return [create_drawable(m) for m in find_circles_between(img, *self.outer_range)]
 
 
 class GridResolver:
@@ -109,6 +117,7 @@ class GridResolver:
                     return [points[1], points[2], points[0]]
                 if in_tolerance(get_angle(points[2], points[0], points[1]), 90, 10):
                     return [points[2], points[0], points[1]]
+                # print('points', points, with_distance)
                 raise RuntimeError('Could not find three dots with 90 degree angle o_O')
 
             def create_grid_point(grid_point: Point, position: PointImg, markers: [Drawable]) -> GridPoint:
@@ -203,7 +212,7 @@ class CaptchaReader:
             debug_marks(img, filename + '_expect.jpg', m)
             m = [Drawable(pos=d, size=3, color=(123, 123, 123),
                           value=str(d.x) + 'x' + str(d.y)) for d in angle_points]
-            print(angle_points)
+            # print(angle_points)
             debug_marks(img, filename + '_angle.jpg', m)
 
             # print(m)

@@ -24,6 +24,7 @@ class Container(containers.DeclarativeContainer):
         'mockbot': {
             'cache_dir': 'build/mockbot'
         }
+
     }
 
     pattern_printer = providers.Factory(
@@ -45,11 +46,12 @@ class Container(containers.DeclarativeContainer):
     )
 
     pattern_creator = providers.Factory(Pattern8x8With4DataFields)
+    marker_finder = MarkerFinder([16, 22], [8, 12])
     collector = providers.Factory(
         ChainDataCollector,
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
-            CaptchaReaderCollector(CaptchaReader(MarkerFinder([30, 45], [17, 26]), GridResolver(), True))
+            CaptchaReaderCollector(CaptchaReader(marker_finder, GridResolver(), True))
         ]
     )
 
@@ -61,7 +63,7 @@ class Container(containers.DeclarativeContainer):
 
     captcha_reader = providers.Factory(
         CaptchaReader,
-        marker_finder=MarkerFinder([30, 45], [17, 26]),
+        marker_finder=marker_finder,
         grid_resolver=GridResolver(),
         debug=True,
     )

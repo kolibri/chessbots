@@ -8,8 +8,8 @@ class PatternPrinter:
     def __init__(self, dpi: int, point_size: PrintPixel):
         self.dpi = dpi
         self.point_size = self._convert_to_pixel(point_size)
-        self.color_trans = (0, 255, 255, 0)
-        self.color_bg = (0, 255, 255, 0)
+        self.color_trans = (255, 255, 255, 0)
+        self.color_bg = (255, 255, 255, 0)
         self.color_fg = (127, 127, 127, 255)
 
     def _convert_to_pixel(self, unit: PrintPixel):
@@ -32,7 +32,7 @@ class PatternPrinter:
             draw = ImageDraw.Draw(img)
 
             e_xy = (p, p, p * 4, p * 4)
-            stroke = int(p * 0.6)
+            stroke = int(p * 0.8)
             if '0' == digit:
                 draw.ellipse(e_xy, outline=self.color_fg, width=stroke)
             else:
