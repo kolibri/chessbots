@@ -4,7 +4,8 @@ from werkzeug.datastructures import MultiDict
 import os
 import hashlib
 from chessbots.lib.filesystem import read_json, dump_json
-# from chessbots.lib.captcha.captcha_reader import CaptchaReader
+from chessbots.lib.captcha.captcha_reader import CaptchaReader
+
 
 class Bot:
     def __init__(self, host_name, data=None):
@@ -108,23 +109,15 @@ class RobotApiCollector(BotDataCollector):
 
 
 class CaptchaReaderCollector(BotDataCollector):
-    def __init__(self, cache_path, pattern_path):
-        self.cache_path = cache_path
-        self.pattern_path = pattern_path
-        self.templates = [
-            [self.pattern_path + 'pattern/pattern_WO.jpeg', 0],
-            [self.pattern_path + 'pattern/pattern_WX.jpeg', 1],
-            [self.pattern_path + 'pattern/pattern_BO.jpeg', 0],
-            [self.pattern_path + 'pattern/pattern_BX.jpeg', 1]
-        ]
+    def __init__(self, captcha_reader: CaptchaReader):
+        self.captcha_reader = captcha_reader
 
     def get_data(self, bot: Bot):
         if 'position_local_filename' not in bot.data.keys():
             return bot.data
         data = bot.data
-        # captcha_reader = CaptchaReader(data['position_local_filename'], self.templates)
-        # captcha = captcha_reader.resolve()
-        # data['captcha_angle'] = captcha.angle
-        # data['captcha_board'] = captcha.board.txt()
+        board, angle = self.captcha_reader.resolve(data['position_local_filename'])
+        data['captcha_angle'] = angle
+        data['captcha_board'] = board.txt()
 
         return data

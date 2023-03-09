@@ -31,7 +31,7 @@ def draw_positions(img, positions: [Drawable]):
         color = pos.color
         cv2.circle(output, pos.pos, pos.size, color, 2)
 
-        cv2.putText(output, pos.value, add_points(pos.pos, Point(2, 2)), cv2.FONT_ITALIC, 0.8, color)
+        cv2.putText(output, pos.value, add_points(pos.pos, Point(2, 2)), cv2.FONT_ITALIC, 0.6, color)
 
     return output
 
@@ -92,7 +92,7 @@ class MarkerFinder:
 
 class GridResolver:
     def __init__(self):
-        self.tolerance = Point(13, 13)
+        self.tolerance = Point(16, 16)
 
     def resolve(self, markers: [Drawable]) -> [str, float, [GridPoint]]:
         def resolve_grid(markers: [Drawable]) -> [GridPoint]:
@@ -169,22 +169,28 @@ class CaptchaReader:
         self.debug = debug
 
     def resolve(self, filename):
+        def debug_marks(img, name: str, marks: [Drawable]):
+            marked = draw_positions(img, marks)
+            cv2.imwrite(name, marked)
         img = cv2.imread(filename)
         markers = self.marker_finder.find_markers(img)
         if self.debug:
-            marked = draw_positions(img, markers)
-            cv2.imwrite(filename + '_marked.jpg', marked)
+            debug_marks(img, filename + '_marked.jpg', markers)
 
         grid, angle, grid_ = self.grid_resolver.resolve(markers)
 
         # print(angle)
         if self.debug:
+            m = [Drawable(pos=d.pos, size=d.size, color=d.color,
+                          value=str(d.pos.x) + 'x' + str(d.pos.y)) for d in markers]
+            debug_marks(img, filename + '_pos.jpg', m)
             m = [Drawable(pos=d.raw.pos, size=d.raw.size, color=d.raw.color,
                           value=str(d.grid_pos.x) + 'x' + str(d.grid_pos.y)) for d in grid_]
-
-            marked = draw_positions(img, m)
-            cv2.imwrite(filename + '_solved.jpg', marked)
-            print(m)
+            debug_marks(img, filename + '_grid.jpg', m)
+            m = [Drawable(pos=d.raw.pos, size=d.raw.size, color=d.raw.color,
+                          value=d.raw.value) for d in grid_]
+            debug_marks(img, filename + '_solved.jpg', m)
+            # print(m)
             with open(filename + '_board.txt', 'w') as f:
                 f.write(grid)
                 f.write('\n')

@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
-from chessbots.tool.mockbot import *
+from chessbots.lib.bot.mockbot import *
 from chessbots.lib.print_units import *
 from chessbots.lib.captcha.captcha_reader import *
 from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
@@ -49,7 +49,7 @@ class Container(containers.DeclarativeContainer):
         ChainDataCollector,
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
-            CaptchaReaderCollector(config['bots']['cache_dir'], config['bots']['cache_dir'])
+            CaptchaReaderCollector(CaptchaReader(MarkerFinder([30, 45], [17, 26]), GridResolver(), True))
         ]
     )
 

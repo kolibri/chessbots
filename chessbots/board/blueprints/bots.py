@@ -2,6 +2,7 @@ from flask import (Blueprint, request, render_template, jsonify)
 from flask import Flask
 
 from chessbots.lib.bot import Bot, BotManager
+from chessbots.lib.bot.mockbot import MockBots
 from dependency_injector.wiring import inject, Provide
 from chessbots.board.containers import Container
 
@@ -47,5 +48,5 @@ def post_register(bots: BotManager = Provide[Container.bot_manager]):
 
 @bp.route('/dashboard', methods=['GET'])
 def get_dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', mockbots=[bot.url() for bot in MockBots().bots])
 

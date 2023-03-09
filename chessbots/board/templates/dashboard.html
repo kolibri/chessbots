@@ -29,9 +29,8 @@
         <form action="{{ url_for('bots.post_register') }}" method="post" id="register_form">
             <textarea name="data">
 [
-    "http://192.168.178.193/",
-    "http://0.0.0.0:8037",
-    "{{ url_for('mockbot.get_show', name='01', _external=True) }}"
+    "{{ url_for('mockbot.get_show', name='null', _external=True) }}",
+    "{{ mockbots|join("\",\n    \"") }}"
 ]
             </textarea>
             <button type="submit">Submit</button>
