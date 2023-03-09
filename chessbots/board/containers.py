@@ -3,6 +3,7 @@ from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
 from chessbots.tool.mockbot import *
 from chessbots.lib.print_units import *
+from chessbots.lib.captcha.captcha_reader import *
 from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
 
 
@@ -56,4 +57,11 @@ class Container(containers.DeclarativeContainer):
         BotManager,
         cache_dir=config['bots']['cache_dir'],
         collector=collector
+    )
+
+    captcha_reader = providers.Factory(
+        CaptchaReader,
+        marker_finder=MarkerFinder([30, 45], [17, 26]),
+        grid_resolver=GridResolver(),
+        debug=True,
     )

@@ -19,8 +19,8 @@ run_action() {
     bot_actions "${@:2}"
 
   elif [[ "build" = "$action" ]]; then ## docker container
-#    docker build -t $IMAGE_NAME --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) .
-    docker build -t $IMAGE_NAME .
+    docker build -t $IMAGE_NAME --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) .
+#    docker build -t $IMAGE_NAME .
 
   elif [[ "help" = "$action" ]]; then ## displays help
     fn=$(basename "$0")
