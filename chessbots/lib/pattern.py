@@ -13,7 +13,7 @@ class Pattern:
     def size(self) -> (int, int):
         return len(self.matrix[0]), len(self.matrix)
 
-    def create_snapshot(self, position: Point, size) -> Pattern:
+    def create_snapshot(self, position: Point, size: Point) -> Pattern:
         res = []
         for y in range(0, size[1]):
             if position.y + y < self.size()[1]:
@@ -28,8 +28,27 @@ class Pattern:
     def rotate(self) -> Pattern:
         return Pattern(np.rot90(self.matrix))
 
+    def flip(self) -> Pattern:
+        return Pattern(np.flip(self.matrix))
+
+    def fliplr(self) -> Pattern:
+        return Pattern(np.fliplr(self.matrix))
+
+    def flipud(self) -> Pattern:
+        return Pattern(np.flipud(self.matrix))
+
     def mirror(self) -> Pattern:
         return Pattern(np.flip(self.matrix, 1))
+
+    def invert(self) -> Pattern:
+        invert_txt = invert_zero_one(matrix_to_txt(self.matrix))
+        return Pattern(txt_to_matrix(invert_txt))
+
+    def bits(self, invert: bool = False):
+        value = ''.join([''.join(r) for r in self.matrix])
+        if invert:
+            return value.replace('0', 'n').replace('1', '0').replace('n', '1')
+        return value
 
     def find_matches(self, snapshot: Pattern):
         board = self.matrix
@@ -67,3 +86,7 @@ def matrix_to_txt(m):
 
 def txt_to_matrix(t):
     return [list(snr) for snr in t.split('\n') if len(snr) > 0]
+
+
+def invert_zero_one(value: str):
+    return value.replace('0', 'n').replace('1', '0').replace('n', '1')

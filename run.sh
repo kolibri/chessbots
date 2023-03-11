@@ -39,12 +39,17 @@ board_actions() {
   elif [[ "run" = "$action" ]]; then ## serve board on port 8031
     flask_cmd script "${@:2}"
 
-  elif [[ "build" = "$action" ]]; then ## serve board on port 8031
+  elif [[ "print" = "$action" ]]; then ## serve board on port 8031
+    rm -rf build/print/
+    mkdir -p build/print/
+    board_actions run board_print
+
+  elif [[ "debug" = "$action" ]]; then ## serve board on port 8031
     rm -rf build/bots/ build/mockbot/
     mkdir -p build/bots/ build/mockbot/
     board_actions run mockbot_pictures
-    board_actions run test_captcha_to_txt
-
+    # board_actions run test_captcha_to_txt
+    board_actions run test_txt_to_position
 
   else
     board_actions serve

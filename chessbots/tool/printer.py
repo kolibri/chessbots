@@ -38,7 +38,7 @@ class PatternPrinter:
             else:
                 draw.ellipse(e_xy, fill=self.color_fg, width=stroke)
             return img
-
+        pattern = pattern.mirror().rotate()
         size = pattern.size()
         img = Image.new('RGBA', [i*self.point_size for i in size], self.color_bg)
 
@@ -58,8 +58,8 @@ class TiledPatternPrinter:
 
     def save_to_files(self, pattern: Pattern, grid_size: int, base_path: str):
 
-        for x in range(0, grid_size):
-            for y in range(0, grid_size):
+        for x in range(0, 1):
+            for y in range(0, 1):
                 sn_size = Point(int(pattern.size()[0] / grid_size), int(pattern.size()[1] / grid_size))
                 self.printer.save_to_file(
                     pattern.create_snapshot(Point(x * sn_size.x, y * sn_size.y), sn_size),

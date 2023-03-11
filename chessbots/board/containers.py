@@ -4,7 +4,8 @@ from chessbots.tool.pattern_creator import *
 from chessbots.lib.bot.mockbot import *
 from chessbots.lib.print_units import *
 from chessbots.lib.captcha.captcha_reader import *
-from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
+from chessbots.lib.captcha.captcha_resolver import *
+from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector, PositionResolverCollector
 
 
 class Container(containers.DeclarativeContainer):
@@ -51,7 +52,8 @@ class Container(containers.DeclarativeContainer):
         ChainDataCollector,
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
-            CaptchaReaderCollector(CaptchaReader(marker_finder, GridResolver(), True))
+            CaptchaReaderCollector(CaptchaReader(marker_finder, GridResolver(), True)),
+            PositionResolverCollector(CaptchaResolver())
         ]
     )
 
@@ -66,4 +68,7 @@ class Container(containers.DeclarativeContainer):
         marker_finder=marker_finder,
         grid_resolver=GridResolver(),
         debug=True,
+    )
+    captcha_resolver = providers.Factory(
+        CaptchaResolver,
     )

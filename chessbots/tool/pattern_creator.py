@@ -24,7 +24,7 @@ class Pattern8x8With4DataFields(PatternCreator):
             ]
         ))
 
-    def create(self, size: int):
+    def create(self, size: int) -> Pattern:
         pattern_size = 8
         if 0 != size % pattern_size:
             print('Warning: field size not divisible py pattern size')

@@ -5,6 +5,7 @@ import os
 import hashlib
 from chessbots.lib.filesystem import read_json, dump_json
 from chessbots.lib.captcha.captcha_reader import CaptchaReader
+from chessbots.lib.captcha.captcha_resolver import CaptchaResolver
 
 
 class Bot:
@@ -119,5 +120,19 @@ class CaptchaReaderCollector(BotDataCollector):
         board, angle = self.captcha_reader.resolve(data['position_local_filename'])
         data['captcha_angle'] = angle
         data['captcha_board'] = board.txt()
+
+        return data
+
+
+class PositionResolverCollector(BotDataCollector):
+    def __init__(self, resolver: CaptchaResolver):
+        self.resolver = resolver
+
+    def get_data(self, bot: Bot):
+        if 'captcha_board' not in bot.data.keys():
+            return bot.data
+        data = bot.data
+        position = self.resolver.resolve(data['captcha_board'])
+        data['position'] = position
 
         return data

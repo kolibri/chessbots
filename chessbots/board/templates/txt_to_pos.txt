@@ -1,0 +1,47 @@
+{{ board.txt() }}
+size: {{ board.size()|join('x') }} pos: {{ bot.pos|join('x') }}
+
+guesses:
+{% for p in pos %}
+{{ p.guess.solved|join('x') }} -> {{ p.guess.mult_pos|join('x') }} @{{ p.pos|join('x') }} r{{ p.rotation }}
+{%- endfor %}
+
+# # # # # #
+{% for p in pos %}
+----------------
+snippet {{ p.pos|join('x') }}:
+{{ p.section.txt().replace('2', ' ') }}
+guess {{ p.guess.pos|join('x') }} {{ p.guess.bint }} {{ p.guess.bins }}
+{%- for bit in p.bits %}
+{{ bit }}
+{%- endfor %}
+vote {{ p.vote_result[1:]|join(' ') }}
+{%- endfor %}
+
+# # # # # #
+{% for p in pos %}
+----------------
+{{ p.pos|join('x') }}:
+{{ p.section.txt().replace('2', ' ') }}
+
+raw bit strings:
+{%- for bit in p.bits %}
+    {{ bit }}
+{%- endfor %}
+
+result:
+{{ p.value|join('x') }}
+{{ p.value_bin }}: {{ p.value_int }}
+
+v + - ? 1234
+{%- for v in p.votes %}
+{{ v[0:4]|join(' ') }} {{ v[4]|join('') }}
+{%- endfor %}
+s: {{ p.vote_result[1:]|join(' ') }}
+r: {{ p.vote_result[0] }}
+
+{{ p.guess }}
+{{ p.match }}
+{%- endfor %}
+
+{{ pos }}

@@ -1,9 +1,10 @@
 import cv2
 from collections import namedtuple
 
-from chessbots.lib.pattern import Pattern as Board
+from chessbots.lib.pattern import Pattern as Board, txt_to_matrix
 from chessbots.lib.pattern import txt_to_matrix
 from chessbots.lib.point_helper import *
+from chessbots.lib.filesystem import *
 
 from typing import NamedTuple
 
@@ -74,7 +75,7 @@ class MarkerFinder:
             snapshot = img[y1:y2, x1:x2]
             if 0 == len(snapshot):
                 return '2'
-            print('gmv', x1, y1, x2, y2, mark)
+            # print('gmv', x1, y1, x2, y2, mark)
 
             sn_marks = find_circles_between(snapshot, *self.inner_range)
 
@@ -140,14 +141,14 @@ class GridResolver:
             base_mod_y = sub_points(angle[1], angle[2])
             # print(('angle', angle, base_mod_x, base_mod_y))
 
-            for x in range(-grid_max, grid_max):
-                for y in range(-grid_max, grid_max):
+            for y in range(-grid_max, grid_max):
+                for x in range(-grid_max, grid_max):
                     mod_x = mult_point(base_mod_x, x)
                     mod_y = mult_point(base_mod_y, y)
                     expected_pos = add_points(angle[1], add_points(mod_x, mod_y))
                     # print('ep', x, y, mod_x, mod_y, expected_pos)
                     if area_max.x >= expected_pos.x >= 0 and area_max.y >= expected_pos.y >= 0:
-                        result.append(create_grid_point(Point(x, y), expected_pos, markers))
+                        result.append(create_grid_point(Point(y, x), expected_pos, markers))
             return result, get_angle(angle[0], angle[1], Point(angle[0].x, angle[1].y)), angle
 
         def grid_to_txt(grid: [GridPoint]):
@@ -175,6 +176,7 @@ class GridResolver:
 
         grid, angle, angle_points = resolve_grid(markers)
         grid_txt = grid_to_txt(grid)
+        grid_txt = Board(txt_to_matrix(grid_txt)).flip().txt()
         return grid_txt, angle, grid, angle_points
 
 
@@ -195,6 +197,8 @@ class CaptchaReader:
             debug_marks(img, filename + '_marked.jpg', markers)
 
         grid, angle, grid_, angle_points = self.grid_resolver.resolve(markers)
+        board = Board(txt_to_matrix(grid))
+        # board = board
 
         # print(angle)
         if self.debug:
@@ -216,11 +220,7 @@ class CaptchaReader:
             debug_marks(img, filename + '_angle.jpg', m)
 
             # print(m)
-            with open(filename + '_board.txt', 'w') as f:
-                f.write(grid)
-                f.write('\n')
-                f.write(str(angle))
-                f.close()
+            dump_txt(filename + '_board.txt', board.txt() + '\n' + str(angle))
+            dump_txt(filename + '_grid.txt', grid + '\n' + str(angle))
 
-        board = Board(txt_to_matrix(grid))
         return board, angle
