@@ -1,0 +1,82 @@
+{% macro image_link(bot, name) %}
+{% set img_path = bot.picture() ~ '_' ~ name ~ '.jpg' %}
+{% if '' == name %}
+{% set img_path = bot.picture() %}
+{% set name = 'raw' %}
+{% endif %}
+<a href="{{ img_path }}" target="_blank">
+    <span>{{ name }}</span>
+    <img src="{{ img_path }}" />
+</a>
+{% endmacro %}
+<!doctype html>
+
+<head>
+    <title>mockbots test result</title>
+    <style>
+section { display: block}
+section.test-fail { background-color: #fcb1b1; margin-bottom: 1px;}
+section.test-pass { background-color: #a3ffbf; }
+section.test-pass > * { display: none; }
+section.test-pass > .title { display: block; }
+
+.pictures { display: inline-flex; height: 12em; }
+.pictures a {width: 10em; height: 10em; display: inline-block}
+.pictures a span {display: inline-block; }
+.pictures a img {width: 10em; height: 10em; display: inline-block }
+
+.txt_grids > div { display: inline-block }
+
+    </style>
+</head>
+<body>
+<main>
+    {% for bot, captcha, grid_test_result, target_sub_pattern in raw %}
+    <section class="result test-{{ 'fail' if grid_test_result == 'F' else 'pass' }}">
+        <span class="title">
+            {{ bot.name }}:
+            {{ grid_test_result }}
+            /{{ captcha.grid_dirs|join('') }}
+            &lt;{{ captcha.angle }}
+
+        </span>
+
+        <div class="txt_grids">
+            <div>
+                <span>target</span>
+                <pre>{{ bot.pattern.txt()|replace('2', '.') }}</pre>
+            </div>
+            <div>
+                <span>result_grid</span>
+                <pre>{{ captcha.result.txt()|replace('2', '.') }}</pre>
+            </div>
+            <div>
+                <span>raw_grid</span>
+                <pre>{{ captcha.grid_txt|replace('2', '.') }}</pre>
+            </div>
+            <div>
+                <span>sub_target</span>
+                <pre>{{ target_sub_pattern.txt()|replace('2', '.') }}</pre>
+            </div>
+        </div>
+
+        <div class="pictures">
+            {{ image_link(bot, 'angle') }}
+            {{ image_link(bot, 'markers') }}
+            {{ image_link(bot, 'pos') }}
+            {{ image_link(bot, 'grid') }}
+            {{ image_link(bot, '') }}
+        </div>
+
+        <div class="markers" style="display: none">
+            {% for m in captcha.markers %}
+            <span class="pos">{{ m.pos }}</span>
+            <span class="value">{{ m.valid_size }}</span>
+            <span class="value">{{ m.radius }}</span>
+            <span class="value">{{ m.value }}</span>
+            {% endfor %}
+        </div>    </section>
+    {% endfor %}
+</main>
+</body>
+

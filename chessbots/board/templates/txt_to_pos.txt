@@ -1,47 +1,39 @@
+{%- macro solution_summary(s) -%}
+pos {{ s.pos|join('x') }} {{ s.rotation }} sol {{ s.solve() }}
+{%- endmacro -%}
+
+{%- macro solution_detail(s) -%}
+# solution detail
+@{{ s.pos|join('x') }} r{{ s.rotation }}
+{{ s.section.txt().replace('2', '.') }}
+
+## pattern solutions
+{% for pat in s.pattern -%}
+pi{{ pat.id }} sp{{ pat.guess.solved|join('x') }} i{{ pat.guess.bint }} rp{{ pat.guess.pos|join('x') }} b{{ pat.guess.bins }} c{{ pat.check_bits_result }}
+{{ pat.solved_bits }}
+{% for b in pat.bits -%}
+    {{ b.check }} {{ b.value|replace('2', '.') }} {{ b.value_int }} {{ b.value_pos|join('x') }} {{ b.bitstring }}
+{% endfor -%}
+vr{{ pat.vote_result }}
+
+{% endfor -%}
+{%- endmacro -%}
+
+{#- MACROS END  -#}
 {{ board.txt() }}
-size: {{ board.size()|join('x') }} pos: {{ bot.pos|join('x') }}
-
-guesses:
-{% for p in pos %}
-{{ p.guess.solved|join('x') }} -> {{ p.guess.mult_pos|join('x') }} @{{ p.pos|join('x') }} r{{ p.rotation }}
-{%- endfor %}
-
-# # # # # #
-{% for p in pos %}
-----------------
-snippet {{ p.pos|join('x') }}:
-{{ p.section.txt().replace('2', ' ') }}
-guess {{ p.guess.pos|join('x') }} {{ p.guess.bint }} {{ p.guess.bins }}
-{%- for bit in p.bits %}
-{{ bit }}
-{%- endfor %}
-vote {{ p.vote_result[1:]|join(' ') }}
-{%- endfor %}
-
-# # # # # #
-{% for p in pos %}
-----------------
-{{ p.pos|join('x') }}:
-{{ p.section.txt().replace('2', ' ') }}
-
-raw bit strings:
-{%- for bit in p.bits %}
-    {{ bit }}
-{%- endfor %}
+pos: {{ bot.pos|join('x') }} size: {{ board.size()|join('x') }}
 
 result:
-{{ p.value|join('x') }}
-{{ p.value_bin }}: {{ p.value_int }}
+{{ result }}
 
-v + - ? 1234
-{%- for v in p.votes %}
-{{ v[0:4]|join(' ') }} {{ v[4]|join('') }}
-{%- endfor %}
-s: {{ p.vote_result[1:]|join(' ') }}
-r: {{ p.vote_result[0] }}
-
-{{ p.guess }}
-{{ p.match }}
+solutions:
+{% for solution in solutions %}
+{{ solution_summary(solution) }}
 {%- endfor %}
 
-{{ pos }}
+
+
+##### < raw > #####
+{% for solution in raw %}
+{{ solution_detail(solution) }}
+{%- endfor %}

@@ -40,19 +40,27 @@ class Container(containers.DeclarativeContainer):
 
     )
 
+    board = Pattern8x8With4DataFields().create(800)
+
+    mockbots = providers.Factory(
+        MockBots,
+        board=board
+    )
+
     mockbot_picture_creator = providers.Factory(
         MockbotPictureCreator,
         path=config['mockbot']['cache_dir'],
-        printer=pattern_printer
+        printer=pattern_printer,
+        mockbots=mockbots
     )
 
     pattern_creator = providers.Factory(Pattern8x8With4DataFields)
-    marker_finder = MarkerFinder([16, 22], [8, 12])
+
     collector = providers.Factory(
         ChainDataCollector,
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
-            CaptchaReaderCollector(CaptchaReader(marker_finder, GridResolver(), True)),
+            CaptchaReaderCollector(),
             PositionResolverCollector(CaptchaResolver())
         ]
     )
@@ -63,12 +71,6 @@ class Container(containers.DeclarativeContainer):
         collector=collector
     )
 
-    captcha_reader = providers.Factory(
-        CaptchaReader,
-        marker_finder=marker_finder,
-        grid_resolver=GridResolver(),
-        debug=True,
-    )
     captcha_resolver = providers.Factory(
         CaptchaResolver,
     )

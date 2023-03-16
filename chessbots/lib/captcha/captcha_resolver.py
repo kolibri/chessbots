@@ -12,12 +12,47 @@ class MatchResult(NamedTuple):
     position: Point
 
 
-def get_section_bits(b: Board):
+def get_section_bits(bits: [str]):
+    return [b[1:-1] for b in bits]
+
+
+def get_check_bits(bits: [str]):
+    return [''.join([b[0], b[15]]) for b in bits]
+
+
+def get_raw_bits(b: Board):
     return [
         b.create_snapshot(Point(0, 0), Point(4, 4)).bits(True),
+        b.create_snapshot(Point(0, 4), Point(4, 4)).flipud().bits(),
         b.create_snapshot(Point(4, 0), Point(4, 4)).fliplr().bits(),
         b.create_snapshot(Point(4, 4), Point(4, 4)).flip().bits(True),
-        b.create_snapshot(Point(0, 4), Point(4, 4)).flipud().bits(),
+    ]
+
+
+def get_raw_bits_pos_1(b: Board):
+    return [
+        b.create_snapshot(Point(0, 0), Point(4, 4)).flip().bits(True),
+        b.create_snapshot(Point(0, 4), Point(4, 4)).fliplr().bits(),
+        b.create_snapshot(Point(4, 0), Point(4, 4)).flipud().bits(),
+        b.create_snapshot(Point(4, 4), Point(4, 4)).bits(True),
+    ]
+
+
+def get_raw_bits_pos_2(b: Board):
+    return [
+        b.create_snapshot(Point(0, 0), Point(4, 4)).flipud().bits(),
+        b.create_snapshot(Point(0, 4), Point(4, 4)).bits(True),
+        b.create_snapshot(Point(4, 0), Point(4, 4)).flip().bits(True),
+        b.create_snapshot(Point(4, 4), Point(4, 4)).fliplr().bits(),
+    ]
+
+
+def get_raw_bits_pos_3(b: Board):
+    return [
+        b.create_snapshot(Point(0, 0), Point(4, 4)).fliplr().bits(),
+        b.create_snapshot(Point(0, 4), Point(4, 4)).flip().bits(True),
+        b.create_snapshot(Point(4, 0), Point(4, 4)).bits(True),
+        b.create_snapshot(Point(4, 4), Point(4, 4)).flipud().bits(),
     ]
 
 
@@ -33,50 +68,14 @@ def get_mismatches(seq1: str, seq2: str):
 
 
 def bit_to_int(bit: str) -> int:
+    if '2' in bit:
+        return -1
     return int(bit, 2)
 
 
 def int_to_pos(val: int) -> Point:
     size = 100
-    return Point(val // size, val % size)
-
-
-def calc_matching(bits: [str]):
-    return sum([
-        get_mismatches(bits[0], bits[1]),
-        get_mismatches(bits[0], bits[2]),
-        get_mismatches(bits[0], bits[3]),
-        get_mismatches(bits[1], bits[2]),
-        get_mismatches(bits[1], bits[3]),
-        get_mismatches(bits[2], bits[3]),
-    ])
-
-
-def create_solution(section: Board, at_pos: Point, rot: int):
-    bits = get_section_bits(section)
-    result = calc_votes(bits)
-
-    bins = [r[0] for r in result]
-    if 2 in bins:
-        return
-
-    binstring = ''.join([str(b) for b in bins])
-    intval = bit_to_int(binstring)
-    if not intval < 10000:
-        return
-
-    votes = calc_votes(bits)
-    vote_result = calc_vote_result(votes)
-    guess = Guess(vote_result[0], at_pos)
-    return Solution(
-        section,
-        at_pos,
-        rot,
-        bits,
-        votes,
-        vote_result,
-        guess
-    )
+    return Point(val % size, val // size)
 
 
 def calc_votes(bits: [str]):
@@ -126,31 +125,154 @@ def calc_vote_result(votes: []):
     ]
 
 
+def validate_check_bits(bits: [str]):
+    return '00101101' == ''.join(bits)
+
+
 class Guess:
-    def __init__(self, bins: str, at: Point):
+    def __init__(self, bins: str, at_pos: Point):
         self.bins = bins
         self.bint = bit_to_int(self.bins)
         self.pos = int_to_pos(self.bint)
-        self.mult_pos = mult_point(self.pos, 8)
-        self.solved = sub_points(self.mult_pos, at)
+        self.solved = add_points(mult_point(self.pos, 8), at_pos)
 
-    def value(self):
-        return self.pos, self.bint, self.bins, self.mult_pos
+    def values(self):
+        return self.solved, self.bint, self.pos, self.bins
 
 
-class Solution(NamedTuple):
+# def get_section_bits(bits: [str]):
+#     return [b[1:-1] for b in bits]
+
+
+# def get_check_bits(bits: [str]):
+#     return [''.join([b[0], b[15]]) for b in bits]
+class ValueField:
+    def __init__(self, bitstring):
+        self.bitstring = bitstring
+        self.value = self.bitstring[1:-1]
+        self.check = ''.join([self.bitstring[0], self.bitstring[len(self.bitstring) - 1]])
+        self.value_int = bit_to_int(self.value)
+        self.value_pos = int_to_pos(self.value_int)
+
+
+class PatternSolution:
+    def __init__(self, id: str, bits: [str, str, str, str], at_pos: Point):
+        self.id = id
+        self.at_pos = at_pos
+
+        self.bits = [ValueField(f) for f in bits]
+        self.solved_bits = self.solve_bits()
+        self.value_bits = [f.value for f in self.bits]
+        self.value_ints = [f.value_int for f in self.bits]
+        self.value_poss = [f.value_pos for f in self.bits]
+        self.check_bits = [f.check for f in self.bits]
+        self.check_bits_result = validate_check_bits(self.check_bits)
+
+        self.votes = calc_votes(self.value_bits)
+        self.vote_result = calc_vote_result(self.votes)
+        self.guess = Guess(self.vote_result[0], self.at_pos)
+
+    def solve_to_one(self):
+        r = list(set(self.solve_bits()))
+        if 1 != len(r):
+            return False
+
+        return r[0]
+
+    def solve_bits(self):
+        if '00' == self.id:
+            return [sub_points(mult_point(b.value_pos, 8), self.at_pos) for b in self.bits]
+        if '01' == self.id:
+            return [
+                sub_points(mult_point(self.bits[0].value_pos, 8), add_points(Point(-4, 0), self.at_pos)),
+                sub_points(mult_point(self.bits[1].value_pos, 8), add_points(Point(-4, 0), self.at_pos)),
+                sub_points(mult_point(self.bits[2].value_pos, 8), add_points(Point(4, 0), self.at_pos)),
+                sub_points(mult_point(self.bits[3].value_pos, 8), add_points(Point(4, 0), self.at_pos)),
+            ]
+        if '10' == self.id:
+            return [
+                sub_points(mult_point(self.bits[0].value_pos, 8), add_points(Point(0, -4), self.at_pos)),
+                sub_points(mult_point(self.bits[1].value_pos, 8), add_points(Point(0, 4), self.at_pos)),
+                sub_points(mult_point(self.bits[2].value_pos, 8), add_points(Point(0, -4), self.at_pos)),
+                sub_points(mult_point(self.bits[3].value_pos, 8), add_points(Point(0, 4), self.at_pos)),
+            ]
+        if '11' == self.id:
+            return [
+                sub_points(mult_point(self.bits[0].value_pos, 8), add_points(Point(-4, -4), self.at_pos)),
+                sub_points(mult_point(self.bits[1].value_pos, 8), Point(self.at_pos.x - 4, self.at_pos.y + 4)),
+                sub_points(mult_point(self.bits[2].value_pos, 8), Point(self.at_pos.x + 4, self.at_pos.y - 4)),
+                sub_points(mult_point(self.bits[3].value_pos, 8), add_points(Point(4, 4), self.at_pos)),
+            ]
+
+
+class Solution:
     section: Board
     pos: Point
     rotation: int
-    bits: [str, str, str, str]
-    votes: [[int, int, int, int, [int, int, int, int]]]
-    vote_result: [int, int, int]
-    guess: Guess
+    pattern: []
 
-    # match: any
+    def __init__(self, section: Board, pos: Point, rot: int):
+        self.section = section
+        self.pos = pos
+        self.rotation = rot
+
+        self.pattern = []
+        # self.pattern = [
+        #     PatternSolution('00', get_raw_bits(section), self.pos),
+        #     PatternSolution('01', get_raw_bits_pos_3(section), self.pos),
+        #     PatternSolution('10', get_raw_bits_pos_2(section), self.pos),
+        #     PatternSolution('11', get_raw_bits_pos_1(section), self.pos),
+        # ]
+
+    def validate(self) -> bool:
+        if 0 == len([p for p in self.pattern if p.solve_to_one()]):
+            return False
+        # if not self.validate_check_bits():
+        #     return False
+        # if not self.guess.bint < 10000:
+        #     return False
+        return True
 
     def solve(self) -> [Point]:
-        return sub_points(self.guess.mult_pos, self.pos)
+        p = [p.solve_to_one() for p in self.pattern if p.solve_to_one()]
+        p = list(set(p))
+
+        if 1 != len(p):
+            return
+        return p[0]
+
+
+def choose_solution(solutions: [Solution]):
+
+    rots = list(set([sol.rotation for sol in solutions]))
+    rots = [[r, [s for s in solutions if s.rotation == r]] for r in rots]
+    rots = [[r[0], len(r[1]), [s.solve() for s in r[1]], r[1]] for r in rots]
+    max_rots = [r[1] for r in rots]
+    if not 0 < len(max_rots):
+        print('no solutions left for max', solutions)
+        return
+    rots = [r for r in rots if r[1] == max(max_rots)]
+
+    sol = list(set(rots[0][2]))
+    sol = sol[0]
+    return sol, rots[0][0], rots[0][1] #, rots
+    # def filter_solutions(filter):
+    #     return [s for s in solutions if s.solve() == filter]
+    #
+    # # print('cs', solutions)
+    # if solutions == []:
+    #     return 'No solution',
+    # vals = [s.solve() for s in solutions]
+    # vals = list(set(vals))
+    # # print(vals)
+    # count = [[v, len(filter_solutions(v)), filter_solutions(v)] for v in vals]
+    # max_count = max([c[1] for c in count])
+    # max_values = [c for c in count if c[1] == max_count]
+    # print('ch', max_count, len(max_values), max_values)
+    # if 1 == len(max_values):
+    #     return max_values[0]
+    # print('')
+    # return 'to many',
 
 
 class CaptchaResolver:
@@ -159,17 +281,17 @@ class CaptchaResolver:
 
         size_x, size_y = board.size()
         raw = []
-        for rotate_step in range(0, 2):
+        for rotate_step in [0, 90, 180, 270]:
             for x in range(0, size_x - 7):
                 for y in range(0, size_y - 7):
                     section = board.create_snapshot(Point(x, y), Point(8, 8))
-                    match = create_solution(section, Point(y, x), rotate_step)
-                    if match:
-                        # print('solution', match)
-                        raw.append(match)
+                    raw.append(Solution(section, Point(x, y), rotate_step))
             board = board.rotate()
 
         # lowest = min([m.votes[0] for m in raw])
         # filtered = [m for m in raw if m.votes[0] == lowest]
         # print(results)
-        return raw, raw
+        filtered = [r for r in raw if r.validate()]
+        choose = choose_solution(filtered)
+        print('choose', choose)
+        return filtered, choose, raw

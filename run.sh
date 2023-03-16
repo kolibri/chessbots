@@ -48,8 +48,8 @@ board_actions() {
     rm -rf build/bots/ build/mockbot/
     mkdir -p build/bots/ build/mockbot/
     board_actions run mockbot_pictures
-    # board_actions run test_captcha_to_txt
-    board_actions run test_txt_to_position
+     board_actions run test_captcha_to_txt
+#    board_actions run test_txt_to_position
 
   else
     board_actions serve

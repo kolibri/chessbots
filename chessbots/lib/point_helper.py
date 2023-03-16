@@ -1,10 +1,19 @@
 from collections import namedtuple
 import math
 
-Point = namedtuple('Point', 'x y')
+# Point = namedtuple('Point', 'x y')
 PointImg = namedtuple('PointImg', 'x y')
 PointGrid = namedtuple('PointGrid', 'x y')
 Color = namedtuple('Color', 'r g b')
+
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def raw(self):
+        return self.x, self.y
 
 
 def add_points(point_a: Point, point_b: Point) -> Point:
@@ -24,7 +33,7 @@ def mult_point(point_a: Point, factor) -> Point:
 
 
 def point_in_area(point: Point, area: [Point, Point]) -> bool:
-    return area[0].x < point[0] < area[1].x and area[0].y < point[1] < area[1].y
+    return area[0].x < point.x < area[1].x and area[0].y < point.y < area[1].y
 
 
 def get_angle(a: Point, b: Point, c: Point) -> float:

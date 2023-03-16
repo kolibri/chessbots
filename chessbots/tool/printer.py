@@ -19,7 +19,7 @@ class PatternPrinter:
         return self._render(pattern)
 
     def calculate_size(self, pattern: Pattern):
-        return [i*self.point_size for i in pattern.size()]
+        return [i*self.point_size for i in pattern.size().raw()]
 
     def save_to_file(self, pattern: Pattern, path: str):
         self._render(pattern).convert('RGB').save(path)
@@ -40,11 +40,11 @@ class PatternPrinter:
             return img
         pattern = pattern.mirror().rotate()
         size = pattern.size()
-        img = Image.new('RGBA', [i*self.point_size for i in size], self.color_bg)
+        img = Image.new('RGBA', [i*self.point_size for i in size.raw()], self.color_bg)
 
         matrix = pattern.matrix
-        for y in range(size[1]):
-            for x in range(size[0]):
+        for y in range(size.y):
+            for x in range(size.x):
                 img.paste(
                     render_digit(matrix[x][y]),
                     (x * self.point_size, y * self.point_size)
