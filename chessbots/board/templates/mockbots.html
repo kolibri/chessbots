@@ -1,3 +1,9 @@
+{% macro print_board(board, name) %}
+<div>
+    <span>target</span>
+    <pre>{{ board|replace('2', '.')|replace('0', 'o') }}</pre>
+</div>
+{% endmacro %}
 {% macro image_link(bot, name) %}
 {% set img_path = bot.picture() ~ '_' ~ name ~ '.jpg' %}
 {% if '' == name %}
@@ -13,12 +19,136 @@
 
 <head>
     <title>mockbots test result</title>
+    <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    function createElement(type, options) {
+        var element = document.createElement(type)
+        if (options) {
+            if (options['attributes'] !== undefined) {
+                for (name in options.attributes) {
+                    element.setAttribute(name, options.attributes[name])
+                }
+            }
+            if (options['classes'] !== undefined) {
+                for (c of options.classes) {
+                    element.classList.add(c);
+                }
+            }
+            if (options['id'] !== undefined) {
+                element.id = options.id
+            }
+            if (options['txt'] !== undefined) {
+                element.appendChild(document.createTextNode(options.txt))
+            }
+            if (options['src'] !== undefined) {
+                element.src = options.src
+            }
+            if (options['dataset'] !== undefined) {
+                for (d in options.dataset) {
+                    element.dataset[d] = options.dataset[d]
+                }
+            }
+            if (options['click'] !== undefined) {
+                element.addEventListener('click', options.click)
+            }
+            if (options['children'] !== undefined) {
+                for (child of options.children) {
+                    element.appendChild(child)
+                }
+            }
+        }
+
+        return element
+    }
+
+    function traverse_results(){
+        var elementList = document.querySelectorAll("section.result")
+        elementList.forEach(function (node, idx) {
+            var show = node.classList.contains('test-pass') ? "none" : "block"
+            var result = node.querySelector(".content")
+
+            //result.style.display = show
+            result.style.display = 'none'
+        });
+    }
+
+    function create_debug_bar() {
+        all_on = createElement('span', {
+                txt: 'all_on',
+                click: function (event) {
+                    event.preventDefault()
+
+                    var elementList = document.querySelectorAll("section.result .content")
+                    elementList.forEach(function (node, idx) {
+                        node.style.display = 'block'
+                    });
+                }
+        });
+
+        all_off = createElement('span', {
+                txt: 'all_off',
+                click: function (event) {
+                    event.preventDefault()
+
+                    var elementList = document.querySelectorAll("section.result .content")
+                    elementList.forEach(function (node, idx) {
+                        node.style.display = 'none'
+                    });
+                }
+        });
+
+        on_off = createElement('span', {
+                txt: 'on/off',
+                click: function (event) {
+                    event.preventDefault()
+                    traverse_results()
+                }
+        });
+
+        dbg = document.getElementById('dbg')
+        dbg.appendChild(all_on)
+        dbg.appendChild(all_off)
+        dbg.appendChild(on_off)
+
+
+
+    }
+
+    function add_click_title(){
+        var elementList = document.querySelectorAll("section.result")
+        elementList.forEach(function (node, idx) {
+            var title = node.querySelector(".title")
+            title.addEventListener('click', function (event) {
+                event.preventDefault()
+                var show = node.style.display == 'block' ? 'none' : 'block'
+                console.log('show', show, node.style.display, node.style)
+                var result = node.querySelector(".content")
+                result.style.display = show
+            })
+        });
+
+    }
+
+    traverse_results()
+    create_debug_bar()
+    add_click_title()
+});
+
+    </script>
     <style>
-section { display: block}
+    section { display: block; font-family: monospace; }
 section.test-fail { background-color: #fcb1b1; margin-bottom: 1px;}
 section.test-pass { background-color: #a3ffbf; }
-section.test-pass > * { display: none; }
-section.test-pass > .title { display: block; }
+#section.test-pass > .content { display: none; }
+section > .title { display: block; }
+section > .title > span { display: inline-block; width: 5em; height: 1em; }
+section > .title > span.name { width: 2em; }
+section > .title > span.test_result { width: 1em; }
+section > .title > span.dirs { width: 1.5em; }
+section > .title > span.angle { width: 3em; overflow: hidden; }
+section > .title > span.angle_points { width: 16em; }
+section > .title > span.point_details { width: 27em; }
 
 .pictures { display: inline-flex; height: 12em; }
 .pictures a {width: 10em; height: 10em; display: inline-block}
@@ -31,51 +161,46 @@ section.test-pass > .title { display: block; }
 </head>
 <body>
 <main>
+    <nav id="dbg"></nav>
     {% for bot, captcha, grid_test_result, target_sub_pattern in raw %}
     <section class="result test-{{ 'fail' if grid_test_result == 'F' else 'pass' }}">
         <span class="title">
-            {{ bot.name }}:
-            {{ grid_test_result }}
-            /{{ captcha.grid_dirs|join('') }}
-            &lt;{{ captcha.angle }}
-
+            <span class="name">{{ bot.name }}:</span>
+            <span class="test_result">{{ grid_test_result }}</span>
+            <span class="dirs">{{ captcha.grid_dirs|join('') }}</span>
+            <span class="angle">{{ captcha.angle }}</span>
+            <span class="angle_points">{{ captcha.angle_points[0].txt }} {{ captcha.angle_points[1].txt }} {{ captcha.angle_points[2].txt }}</span>
+            <span class="point_details">{{ captcha.angle_points_details|join(',') }}</span>
         </span>
+        <div class="content">
 
-        <div class="txt_grids">
-            <div>
-                <span>target</span>
-                <pre>{{ bot.pattern.txt()|replace('2', '.') }}</pre>
-            </div>
-            <div>
-                <span>result_grid</span>
-                <pre>{{ captcha.result.txt()|replace('2', '.') }}</pre>
-            </div>
-            <div>
-                <span>raw_grid</span>
-                <pre>{{ captcha.grid_txt|replace('2', '.') }}</pre>
-            </div>
-            <div>
-                <span>sub_target</span>
-                <pre>{{ target_sub_pattern.txt()|replace('2', '.') }}</pre>
-            </div>
-        </div>
+            <div class="txt_grids">
+                {{ print_board(bot.pattern.txt(), 'target') }}</pre>
+                {{ print_board(captcha.result.txt(), 'result') }}</pre>
+                {{ print_board(captcha.grid_txt, 'raw') }}</pre>
+                {{ print_board(target_sub_pattern.txt(), 'sub pattern') }}</pre>
 
-        <div class="pictures">
-            {{ image_link(bot, 'angle') }}
-            {{ image_link(bot, 'markers') }}
-            {{ image_link(bot, 'pos') }}
-            {{ image_link(bot, 'grid') }}
-            {{ image_link(bot, '') }}
-        </div>
 
-        <div class="markers" style="display: none">
-            {% for m in captcha.markers %}
-            <span class="pos">{{ m.pos }}</span>
-            <span class="value">{{ m.valid_size }}</span>
-            <span class="value">{{ m.radius }}</span>
-            <span class="value">{{ m.value }}</span>
-            {% endfor %}
-        </div>    </section>
+            <div class="pictures">
+                {{ image_link(bot, 'angle') }}
+                {{ image_link(bot, 'markers') }}
+                {{ image_link(bot, 'pos') }}
+                {{ image_link(bot, 'value') }}
+                {{ image_link(bot, 'grid') }}
+                {{ image_link(bot, 'grid_expect') }}
+                {{ image_link(bot, '') }}
+            </div>
+
+            <div class="markers" style="display: none">
+                {% for m in captcha.markers %}
+                <span class="pos">{{ m.pos }}</span>
+                <span class="value">{{ m.valid_size }}</span>
+                <span class="value">{{ m.radius }}</span>
+                <span class="value">{{ m.value }}</span>
+                {% endfor %}
+            </div>    
+        </div>    
+    </section>
     {% endfor %}
 </main>
 </body>

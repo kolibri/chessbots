@@ -48,8 +48,10 @@ class MockBots:
 
         generated = []
         for rotation in range(0, 360, 1):
+        # for rotation in range(40, 50):#
             # if 46 == rotation:
-            if 0 <= rotation % 45 < 5:
+            # if rotation % 45 in [0, 1, 2, 3, 4, 5, 40, 41, 42, 43, 44, 45]:
+            # if rotation % 45 == 0:
                 rot_steps = rotation // 90
                 rot_mod = rotation // 90
                 generated.append(create_mockbot('r' + str(rotation), '', Point(0, 0), rotation, rot_mod))

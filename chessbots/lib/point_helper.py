@@ -1,9 +1,8 @@
 from collections import namedtuple
 import math
+from typing import Self
 
 # Point = namedtuple('Point', 'x y')
-PointImg = namedtuple('PointImg', 'x y')
-PointGrid = namedtuple('PointGrid', 'x y')
 Color = namedtuple('Color', 'r g b')
 
 
@@ -11,9 +10,23 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.raw = self.x, self.y
+        self.txt = str(self.x) + 'x' + str(self.y)
 
-    def raw(self):
-        return self.x, self.y
+    def __eq__(self, other: Self) -> bool:
+        return self.x == other.x and self.y == other.y
+
+    def flip(self) -> Self:
+        return Point(self.y, self.x)
+    # def txt(self) -> str:
+    #     return str(self.x) + 'x' + str(self.y)
+
+
+def get_direction(a, b) -> Point:
+    return Point(
+        -1 if a.y < b.y else 1,
+        -1 if a.x < b.x else 1
+    )
 
 
 def add_points(point_a: Point, point_b: Point) -> Point:
@@ -38,6 +51,7 @@ def point_in_area(point: Point, area: [Point, Point]) -> bool:
 
 def get_angle(a: Point, b: Point, c: Point) -> float:
     ang = math.degrees(math.atan2(c.y - b.y, c.x - b.x) - math.atan2(a.y - b.y, a.x - b.x))
+    return ang
     ang = ang + 360 if ang < 0 else ang
     return 360 - ang if ang > 180 else ang
 
