@@ -3,14 +3,15 @@ from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
 from chessbots.lib.bot.mockbot import *
 from chessbots.lib.print_units import *
-from chessbots.lib.captcha.captcha_reader import *
-from chessbots.lib.captcha.captcha_resolver import *
-from chessbots.lib.bot import BotManager, ChainDataCollector, RobotApiCollector, CaptchaReaderCollector, PositionResolverCollector
+from chessbots.lib.captcha.position import *
+from chessbots.lib.bot import BotManager
+from chessbots.lib.bot.data_collector import ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
 
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
         ".blueprints.bots",
+        ".blueprints.mockbot",
         ".blueprints.tools",
     ])
 
@@ -47,6 +48,11 @@ class Container(containers.DeclarativeContainer):
         board=board
     )
 
+    mockbot_tester = providers.Factory(
+        MockBotTester,
+        base_path=config['mockbot']['cache_dir']
+    )
+
     mockbot_picture_creator = providers.Factory(
         MockbotPictureCreator,
         path=config['mockbot']['cache_dir'],
@@ -61,7 +67,6 @@ class Container(containers.DeclarativeContainer):
         collectors=[
             RobotApiCollector(config['bots']['cache_dir']),
             CaptchaReaderCollector(),
-            PositionResolverCollector(CaptchaResolver())
         ]
     )
 
@@ -71,6 +76,3 @@ class Container(containers.DeclarativeContainer):
         collector=collector
     )
 
-    captcha_resolver = providers.Factory(
-        CaptchaResolver,
-    )

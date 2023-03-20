@@ -162,11 +162,11 @@ section > .title > span.point_details { width: 27em; }
 <body>
 <main>
     <nav id="dbg"></nav>
-    {% for bot, captcha, grid_test_result, target_sub_pattern in raw %}
-    <section class="result test-{{ 'fail' if grid_test_result == 'F' else 'pass' }}">
+    {% for bot, captcha, res in result %}
+    <section class="result test-{{ 'pass' if res else 'fail' }}">
         <span class="title">
             <span class="name">{{ bot.name }}:</span>
-            <span class="test_result">{{ grid_test_result }}</span>
+            <span class="test_result">{{ r }}</span>
             <span class="dirs">{{ captcha.grid_dirs|join('') }}</span>
             <span class="angle">{{ captcha.angle }}</span>
             <span class="angle_points">{{ captcha.angle_points[0].txt }} {{ captcha.angle_points[1].txt }} {{ captcha.angle_points[2].txt }}</span>
@@ -176,10 +176,9 @@ section > .title > span.point_details { width: 27em; }
 
             <div class="txt_grids">
                 {{ print_board(bot.pattern.txt(), 'target') }}</pre>
-                {{ print_board(captcha.result.txt(), 'result') }}</pre>
+                {{ print_board(captcha.board.txt(), 'result') }}</pre>
                 {{ print_board(captcha.grid_txt, 'raw') }}</pre>
-                {{ print_board(target_sub_pattern.txt(), 'sub pattern') }}</pre>
-
+            </div>
 
             <div class="pictures">
                 {{ image_link(bot, 'angle') }}
@@ -189,6 +188,14 @@ section > .title > span.point_details { width: 27em; }
                 {{ image_link(bot, 'grid') }}
                 {{ image_link(bot, 'grid_expect') }}
                 {{ image_link(bot, '') }}
+            </div>
+            <div class="position">
+                # position
+                >{{ captcha.position }}<
+                {% for sol in captcha.position_solutions %}
+                {{ sol.guess.solved }}
+                {{ sol.guess.bins|join(', ') }}
+                {% endfor %}
             </div>
 
             <div class="markers" style="display: none">

@@ -44,7 +44,7 @@ class Pattern:
         invert_txt = invert_zero_one(matrix_to_txt(self.matrix))
         return Pattern(txt_to_matrix(invert_txt))
 
-    def bits(self, invert: bool = False):
+    def bits(self, invert: bool = False) -> str:
         value = ''.join([''.join(r) for r in self.matrix])
         if invert:
             return value.replace('0', 'n').replace('1', '0').replace('n', '1')

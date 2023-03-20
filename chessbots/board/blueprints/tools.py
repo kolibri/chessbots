@@ -6,8 +6,9 @@ import numpy as np
 from flask import Blueprint
 from chessbots.tool.pattern_creator import Pattern8x8With4DataFields
 from chessbots.tool.printer import *
-from chessbots.lib.captcha.captcha_reader import *
-from chessbots.lib.captcha.captcha_resolver import *
+from chessbots.lib.captcha import Captcha
+from chessbots.lib.captcha.grid import create_angel_points
+from chessbots.lib.captcha.position import *
 from dependency_injector.wiring import inject, Provide
 from chessbots.board.containers import Container
 from chessbots.lib.bot.mockbot import *
@@ -90,7 +91,7 @@ def test_get_angle_points(
 
     for ex, d in angle_data:
         try:
-            a, b, c = find_angel_points(d)
+            a, b, c = create_angel_points(d)
 
             rs = ''.join([''.join([str(m.x) + str(m.y) for m in [a, b, c]])])
 
@@ -99,7 +100,7 @@ def test_get_angle_points(
             print('error')
 
     for ex, d in data:
-        a, b, c = find_angel_points(d)
+        a, b, c = create_angel_points(d)
         rs = ''.join([''.join([str(m.x) + str(m.y) for m in [a, b, c]])])
 
         print(ex, rs, rs == ex, a.txt, b.txt, c.txt, get_angle(c, b, a))
@@ -111,37 +112,11 @@ def test_get_angle_points(
 @inject
 def test_captcha_to_txt(
         mockbots: MockBots = Provide[Container.mockbots],
+        mockbot_tester: MockBotTester = Provide[Container.mockbot_tester],
 ):
-    def assert_result(captcha, bot) -> str:
-        if captcha.result.txt() == bot.pattern.txt():
-            return '.'
-        elif captcha.result.find_matches(bot.pattern.create_snapshot(Point(4, 4), Point(8, 8))):
-            return ':'
-        return 'F'
 
-    def test_mockbots(bots: MockBots):
-        output = ''
-        failed = []
-        raw = []
-        for bot in bots.bots:
-            path = os.path.join('build/mockbot/', bot.picture())
-            captcha = CaptchaResult(path)
-            captcha.draw_debug_images()
-            # result = assert_result(captcha, bot)
-
-            # output = output + result
-            # if 'F' == result:
-            #     failed.append([bot, captcha])
-            raw.append([bot, captcha, assert_result(captcha, bot), bot.pattern.create_snapshot(Point(4, 4), Point(8, 8))])
-            # print('{:.4f}'.format(captcha.angle), captcha.grid_dirs)
-        return output, failed, raw
-
-    test_sum, failed, raw = test_mockbots(mockbots)
-    dbg = render_template('mockbots.html', test_sum=test_sum, result=failed, raw=raw)
-    dump_txt('build/mockbot/_test_result.html', dbg)
-
-    print(test_sum)
-    print([[f[0].name, f[0].pattern.create_snapshot(Point(4, 4), Point(8, 8)).txt(), f[1].grid_dirs] for f in failed])
+    result = [mockbot_tester.test_captcha(bot) for bot in mockbots.bots]
+    dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html', result=result))
 
 
 # @bp.cli.command('test_txt_to_position')

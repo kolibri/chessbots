@@ -1,8 +1,6 @@
-from flask import (Blueprint, jsonify, url_for, send_from_directory)
-from flask import Flask
+from flask import (Blueprint, jsonify, send_from_directory)
 from chessbots.lib.bot.mockbot import *
 
-# from flask import (Blueprint, request, render_template, jsonify)
 from flask import Flask
 
 from chessbots.lib.bot.mockbot import MockBots
@@ -27,6 +25,7 @@ def get_show(name: str, mockbots: MockBots = Provide[Container.mockbots]):
 
 
 @bp.route('/<string:name>/position.jpeg', methods=['GET'])
+@inject
 def get_picture(name: str, mockbots: MockBots = Provide[Container.mockbots]):
     if not mockbots.has(name):
         return jsonify('not found'), 404

@@ -1,11 +1,8 @@
 from __future__ import annotations
-import requests
 from werkzeug.datastructures import MultiDict
 import os
 import hashlib
 from chessbots.lib.filesystem import read_json, dump_json
-from chessbots.lib.captcha.captcha_reader import CaptchaResult
-from chessbots.lib.captcha.captcha_resolver import CaptchaResolver
 
 
 class Bot:
@@ -74,63 +71,3 @@ class BotManager:
 class BotDataCollector:
     def get_data(self, bot: Bot) -> Bot:
         pass
-
-
-class ChainDataCollector(BotDataCollector):
-    def __init__(self, collectors: [BotDataCollector]):
-        self.collectors = collectors
-
-    def get_data(self, bot: Bot):
-        data = bot.data
-        for collector in self.collectors:
-            data = data | collector.get_data(bot)
-        return data
-
-
-class RobotApiCollector(BotDataCollector):
-    def __init__(self, cache_path: str):
-        self.cache_path = cache_path
-
-    def get_data(self, bot: Bot):
-        try:
-            data = requests.get(bot.host_name).json()
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            data = {'state': 'offline', 'url': bot.host_name}
-            print('robot sensor: failed to load bot info', data, e)
-
-        if 'live_image' in data:
-            img_cache_path = os.path.join(self.cache_path, bot.id + '_position.jpeg')
-            try:
-                r = requests.get(data.get('live_image'))
-                open(img_cache_path, 'wb').write(r.content)
-                data['position_local_filename'] = img_cache_path
-            except requests.exceptions.RequestException as e:
-                print('robot sensor: failed to load image: ', data['live_image'])
-        return data
-
-
-class CaptchaReaderCollector(BotDataCollector):
-    def get_data(self, bot: Bot):
-        if 'position_local_filename' not in bot.data.keys():
-            return bot.data
-        data = bot.data
-        captcha = CaptchaResult(data['position_local_filename'], [16, 22], [8, 12], 16)
-        # board, angle = self.captcha_reader.resolve(data['position_local_filename'])
-        data['captcha_angle'] = captcha.angle
-        data['captcha_board'] = captcha.result.txt()
-
-        return data
-
-
-class PositionResolverCollector(BotDataCollector):
-    def __init__(self, resolver: CaptchaResolver):
-        self.resolver = resolver
-
-    def get_data(self, bot: Bot):
-        if 'captcha_board' not in bot.data.keys():
-            return bot.data
-        data = bot.data
-        position = self.resolver.resolve(data['captcha_board'])
-        data['position'] = position
-
-        return data

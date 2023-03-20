@@ -16,6 +16,10 @@ class Point:
     def __eq__(self, other: Self) -> bool:
         return self.x == other.x and self.y == other.y
 
+    def __str__(self):
+        return self.txt
+
+
     def flip(self) -> Self:
         return Point(self.y, self.x)
     # def txt(self) -> str:

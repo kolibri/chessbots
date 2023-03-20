@@ -47,6 +47,7 @@ def post_register(bots: BotManager = Provide[Container.bot_manager]):
 
 
 @bp.route('/dashboard', methods=['GET'])
-def get_dashboard():
-    return render_template('dashboard.html', mockbots=[bot.url() for bot in MockBots().bots])
+@inject
+def get_dashboard(mockbots: MockBots = Provide[Container.mockbots]):
+    return render_template('dashboard.html', mockbots=[bot.url() for bot in mockbots.bots])
 

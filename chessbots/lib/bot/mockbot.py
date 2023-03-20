@@ -5,6 +5,7 @@ from chessbots.tool.printer import PatternPrinter
 from chessbots.lib.filesystem import *
 import os
 from typing import NamedTuple
+from chessbots.lib.captcha import Captcha
 
 
 class MockBot(NamedTuple):
@@ -31,43 +32,49 @@ class MockBot(NamedTuple):
     def picture(self):
         return 'mockbot_' + self.name + '.jpg'
 
-    def create(self):
-        pass
+
+class MockBotTester:
+    def __init__(self, base_path: str):
+        self.base_path = base_path
+
+    def test_captcha(self, bot: MockBot):
+        captcha = Captcha(os.path.join(self.base_path, bot.picture()))
+        captcha.draw_debug_images()
+        print('mockbot test', bot.name, captcha.board.txt(), captcha.position.txt)
+
+        test_result = bot.pos == captcha.position
+
+        return bot, captcha, test_result
+
+
+def create_mockbot(board: Pattern, name: str, piece: str, pos: Point, angle: int) -> MockBot:
+    size = Point(16, 16)
+    board = board.create_snapshot(pos, size)
+    for i in range(0, angle // 90):
+        board = board.rotate()
+    return MockBot(name, piece, pos, angle, board, size)
 
 
 class MockBots:
     def __init__(self, board: Pattern):
-        def create_mockbot(name: str, piece: str, pos: Point, angle: int, grid_rot: int) -> MockBot:
-            size = Point(16, 16)
-            board = self.board.create_snapshot(pos, size)
-            for i in range(0, grid_rot):
-                board = board.rotate()
-            return MockBot(name, piece, pos, angle, board, size)
-
         self.board = board
 
-        generated = []
-        for rotation in range(0, 360, 1):
-        # for rotation in range(40, 50):#
-            # if 46 == rotation:
-            # if rotation % 45 in [0, 1, 2, 3, 4, 5, 40, 41, 42, 43, 44, 45]:
-            # if rotation % 45 == 0:
-                rot_steps = rotation // 90
-                rot_mod = rotation // 90
-                generated.append(create_mockbot('r' + str(rotation), '', Point(0, 0), rotation, rot_mod))
+        rotations = range(0, 1)
+        x_range = range(0, 1)
+        y_range = range(0, 1)
 
-        self.bots = [
-            # create_mockbot('hk', 'k', Point(31 * 8 + 5, 76 * 8 + 2), 15, 0),
-            # create_mockbot('mj', '', Point(29 * 8, 76 * 8), -15, 0),
-            # create_mockbot('ma', '', Point(0, 0), -2, 0),
-            # create_mockbot('mb', '', Point(0, 0), 2, 0),
-            # create_mockbot('mc', '', Point(0, 0), 45, 0),
-            # create_mockbot('k7', 'p', Point(32 * 8, 32 * 8), 90, 1),
-            # create_mockbot('pd', 'b', Point(0, 0), 0, 0),
-            # create_mockbot('pj', 'R', Point(4 * 8 + 3, 7 * 8 + 7), 0, 0),
-            # create_mockbot('pk', 'Q', Point(8 * 8, 16 * 8), 0, 0),
-        ]
-        self.bots = generated
+        points = []
+        for x in x_range:
+            for y in y_range:
+                points.append(Point(x, y))
+
+        def from_pos_and_rot(pos: Point, rot: int):
+            return create_mockbot(self.board, str(pos) + 'r' + str(rot), '', pos, rot)
+
+        self.bots = []
+        for at_pos in points:
+            for rot in rotations:
+                self.bots.append(from_pos_and_rot(at_pos, rot))
 
     def has(self, name: str) -> bool:
         for bot in self.bots:
