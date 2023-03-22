@@ -33,9 +33,9 @@ class Pattern8x8With4DataFields(PatternCreator):
         fields = [
             [
                 bits_to_pattern('0' + bits + '0').matrix,
-                bits_to_pattern('0' + bits_inverted + '1').fliplr().matrix,
+                bits_to_pattern('1' + bits_inverted + '0').fliplr().matrix,
             ], [
-                bits_to_pattern('1' + bits_inverted + '0').flipud().matrix,
+                bits_to_pattern('0' + bits_inverted + '1').flipud().matrix,
                 bits_to_pattern('1' + bits + '1').flip().matrix,
             ]
         ]

@@ -52,7 +52,9 @@ class Captcha:
         self.angle, self.grid, self.angle_points, self.grid_txt = resolve_markers_to_grid(self.markers, 16, self.grid_tolerance)
 
         self.board = Board(txt_to_matrix(self.grid_txt))
-        self.position, self.position_solutions = resolve_board_to_position(self.board)
+        self.position = Point(-1, -1)
+        self.position_checks = []
+        self.position, self.position_checks = resolve_board_to_position(self.board)
 
     def draw_debug_images(self):
         def get_marker_points(marks: [DrawPoint]) -> [DrawPoint]:

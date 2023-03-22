@@ -40,7 +40,7 @@ class MockBotTester:
     def test_captcha(self, bot: MockBot):
         captcha = Captcha(os.path.join(self.base_path, bot.picture()))
         captcha.draw_debug_images()
-        print('mockbot test', bot.name, captcha.board.txt(), captcha.position.txt)
+        # print('mockbot test', bot.name, captcha.board.txt(), captcha.position.txt)
 
         test_result = bot.pos == captcha.position
 
@@ -59,14 +59,14 @@ class MockBots:
     def __init__(self, board: Pattern):
         self.board = board
 
-        rotations = range(0, 1)
-        x_range = range(0, 1)
-        y_range = range(0, 1)
+        rotations = [0, 15]
+        x_range = range(8*3+7, 4)
+        y_range = range(8*7+3, 8)
 
-        points = []
-        for x in x_range:
-            for y in y_range:
-                points.append(Point(x, y))
+        points = [Point(8*3+7, 8*7+3)]
+        # for x in x_range:
+        #     for y in y_range:
+        #         points.append(Point(x, y))
 
         def from_pos_and_rot(pos: Point, rot: int):
             return create_mockbot(self.board, str(pos) + 'r' + str(rot), '', pos, rot)
@@ -118,6 +118,6 @@ class MockbotPictureCreator:
         img = enlarged_img.rotate(bot.angle).crop((box1.x, box1.y, box2.x, box2.y))
         path = os.path.join(self.path, 'mockbot_' + bot.name + '.jpg')
 
-        print('save to', path, bot)
+        print('save to', path, bot.name)
         dump_txt(path + '__target.txt', actual_pattern.txt() + '\n@' + str(bot.pos.x) + 'x' + str(bot.pos.y) + ' a' + str(bot.angle))
         img.convert('RGB').save(path)

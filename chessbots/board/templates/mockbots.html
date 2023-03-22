@@ -1,6 +1,30 @@
+{% macro position(bot, captcha) %}
+<pre class="position">
+pos: {{ captcha.position }}
+{% for check in captcha.position_checks if check.usable %}
+{{ check.usable }} {{ check.snapshot_pos.txt }} {{ check.rotation }} {{ check.read_style }}
+{{ check.bint }} {{ check.pos }} {{ check.mult_pos }}
+
+{{ check.pattern.txt() }}
+
+bit values:
+{% for section in check.sections -%}
+{{ section.bit_raw }} {{ section.bit_value }} {{ section.bit_check }}
+{% endfor %}
+
+solved: {{ check.solved_position }}
+guesses: {{ check.solved_sections|join(' ') }}
+
+
+{% endfor %}
+</div>
+</pre>
+
+{% endmacro %}
+
 {% macro print_board(board, name) %}
 <div>
-    <span>target</span>
+    <span>{{ name }}</span>
     <pre>{{ board|replace('2', '.')|replace('0', 'o') }}</pre>
 </div>
 {% endmacro %}
@@ -189,14 +213,7 @@ section > .title > span.point_details { width: 27em; }
                 {{ image_link(bot, 'grid_expect') }}
                 {{ image_link(bot, '') }}
             </div>
-            <div class="position">
-                # position
-                >{{ captcha.position }}<
-                {% for sol in captcha.position_solutions %}
-                {{ sol.guess.solved }}
-                {{ sol.guess.bins|join(', ') }}
-                {% endfor %}
-            </div>
+            {{ position(bot, captcha) }}
 
             <div class="markers" style="display: none">
                 {% for m in captcha.markers %}
