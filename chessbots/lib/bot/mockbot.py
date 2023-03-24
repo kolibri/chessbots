@@ -12,7 +12,6 @@ class MockBot(NamedTuple):
     name: str
     piece: str
     pos: Point
-    # size: Point
     angle: float
     pattern: Pattern
     size: Point
@@ -59,14 +58,14 @@ class MockBots:
     def __init__(self, board: Pattern):
         self.board = board
 
-        rotations = [0, 15]
-        x_range = range(8*3+7, 4)
-        y_range = range(8*7+3, 8)
+        rotations = [0]
+        x_range = range(0, 16, 4)
+        y_range = range(0, 16, 4)
 
-        points = [Point(8*3+7, 8*7+3)]
-        # for x in x_range:
-        #     for y in y_range:
-        #         points.append(Point(x, y))
+        points = []
+        for x in x_range:
+            for y in y_range:
+                points.append(Point(x, y))
 
         def from_pos_and_rot(pos: Point, rot: int):
             return create_mockbot(self.board, str(pos) + 'r' + str(rot), '', pos, rot)
@@ -97,7 +96,13 @@ class MockbotPictureCreator:
 
     def create(self):
         for bot in self.mockbots.bots:
-            self.create_for_bot(bot)
+            img = self.create_for_bot(bot)
+            path = os.path.join(self.path, 'mockbot_' + bot.name + '.jpg')
+
+            print('save to', path, bot.name)
+            dump_txt(path + '__target.txt',
+                     bot.pattern.txt() + '\n@' + str(bot.pos.x) + 'x' + str(bot.pos.y) + ' a' + str(bot.angle))
+            img.convert('RGB').save(path)
 
     def create_for_bot(self, bot: MockBot):
         size = bot.size
@@ -108,16 +113,11 @@ class MockbotPictureCreator:
         enlarged_pattern = self.mockbots.board.create_snapshot(snapshot_pos, enlarged_size)
         enlarged_img = self.printer.create_image(enlarged_pattern)
 
-        actual_pattern = bot.pattern
-        actual_size = Point(*self.printer.calculate_size(actual_pattern))
+        actual_size = Point(*self.printer.calculate_size(bot.pattern))
 
         width, height = enlarged_img.size
         center = Point(int(width / 2), int(height / 2))
         box1 = sub_points(center, mult_point(actual_size, 0.5))
         box2 = add_points(center, mult_point(actual_size, 0.5))
         img = enlarged_img.rotate(bot.angle).crop((box1.x, box1.y, box2.x, box2.y))
-        path = os.path.join(self.path, 'mockbot_' + bot.name + '.jpg')
-
-        print('save to', path, bot.name)
-        dump_txt(path + '__target.txt', actual_pattern.txt() + '\n@' + str(bot.pos.x) + 'x' + str(bot.pos.y) + ' a' + str(bot.angle))
-        img.convert('RGB').save(path)
+        return img

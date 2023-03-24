@@ -7,13 +7,10 @@ from chessbots.lib.point_helper import *
 class PatternPrinter:
     def __init__(self, dpi: int, point_size: PrintPixel):
         self.dpi = dpi
-        self.point_size = self._convert_to_pixel(point_size)
+        self.point_size = point_size.to_pixel(self.dpi)
         self.color_trans = (255, 255, 255, 0)
         self.color_bg = (255, 255, 255, 0)
         self.color_fg = (127, 127, 127, 255)
-
-    def _convert_to_pixel(self, unit: PrintPixel):
-        return unit.to_pixel(self.dpi)
 
     def create_image(self, pattern: Pattern):
         return self._render(pattern)

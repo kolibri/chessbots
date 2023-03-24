@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     send_bot_action('get', '/bots', 'id=' + value)
                 }
 
-            } else if (key.endsWith('_image')) {
+            } else if (key.startsWith('image_')) {
                 data.children = [
                     createElement('a', {
                         attributes: {'href': value, 'target': '_blank'},

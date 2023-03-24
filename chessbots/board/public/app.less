@@ -1,0 +1,85 @@
+img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#dashboard {
+  > nav {
+    a {
+      font-size: 1.5em;
+    }
+
+    a:active {
+      color: #000;
+    }
+  }
+
+  > section[data-show='1'] {
+    display: block;
+  }
+
+  > section[data-show='0'] {
+    display: none;
+  }
+}
+
+#register_form textarea {
+  width: 40em;
+  height: 10em;
+  display: block;
+}
+
+.debug-bots-list {
+  outline: 1px solid black;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 0.8em;
+  display: flex;
+  gap: 3px 3px;
+  flex-wrap: wrap;
+
+  > div {
+    outline: 1px solid black;
+    height: auto;
+    flex: 1 20%;
+
+    > * {
+      margin: 0;
+    }
+
+    > h3 {
+      text-overflow: clip;
+      overflow: hidden;
+      background-color: #bcd;
+    }
+
+    > dl {
+      > dt,
+      > dd {
+        overflow: hidden;
+        margin-inline-start: 0;
+        outline: 1px solid blue;
+      }
+
+      > dt[data-show='0'] {
+        background-color: #abc;
+      }
+
+      > dt[data-show='1'] {
+        background-color: #def;
+      }
+
+      > dd {
+        display: none;
+      }
+
+      > dt[data-show='0'] + dd {
+        display: none;
+      }
+
+      > dt[data-show='1'] + dd {
+        display: block;
+      }
+    }
+  }
+}

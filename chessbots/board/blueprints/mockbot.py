@@ -1,6 +1,6 @@
-from flask import (Blueprint, jsonify, send_from_directory)
+from flask import (Blueprint, jsonify, send_from_directory, send_file)
 from chessbots.lib.bot.mockbot import *
-
+from io import BytesIO
 from flask import Flask
 
 from chessbots.lib.bot.mockbot import MockBots
@@ -26,8 +26,16 @@ def get_show(name: str, mockbots: MockBots = Provide[Container.mockbots]):
 
 @bp.route('/<string:name>/position.jpeg', methods=['GET'])
 @inject
-def get_picture(name: str, mockbots: MockBots = Provide[Container.mockbots]):
+def get_picture(
+        name: str,
+        mockbots: MockBots = Provide[Container.mockbots],
+        picture_creator: MockbotPictureCreator = Provide[Container.mockbot_picture_creator]
+):
     if not mockbots.has(name):
         return jsonify('not found'), 404
     bot = mockbots.get(name)
-    return send_from_directory('/app/build/mockbot', bot.picture())
+    img = picture_creator.create_for_bot(bot)
+    img_io = BytesIO()
+    img.convert('RGB').save(img_io, 'JPEG')
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/jpeg')

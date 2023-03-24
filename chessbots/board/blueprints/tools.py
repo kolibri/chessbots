@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from flask import Blueprint
 from chessbots.tool.pattern_creator import Pattern8x8With4DataFields
+from chessbots.lib.pattern import *
 from chessbots.tool.printer import *
 from chessbots.lib.captcha import Captcha
 from chessbots.lib.captcha.grid import create_angel_points
@@ -20,8 +21,8 @@ bp = Blueprint('script', __name__)
 @bp.cli.command('pattern_test')
 @inject
 def pattern_test(pattern_creator: Pattern8x8With4DataFields = Provide[Container.pattern_creator]):
-    board = pattern_creator.create(800)
 
+    board = pattern_creator.create(800)
     text_file = open("build/board_pattern.txt", "w")
     text_file.write(Pattern(txt_to_matrix(board.txt())).txt())
     text_file.close()
@@ -116,7 +117,7 @@ def test_captcha_to_txt(
 ):
 
     result = [mockbot_tester.test_captcha(bot) for bot in mockbots.bots]
-    dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html', result=result))
+    dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html.j2', result=result))
 
 
 # @bp.cli.command('test_txt_to_position')

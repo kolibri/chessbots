@@ -237,32 +237,83 @@ class CheckResult:
         self.rotation = rotation
         self.read_style = read_style
 
-        match self.read_style:
-            case 0:
-                self.rotation_mod = Point(0, 0)
-            case 1:
-                self.rotation_mod = Point(0, 1)
-            case 2:
-                self.rotation_mod = Point(1, 0)
-            case 3:
-                self.rotation_mod = Point(1, 1)
-
         if '2' in self.pattern.txt():
             return
-
+        '''
+            1x1 1x1   2x1 2x1   3x1 3x1  
+            1x1 1x1   2x1 2x1   3x1 3x1
+        
+            1x2 1x2   2x2 2x2   3x2 3x2
+            1x2 1x2   2x2 2x2   3x2 3x2
+        
+            1x3 1x3   2x3 2x3   3x3 3x3
+            1x3 1x3   2x3 2x3   3x3 3x3
+        
+        -
+            1x1   1x1 2x1   2x1 3x1   3x1
+              
+            1x1   1x1 2x1   2x1 3x1   3x1
+            1x2   1x2 2x2   2x2 3x2   3x2
+            
+            1x2   1x2 2x2   2x2 3x2   3x2
+            1x3   1x3 2x3   2x3 3x3   3x3
+            
+            1x3   1x3 2x3   2x3 3x3   3x3
+        -
+        
+        0x0  0.5x0.5
+            0x0 0x0  
+            0x0 0x0
+        0x1  0.5x1:
+            0x0 0x0  
+            0x1 0x1
+        1x0  1x0.5:
+            0x0 1x0  
+            0x0 1x0
+        1x1  4x4
+            0x0 1x0
+            0x1 1x1
+        2x2 8x8
+            1x1 1x1
+            1x1 1x1
+        3x3 12x12
+            1x1 2x1
+            1x2 2x2
+        4x4 16x16
+            2x2 2x2
+            2x2 2x2    
+        
+        
+        
+        
+        
+            # 0 - 1x1 1x1 1x1 1x1 
+        '''
         match self.read_style:
             case 0:
+                # 01 1x1 1x1
+                # 23 1x1 1x1
                 self.pattern_points = [Point(0, 0), Point(4, 0), Point(0, 4), Point(4, 4)]
                 self.pattern_point_modifiers = [Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)]
+                self.read_style_mod = Point(0.5, 0.5)
             case 1:
+                # 23 1x2 1x2
+                # 01 1x1 1x1
                 self.pattern_points = [Point(0, 4), Point(4, 4), Point(0, 0), Point(4, 0)]
-                self.pattern_point_modifiers = [Point(0, 0), Point(0, 0), Point(0, 1), Point(0, 1)]
+                self.pattern_point_modifiers = [Point(0.5, 0), Point(0.5, 0), Point(0.5, 1), Point(0.5, 1)]
+                self.read_style_mod = Point(0, 1)
             case 2:
+                # 10 2x1 1x1
+                # 32 2x1 1x1
                 self.pattern_points = [Point(4, 0), Point(0, 0), Point(4, 4), Point(0, 4)]
-                self.pattern_point_modifiers = [Point(0, 0), Point(1, 0), Point(0, 0), Point(1, 0)]
+                self.pattern_point_modifiers = [Point(0, 0.5), Point(-1, 0.5), Point(0, 0.5), Point(-1, 0.5)]
+                self.read_style_mod = Point(1, 0)
             case 3:
+                # 32  2x2 2x1
+                # 10  1x2 1x1
                 self.pattern_points = [Point(4, 4), Point(0, 4), Point(4, 0), Point(0, 0)]
-                self.pattern_point_modifiers = [Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)]
+                self.pattern_point_modifiers = [Point(1, 1), Point(0, 1), Point(1, 0), Point(0, 0)]
+                self.read_style_mod = Point(1, 1)
             case _:
                 raise RuntimeError('Bad read style: ' + str(self.read_style))
 
@@ -273,18 +324,13 @@ class CheckResult:
             ValueSection(3, self.pattern.create_snapshot(self.pattern_points[3], Point(4, 4))),
         ]
 
-        sn = self.snapshot_pos
-        rm = self.rotation_mod
+        rm = self.read_style_mod
         ppm = self.pattern_point_modifiers
         self.solved_sections = [
-            self.sections[0].pos_value.mult(8).add(ppm[0].mult(8)).sub(sn).sub(rm.mult(4)),
-            self.sections[1].pos_value.mult(8).add(ppm[1].mult(8)).sub(sn).sub(rm.mult(4)),
-            self.sections[2].pos_value.mult(8).add(ppm[2].mult(8)).sub(sn).sub(rm.mult(4)),
-            self.sections[3].pos_value.mult(8).add(ppm[3].mult(8)).sub(sn).sub(rm.mult(4)),
-            # sub_points(add_points(mult_point(self.sections[0].pos_value, 8), mult_point(self.pattern_point_modifiers[0], 8)), self.snapshot_pos),
-            # sub_points(add_points(mult_point(self.sections[1].pos_value, 8), mult_point(self.pattern_point_modifiers[1], 8)), self.snapshot_pos),
-            # sub_points(add_points(mult_point(self.sections[2].pos_value, 8), mult_point(self.pattern_point_modifiers[2], 8)), self.snapshot_pos),
-            # sub_points(add_points(mult_point(self.sections[3].pos_value, 8), mult_point(self.pattern_point_modifiers[3], 8)), self.snapshot_pos),
+            self.sections[0].pos_value.add(ppm[0]).sub(rm),
+            self.sections[1].pos_value.add(ppm[1]).sub(rm),
+            self.sections[2].pos_value.add(ppm[2]).sub(rm),
+            self.sections[3].pos_value.add(ppm[3]).sub(rm),
         ]
 
         self.validity_check_solved_sections_unique = True if 1 == len(set([s.raw for s in self.solved_sections])) else False
@@ -295,37 +341,21 @@ class CheckResult:
         if not self.validity_check_solved_sections_unique:
             return
 
-        self.solved_position = self.solved_sections[0]
         self.usable = True
-
-        #
-        # self.validity_check_section_value_bit_lengths = True if 1 == len(set([len(b.bit_raw) for b in self.sections])) else False
-        # if not self.validity_check_section_value_bit_lengths:
-        #     return
-        #
-        # self.votes = [vote_value(self.sections, i) for i in range(0, len(self.sections[0].bit_value))]
-        # self.voted_value = ''.join([str(v[0]) for v in self.votes])
-        # self.positive_votes = ''.join([str(v[1]) for v in self.votes])
-        # self.negative_votes = ''.join([str(v[2]) for v in self.votes])
-        # self.neutral_votes = ''.join([str(v[3]) for v in self.votes])
-        #
-        # self.validity_check_voted_value_usable = True if '2' not in self.voted_value else False
-        # if not self.validity_check_voted_value_usable:
-        #     return
-        #
-        # self.bint = bit_to_int(self.voted_value)
-        # self.pos = int_to_pos(self.bint)
-        # self.mult_pos = mult_point(self.pos, 8)
+        self.solved_position = self.solved_sections[0]
 
 
+class CheckResultCollection:
+    def __init__(self, results: [CheckResult]):
+        self.results = results
 
 
 def resolve_board_to_position(board: Board):
     snapshot_size = Point(8, 8)
     results = []
     for rotate_step in range(0, 4):
-        for x in range(0, board.size().x - snapshot_size.x):
-            for y in range(0, board.size().y - snapshot_size.y):
+        for x in range(0, board.size().x - snapshot_size.x + 1):
+            for y in range(0, board.size().y - snapshot_size.y + 1):
                 for read_style in [0, 1, 2, 3]:
                     results.append(CheckResult(
                         board.create_snapshot(Point(x, y), snapshot_size),
@@ -336,6 +366,7 @@ def resolve_board_to_position(board: Board):
         board = board.rotate()
 
     filtered = [r for r in results if r.usable]
+    collection = CheckResultCollection(filtered)
     print(filtered)
     has_unique_result = True if 1 == len(set([s.solved_position.raw for s in filtered])) else False
     if has_unique_result:
@@ -343,27 +374,3 @@ def resolve_board_to_position(board: Board):
 
     return Point(-1, -1), results
 
-
-# def vote_value(bits: [ValueSection, ValueSection, ValueSection, ValueSection], i: int):
-#     # -> [value, positive_votes, negative_votes, no_vote, raw]
-#     a, b, c, d = bits
-#     letters = [a.bit_value[i], b.bit_value[i], c.bit_value[i], d.bit_value[i]]
-#     letters = [int(i) for i in letters]
-#     a, b, c, d = letters
-#     # if a == b == c == d:
-#     #     return [a, 4, 0, 0, letters]
-#
-#     zero_count = sum([1 for m in letters if m == 0])
-#     ones_count = sum([1 for m in letters if m == 1])
-#     twos_count = sum([1 for m in letters if m == 2])
-#
-#     # returns: [value, positive_votes, negative_votes, no_votes, raw]
-#     if ones_count == 0 and zero_count > 0:
-#         return [0, 4 - zero_count, ones_count, twos_count, letters]
-#     if zero_count == 0 and ones_count > 0:
-#         return [1, 4 - ones_count, zero_count, twos_count, letters]
-#     if twos_count <= 1 and zero_count > ones_count:
-#         return [0, 4 - zero_count, ones_count, twos_count, letters]
-#     if twos_count <= 1 and zero_count < ones_count:
-#         return [1, ones_count, zero_count, twos_count, letters]
-#     return [2, 4, 4 - zero_count + ones_count, twos_count, letters]

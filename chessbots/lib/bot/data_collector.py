@@ -27,7 +27,7 @@ class RobotApiCollector(BotDataCollector):
             data = {'state': 'offline', 'url': bot.host_name}
             print('robot sensor: failed to load bot info', data, e)
 
-        if 'live_image' in data:
+        if 'image_live' in data:
             img_cache_path = os.path.join(self.cache_path, bot.id + '_position.jpeg')
             try:
                 r = requests.get(data.get('live_image'))

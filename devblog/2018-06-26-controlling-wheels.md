@@ -48,13 +48,13 @@ var motorRightPin1 = new Gpio(23, 'out');
 var motorRightPin2 = new Gpio(24, 'out');
  http.listen(80);
  function handler (req, res) { //create server
-    fs.readFile(__dirname + '/index.html', function(err, data) { //read file index.html in public folder
+    fs.readFile(__dirname + '/index.html.j2', function(err, data) { //read file index.html.j2 in public folder
         if (err) {
             res.writeHead(404, {'Content-Type': 'text/html'}); //display 404 on error
             return res.end("404 Not Found");
         } 
          res.writeHead(200, {'Content-Type': 'text/html'}); //write HTML
-        res.write(data); //write data from index.html
+        res.write(data); //write data from index.html.j2
         return res.end();
     });
 }

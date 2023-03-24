@@ -4,7 +4,7 @@ from chessbots.lib.pattern import *
 
 
 class PatternCreator:
-    def create(self, size: int):
+    def create(self, size: int) -> Pattern:
         pass
 
 

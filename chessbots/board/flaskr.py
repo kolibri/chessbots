@@ -40,7 +40,7 @@ def create_app(test_config=None):
 
     @app.route("/")
     def index():
-        return render_template('index.html')
+        return render_template('index.html.j2')
 
     @app.route("/favicon.png")
     def favicon():
