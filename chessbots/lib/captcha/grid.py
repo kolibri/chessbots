@@ -38,7 +38,7 @@ def resolve_markers_to_grid(markers: [Marker], grid_size: int, tolerance: int) -
             mod_x = mult_point(base_mod_x, x * -1)
             mod_y = mult_point(base_mod_y, y * -1)
 
-            expected_pos = add_points(angle_points[1], add_points(mod_x, mod_y))
+            expected_pos = add_points(angle_points[0], add_points(mod_x, mod_y))
             if area_size.x >= expected_pos.x >= 0 and area_size.y >= expected_pos.y >= 0:
                 target = Point(-x, y)
                 result.append(create_grid_point(target, expected_pos, markers, t_point))

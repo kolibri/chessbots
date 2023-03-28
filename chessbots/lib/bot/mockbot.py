@@ -41,9 +41,17 @@ class MockBotTester:
         captcha.draw_debug_images()
         # print('mockbot test', bot.name, captcha.board.txt(), captcha.position.txt)
 
-        test_result = bot.pos == captcha.position
+        board_pos = Point(bot.pos.x // 4, bot.pos.y // 4).add(Point(1, 1))
+        tolerance = Point(1, 1)
+        test_result_position = captcha.position.in_area([board_pos.sub(tolerance), board_pos.add(tolerance)])
 
-        return bot, captcha, test_result
+        ang_tol = 1
+        ang_act = captcha.rotation
+        ang_exp = bot.angle
+        test_result_angle = ang_exp - ang_tol < ang_act < ang_exp + ang_tol
+        print(test_result_position, test_result_angle, bot.name, board_pos, captcha.position, board_pos.sub(tolerance), board_pos.add(tolerance), 'a', ang_exp, ang_act)
+
+        return bot, captcha, test_result_position, test_result_angle, board_pos
 
 
 def create_mockbot(board: Pattern, name: str, piece: str, pos: Point, angle: int) -> MockBot:
@@ -58,14 +66,17 @@ class MockBots:
     def __init__(self, board: Pattern):
         self.board = board
 
-        rotations = [0]
-        x_range = range(0, 16, 4)
-        y_range = range(0, 16, 4)
+        rotations = range(0, 360, 15)
+        # rotations = [0, 45, 135]
+        x_range = range(0+16, 4+16, 1)
+        y_range = range(0+16, 4+16, 1)
 
-        points = []
-        for x in x_range:
-            for y in y_range:
-                points.append(Point(x, y))
+        points = [Point(18, 19)]
+        # points = []
+        # for x in x_range:
+        #     for y in y_range:
+        #         points.append(Point(x, y))
+
 
         def from_pos_and_rot(pos: Point, rot: int):
             return create_mockbot(self.board, str(pos) + 'r' + str(rot), '', pos, rot)

@@ -57,7 +57,7 @@ class TiledPatternPrinter:
 
         for x in range(0, 1):
             for y in range(0, 1):
-                sn_size = Point(int(pattern.size()[0] / grid_size), int(pattern.size()[1] / grid_size))
+                sn_size = Point(int(pattern.size().x / grid_size), int(pattern.size().y / grid_size))
                 self.printer.save_to_file(
                     pattern.create_snapshot(Point(x * sn_size.x, y * sn_size.y), sn_size),
                     base_path + str(x) + 'x' + str(y) + '.jpg'

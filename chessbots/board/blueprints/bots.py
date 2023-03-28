@@ -20,7 +20,7 @@ def get_index(bots: BotManager = Provide[Container.bot_manager]):
     /bots/?state=online&piece=wk
     /bots/?id=herzbube
     """
-    return jsonify([bot.data for bot in bots.filter(request.args)]), 200
+    return jsonify([bot.data for bot in bots.get_filtered(request.args)]), 200
 
 
 @bp.route('/', methods=['PATCH'])

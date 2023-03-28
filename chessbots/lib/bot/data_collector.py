@@ -45,7 +45,7 @@ class CaptchaReaderCollector(BotDataCollector):
         data = bot.data
         captcha = Captcha(data['position_local_filename'])
         data['captcha_angle'] = captcha.angle
-        data['captcha_board'] = captcha.result.txt()
-        data['position'] = captcha.result
+        data['captcha_board'] = captcha.board.txt()
+        data['position'] = captcha.position
 
         return data

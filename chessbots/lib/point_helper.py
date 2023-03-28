@@ -19,17 +19,20 @@ class Point:
     def __str__(self):
         return self.txt
 
+    def __hash__(self):
+        return self.raw.__hash__()
+
     def add(self, other: Self):
         return Point(self.x + other.x, self.y + other.y)
 
     def sub(self, other: Self):
         return Point(self.x - other.x, self.y - other.y)
 
-    def mult(self, factor: int):
+    def mult(self, factor: float):
         return Point(self.x * factor, self.y * factor)
 
     def in_area(self, area: [Self, Self]):
-        return area[0].x < self.x < area[1].x and area[0].y < self.y < area[1].y
+        return area[0].x <= self.x <= area[1].x and area[0].y <= self.y <= area[1].y
 
     def distance(self, other: Self):
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

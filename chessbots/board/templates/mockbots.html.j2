@@ -5,18 +5,16 @@
     <pre class="position">
 pos: {{ captcha.position }}
 {% for check in captcha.position_checks if check.usable %}
-{{ check.usable }} {{ check.snapshot_pos.txt }} {{ check.rotation }} {{ check.read_style }}
-{{ check.bint }} {{ check.pos }} {{ check.mult_pos }}
+{{ check.usable }} solved:{{ check.rs_position }} snpos:{{ check.snapshot_pos.txt }} r{{ check.rotation }} s{{ check.read_style }}
+{{ check.note }}
 
 {{ check.pattern.txt() }}
 
 bit values:
 {% for section in check.sections -%}
-{{ section.bit_raw }} {{ section.bit_value }} {{ section.bit_check }}
+{{ section.bit_raw }} {{ section.bit_value }} {{ section.bit_check }} {{ section.check_expect }} {{ section.bit_int }} {{ section.grid_value().txt }}
 {% endfor %}
 
-solved: {{ check.solved_position }}
-guesses: {{ check.solved_sections|join(' ') }}
 
 
 {% endfor %}
@@ -47,15 +45,19 @@ guesses: {{ check.solved_sections|join(' ') }}
 {% block body %}
     <main>
         <nav id="dbg"></nav>
-        {% for bot, captcha, res in result %}
-            <section class="result test-{{ 'pass' if res else 'fail' }}">
+        <span>sum: {{ result|length }}</span>
+        {% for bot, captcha, res, ang_res, target_pos in result %}
+            <section class="result test-{{ 'pass' if res and ang_res else 'fail' }}">
         <span class="title">
             <span class="name">{{ bot.name }}:</span>
-            <span class="test_result">{{ r }}</span>
-            <span class="dirs">{{ captcha.grid_dirs|join('') }}</span>
-            <span class="angle">{{ captcha.angle }}</span>
-            <span class="angle_points">{{ captcha.angle_points[0].txt }} {{ captcha.angle_points[1].txt }} {{ captcha.angle_points[2].txt }}</span>
-            <span class="point_details">{{ captcha.angle_points_details|join(',') }}</span>
+            <span class="test_result">{{ 'ok' if res else 'F' }}</span>
+            <span class="test_result">{{ 'ok' if ang_res else 'F' }}</span>
+            <span class="pos">cp:{{ captcha.position.txt }}</span>
+            <span class="pos">tp:{{ target_pos.txt }}</span>
+            <span class="pos">tp:{{ captcha.position_checks|length }}</span>
+            <span class="angle">rot:{{ captcha.rotation }}</span>
+            <span class="angle">ca:{{ captcha.angle }}</span>
+            <span class="angle_points">ap:{{ captcha.angle_points[0].txt }} {{ captcha.angle_points[1].txt }} {{ captcha.angle_points[2].txt }}</span>
         </span>
                 <div class="content">
 
@@ -234,33 +236,29 @@ guesses: {{ check.solved_sections|join(' ') }}
 
         section > .title > span {
             display: inline-block;
-            width: 5em;
+            width: 4em;
             height: 1em;
         }
 
         section > .title > span.name {
-            width: 2em;
+            width: 6em;
         }
 
         section > .title > span.test_result {
-            width: 1em;
+            width: 2em;
         }
 
-        section > .title > span.dirs {
-            width: 1.5em;
+        section > .title > span.pos {
+            width: 4em;
         }
 
         section > .title > span.angle {
-            width: 3em;
+            width: 5em;
             overflow: hidden;
         }
 
         section > .title > span.angle_points {
-            width: 16em;
-        }
-
-        section > .title > span.point_details {
-            width: 27em;
+            width: 17em;
         }
 
         .pictures {

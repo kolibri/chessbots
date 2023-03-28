@@ -5,6 +5,8 @@ ARG GROUP_ID
 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
+RUN pip install esptool adafruit-ampy
+
 RUN addgroup --gid $GROUP_ID chessbot
 RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID chessbot
 USER chessbot

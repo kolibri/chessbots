@@ -1,3 +1,4 @@
+from chessbots.tool.pattern_creator import *
 from chessbots.lib.pattern import Pattern as Board
 from chessbots.lib.point_helper import *
 from typing import NamedTuple
@@ -202,19 +203,21 @@ def get_section_bits_for_pattern(b: Board, pattern: int):
 
 
 class ValueSection:
-    def __init__(self, index, pattern: Board):
+    def __init__(self, index, read_style: int, pattern: Board):
+        self.usable = False
         self.index = index
         self.pattern = pattern
+        self.read_style = read_style
         match self.index:
             case 0:
                 self.bit_raw = self.pattern.bits()
                 self.check_expect = '00'
             case 1:
                 self.bit_raw = self.pattern.fliplr().bits(True)
-                self.check_expect = '10'
+                self.check_expect = '01'
             case 2:
                 self.bit_raw = self.pattern.flipud().bits(True)
-                self.check_expect = '01'
+                self.check_expect = '10'
             case 3:
                 self.bit_raw = self.pattern.flip().bits()
                 self.check_expect = '11'
@@ -223,10 +226,128 @@ class ValueSection:
 
         self.bit_value = self.bit_raw[1:-1]
         self.bit_check = ''.join([self.bit_raw[0], self.bit_raw[-1]])
+        self.bit_int = -1
+        if "2" not in self.bit_value:
+            self.bit_int = bit_to_int(self.bit_value)
 
-        self.int_value = bit_to_int(self.bit_value)
-        self.pos_value = int_to_pos(self.int_value)
+    def has_usable_value(self) -> bool:
+        if "2" in self.bit_value:
+            return False
+        if 100 * 100 < bit_to_int(self.bit_value):
+            return False
+        return True
 
+    def passes_check_bits(self, strict: bool = True) -> bool:
+        if self.check_expect == self.bit_check:
+            return True
+        if strict:
+            return False
+        if self.bit_check[1] == '2' and self.check_expect[0] == self.bit_check[0]:
+            return True
+        elif self.bit_check[0] == '2' and self.check_expect[1] == self.bit_check[1]:
+            return True
+        return False
+
+    def grid_value(self):
+        if not self.has_usable_value():
+            return Point(-1, -1)
+
+        pos = int_to_pos(bit_to_int(self.bit_value)).mult(2)
+        match self.read_style:
+            case 0:
+                return pos
+            case 1:
+                match self.index:
+                    case 0 | 1:
+                        return pos.add(Point(0, -1))
+                    case 2 | 3:
+                        return pos.add(Point(0, 1))
+            case 2:
+                match self.index:
+                    case 0 | 2:
+                        return pos.add(Point(-1, 0))
+                    case 1 | 3:
+                        return pos.add(Point(1, 0))
+            case 3:
+                match self.index:
+                    case 0:
+                        return pos.add(Point(1, 1))
+                    case 1:
+                        return pos.add(Point(-1, 1))
+                    case 2:
+                        return pos.add(Point(1, -1))
+                    case 3:
+                        return pos.add(Point(-1, -1))
+
+
+class SectionAssertion:
+    def __init__(self, from_point: Point, index: int, read_style: int):
+        self.from_point = from_point
+        self.index = index
+        self.read_style = read_style
+
+    def compute_expected_bin(self) -> str:
+        pos = self.grid_position()
+        to_int = int(pos.y * 100 + pos.x)
+        bs = '{0:014b}'
+        to_text = bs.format(to_int)
+        # if self.index in [1, 2]:
+            # to_text = invert_zero_one(to_text)
+        return to_text
+
+    def vote(self, given: ValueSection):
+        expected = self.compute_expected_bin()
+        given_bit = given.bit_value
+        if len(expected) != len(given_bit):
+            print('Cannot compare different length strings', expected, given_bit)
+            raise RuntimeError('Cannot compare different length strings')
+
+        votes = []
+        for i in range(0, len(expected)):
+            be = expected[i]
+            bg = given_bit[i]
+            if be == bg:
+                votes.append(0)
+            elif '2' == bg:
+                votes.append(1)
+            else:
+                votes.append(2)
+
+        vote_confirm_negative = len([v for v in votes if v != 0])
+        vote_guess = len([v for v in votes if v == 1])
+        vote_against = len([v for v in votes if v == 2])
+
+        return vote_confirm_negative, vote_guess, vote_against, expected, given_bit, self.grid_position().txt
+
+
+    def grid_position(self):
+        pos = self.from_point
+        match self.read_style:
+            case 0:
+                pos = pos
+            case 1:
+                match self.index:
+                    case 0 | 1:
+                        pos = pos.add(Point(0, 1))
+                    case 2 | 3:
+                        pos = pos.add(Point(0, -1))
+            case 2:
+                match self.index:
+                    case 0 | 2:
+                        pos = pos.add(Point(1, 0))
+                    case 1 | 3:
+                        pos = pos.add(Point(-1, 0))
+            case 3:
+                match self.index:
+                    case 0:
+                        pos = pos.add(Point(0, 0))
+                    case 1:
+                        pos = pos.add(Point(-1, 0))
+                    case 2:
+                        pos = pos.add(Point(0, -1))
+                    case 3:
+                        pos = pos.add(Point(-1, -1))
+        return pos.mult(0.5)
 
 
 class CheckResult:
@@ -237,58 +358,8 @@ class CheckResult:
         self.rotation = rotation
         self.read_style = read_style
 
-        if '2' in self.pattern.txt():
-            return
-        '''
-            1x1 1x1   2x1 2x1   3x1 3x1  
-            1x1 1x1   2x1 2x1   3x1 3x1
-        
-            1x2 1x2   2x2 2x2   3x2 3x2
-            1x2 1x2   2x2 2x2   3x2 3x2
-        
-            1x3 1x3   2x3 2x3   3x3 3x3
-            1x3 1x3   2x3 2x3   3x3 3x3
-        
-        -
-            1x1   1x1 2x1   2x1 3x1   3x1
-              
-            1x1   1x1 2x1   2x1 3x1   3x1
-            1x2   1x2 2x2   2x2 3x2   3x2
-            
-            1x2   1x2 2x2   2x2 3x2   3x2
-            1x3   1x3 2x3   2x3 3x3   3x3
-            
-            1x3   1x3 2x3   2x3 3x3   3x3
-        -
-        
-        0x0  0.5x0.5
-            0x0 0x0  
-            0x0 0x0
-        0x1  0.5x1:
-            0x0 0x0  
-            0x1 0x1
-        1x0  1x0.5:
-            0x0 1x0  
-            0x0 1x0
-        1x1  4x4
-            0x0 1x0
-            0x1 1x1
-        2x2 8x8
-            1x1 1x1
-            1x1 1x1
-        3x3 12x12
-            1x1 2x1
-            1x2 2x2
-        4x4 16x16
-            2x2 2x2
-            2x2 2x2    
-        
-        
-        
-        
-        
-            # 0 - 1x1 1x1 1x1 1x1 
-        '''
+        # if '2' in self.pattern.txt():
+        #     return
         match self.read_style:
             case 0:
                 # 01 1x1 1x1
@@ -296,6 +367,7 @@ class CheckResult:
                 self.pattern_points = [Point(0, 0), Point(4, 0), Point(0, 4), Point(4, 4)]
                 self.pattern_point_modifiers = [Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)]
                 self.read_style_mod = Point(0.5, 0.5)
+
             case 1:
                 # 23 1x2 1x2
                 # 01 1x1 1x1
@@ -318,36 +390,279 @@ class CheckResult:
                 raise RuntimeError('Bad read style: ' + str(self.read_style))
 
         self.sections = [
-            ValueSection(0, self.pattern.create_snapshot(self.pattern_points[0], Point(4, 4))),
-            ValueSection(1, self.pattern.create_snapshot(self.pattern_points[1], Point(4, 4))),
-            ValueSection(2, self.pattern.create_snapshot(self.pattern_points[2], Point(4, 4))),
-            ValueSection(3, self.pattern.create_snapshot(self.pattern_points[3], Point(4, 4))),
+            ValueSection(0, self.read_style, self.pattern.create_snapshot(self.pattern_points[0], Point(4, 4))),
+            ValueSection(1, self.read_style, self.pattern.create_snapshot(self.pattern_points[1], Point(4, 4))),
+            ValueSection(2, self.read_style, self.pattern.create_snapshot(self.pattern_points[2], Point(4, 4))),
+            ValueSection(3, self.read_style, self.pattern.create_snapshot(self.pattern_points[3], Point(4, 4))),
         ]
-
-        rm = self.read_style_mod
-        ppm = self.pattern_point_modifiers
-        self.solved_sections = [
-            self.sections[0].pos_value.add(ppm[0]).sub(rm),
-            self.sections[1].pos_value.add(ppm[1]).sub(rm),
-            self.sections[2].pos_value.add(ppm[2]).sub(rm),
-            self.sections[3].pos_value.add(ppm[3]).sub(rm),
-        ]
-
-        self.validity_check_solved_sections_unique = True if 1 == len(set([s.raw for s in self.solved_sections])) else False
         self.validity_check_check_bits = True if '00011011' == ''.join([s.bit_check for s in self.sections]) else False
-        if not self.validity_check_check_bits:
-            return
-
-        if not self.validity_check_solved_sections_unique:
-            return
-
-        self.usable = True
-        self.solved_position = self.solved_sections[0]
+        # self.usable = self.validity_check_check_bits
+        a: ValueSection
+        b: ValueSection
+        c: ValueSection
+        d: ValueSection
+        a, b, c, d = self.sections
 
 
-class CheckResultCollection:
-    def __init__(self, results: [CheckResult]):
-        self.results = results
+
+        check_results = [s.passes_check_bits(False) for s in self.sections]
+        check_results_with_tolerance = [s.passes_check_bits(False) for s in self.sections]
+        section_value_checks = [s.has_usable_value() for s in self.sections]
+        section_values = [s.grid_value() for s in self.sections]
+        section_values_set = set(section_values)
+        self.rs_position = Point(-1, -1)
+        self.note = ''
+        # the lucky case:
+        # all resolve totally with positions
+        # three resolve totally with positions
+        #   not resolving has checkbits positive with tolerance
+        if False not in check_results and False not in section_value_checks and 1 == len(section_values_set):
+            self.rs_position = section_values_set.pop()
+            self.usable = True
+        else:
+            sections_with_valid_check_bits = [s for s in self.sections if s.passes_check_bits(False)]
+            self.usable = True
+            if 0 == len(sections_with_valid_check_bits):
+                self.note = 'invalid check bits'
+                self.usable = False
+                # return
+
+            sections_with_position = [s for s in sections_with_valid_check_bits if s.has_usable_value()]
+
+            if 2 > len(sections_with_position):
+                self.note = 'not enough usable sections'
+                self.usable = False
+                # return
+
+            set_pos = [s.grid_value() for s in sections_with_position]
+            if 0 == len(set(set_pos)):
+                self.note = "empty set pos"
+                self.usable = False
+                # return
+            if 1 != len(set(set_pos)):
+                self.note = "Grid values are not equal"
+                self.usable = False
+                # return
+            else:
+
+                sets = [0, 1, 2, 3]
+                missing = [i for i in sets if i not in [s.index for s in sections_with_position]]
+
+                missing_sections = [SectionAssertion(set_pos[0], i, read_style) for i in missing]
+
+                msr = [m for m in missing_sections if m.vote(self.sections[m.index])[2] == 0]
+                if len(missing_sections) != len(msr):
+                    self.note = 'msr', [m.vote(self.sections[m.index]) for m in missing_sections]
+                    self.usable = False
+                    # return
+
+                self.rs_position = set_pos[0]
+                # self.usable = True
+
+
+
+
+
+
+
+
+
+
+
+        # a, b, c, d = [s.pos_value for s in self.sections]
+
+        # match self.read_style:
+        #     case 0:
+        #         if a == b == c == d:
+        #             self.rs_position = a.mult(2)
+        #             self.usable = self.validity_check_check_bits
+        #     case 1:
+        #         if Point(0, -1) == c.sub(a) and Point(0, -1) == d.sub(b) and a.add(c) == b.add(d):
+        #             self.rs_position = a.add(c)
+        #             self.usable = self.validity_check_check_bits
+        #     case 2:
+        #         if Point(-1, 0) == b.sub(a) and Point(-1, 0) == d.sub(c) and a.add(b) == c.add(d):
+        #             self.rs_position = a.add(b)
+        #             self.usable = self.validity_check_check_bits
+        #     case 3:
+        #         rp1 = Point(b.x, c.y)
+        #         rp2 = Point(c.x, b.y)
+        #         if Point(1, 1) == a.sub(d) and Point(-1, -1) == rp1.sub(rp2) and a.add(d) == b.add(c):
+        #             self.rs_position = a.add(d)
+        #             self.usable = self.validity_check_check_bits
+
+        #
+        #
+        #
+        # rm = self.read_style_mod
+        # ppm = self.pattern_point_modifiers
+        # self.solved_sections = [
+        #     self.sections[0].pos_value.add(ppm[0]).sub(rm),
+        #     self.sections[1].pos_value.add(ppm[1]).sub(rm),
+        #     self.sections[2].pos_value.add(ppm[2]).sub(rm),
+        #     self.sections[3].pos_value.add(ppm[3]).sub(rm),
+        # ]
+        #
+        # self.validity_check_solved_sections_unique = True if 1 == len(set([s.raw for s in self.solved_sections])) else False
+        # self.validity_check_check_bits = True if '00011011' == ''.join([s.bit_check for s in self.sections]) else False
+        # if not self.validity_check_check_bits:
+        #     return
+        #
+        # if not self.validity_check_solved_sections_unique:
+        #     return
+        #
+        # self.usable = True
+        # self.solved_position = self.solved_sections[0]
+def get_grid_dimensions(raw: [Point]):
+    gminx = min([r.x for r in raw])
+    gmaxx = max([r.x for r in raw])
+    gminy = min([r.y for r in raw])
+    gmaxy = max([r.y for r in raw])
+
+    return gminx, gmaxx, gminy, gmaxy
+
+
+class GriddedCheckResult:
+    def __init__(self, pos: Point, result: CheckResult):
+        self.pos = pos
+        self.result = result
+
+
+class Grid:
+    def __init__(self, grid: [GriddedCheckResult]):
+        self.grid_length = len(grid)
+        # if 9 == self.grid_length
+
+
+def vote_part(sn: Board, raw: Board) -> [int, int, int, [], Board]:
+    sn_bit = sn.bits()
+    raw_bit = raw.bits()
+
+    if len(sn_bit) != len(raw_bit):
+        print('compared unequal bit length')
+        return
+    votes = []
+    for i in range(0, len(sn_bit)):
+        expect = sn_bit[i]
+        actual = raw_bit[i]
+        if expect == actual:
+            vote = 0 # match
+        elif actual == '2':
+            vote = 1 # match against unknown value
+        else:
+            vote = 2 # mismatch
+
+        votes.append([expect, actual, vote])
+
+    match = len([v for v in votes if v[2] == 0])
+    semimatch = len([v for v in votes if v[2] == 1])
+    mismatch = len([v for v in votes if v[2] == 2])
+
+    return match, semimatch, mismatch, votes, sn
+
+
+def vote_grids(snapshot: Board, raw: Board, pos: Point, gcr: GriddedCheckResult):
+    raw_board = raw.create_snapshot(pos, snapshot.size())
+    votes = []
+    for x in range(0, 16, 4):
+        for y in range(0, 16, 4):
+            sn_part = snapshot.create_snapshot(Point(x, y), Point(4, 4))
+            raw_part = raw_board.create_snapshot(Point(x, y), Point(4, 4))
+            votes.append(vote_part(sn_part, raw_part))
+
+    valid_votes = [v for v in votes if v[0] > 8 and v[2] < 0]
+
+    return get_grid_dimensions([int_to_pos(bit_to_int(v[4].bits())) for v in votes])
+
+
+
+
+
+def to_grid(rawraw: [CheckResult]):
+    raw = [r for r in rawraw if r.usable]
+    if not 0 < len(raw):
+        return Point(-1, -1), rawraw
+
+    rots = [r.rotation for r in raw]
+    rotation = -1
+    if 1 == len(set(rots)):
+        rotation = rots[0]
+
+    minx, maxx, miny, maxy = get_grid_dimensions([r.rs_position for r in raw])
+    return Point(int((minx + maxx) / 2), int((miny + maxy) / 2)), rotation
+
+    # print('tg', gminx, gmaxx, gminy, gmaxy, [r.rs_position.txt for r in raw])
+
+    # ref = raw[0]
+    # rest = raw
+    # grid = []
+    # for x in range(gminx, gmaxx+1):
+    #     for y in range(gminy, gmaxy+1):
+    #         p = Point(x, y)
+    #         filtered_to_pos = [r for r in rest if r.rs_position == p]
+    #         # print([f.rs_position.txt for f in filtered_to_pos], [f.rs_position.txt for f in rest])
+    #         if 1 == len(filtered_to_pos):
+    #             found: CheckResult = filtered_to_pos[0]
+    #             from_center_mod = ref.rs_position.sub(p)
+    #             expected_snapshot_position = ref.snapshot_pos.sub(from_center_mod.mult(4))
+    #             # print('expecz', p.txt, ref.rs_position.txt, ref.snapshot_pos.txt, from_center_mod.txt, expected_snapshot_position.txt, found.snapshot_pos.txt)
+    #             if found.snapshot_pos == expected_snapshot_position:
+    #                 rest = [r for r in rest if r.rs_position != p]
+    #                 grid.append(GriddedCheckResult(Point(x - gminx, y - gminy), found))
+    #
+    # # print('rest', rest, 'grid', grid)
+    #
+    # minx, maxx, miny, maxy = get_grid_dimensions([r.rs_position for r in raw])
+    # grid_length = len(grid)
+    # if 9 == grid_length:
+    #     return Point(int((minx + maxx)/2), int((miny + maxy)/2)), grid
+    # elif 1 == grid_length:
+    #     # construct surrounding field
+    #     pos = grid[0].result.rs_position
+    #     read_style = grid[0].result.read_style
+    #     board = Pattern8x8With4DataFields().create(800)
+    #     sn_pos = pos.sub(Point(1, 1)).mult(4)
+    #     sn_size = Point(16, 16)
+    #
+    #     snapshot = board.create_snapshot(sn_pos, sn_size)
+    #
+    #     minx, maxx, miny, maxy = vote_grids(snapshot, raw_board, grid[0].result.snapshot_pos.sub(Point(4, 4)), grid[0])
+    #
+    #     # compare raw grid with construct
+    #     # based on matches assume missing grid fields
+    #
+    #
+    # p = Point(int((minx + maxx)/2), int((miny + maxy)/2))
+    #
+    # return p, grid
+
+
+def check_results_to_one(results: [CheckResult]) -> [Point, []]:
+    # has center result
+    results = [r for r in results if r.usable]
+    foo = [r for r in results if r.has_center_point]
+    # print(foo)
+    if 1 == len(foo):
+        center_result: CheckResult = foo[0]
+        gminx = min([r.rs_position.x for r in results])
+        gmaxx = max([r.rs_position.x for r in results])
+        gminy = min([r.rs_position.y for r in results])
+        gmaxy = max([r.rs_position.y for r in results])
+        grid = [center_result]
+        for x in range(gminx, gmaxx):
+            for y in range(gminy, gmaxy):
+                p = Point(x, y)
+                filtered_to_pos = [r for r in results if r.rs_position == p]
+                # print([f.rs_position for f in filtered_to_pos])
+                if 1 == len(filtered_to_pos):
+                    found: CheckResult = filtered_to_pos[0]
+                    from_center_mod = center_result.rs_position.sub(p)
+                    expected_snapshot_position = center_result.snapshot_pos.sub(from_center_mod.mult(4))
+                    if found.snapshot_pos == expected_snapshot_position:
+                        grid.append(found)
+
+        return Point(-2, -2), grid
+    return Point(-1, -1), []
 
 
 def resolve_board_to_position(board: Board):
@@ -357,20 +672,18 @@ def resolve_board_to_position(board: Board):
         for x in range(0, board.size().x - snapshot_size.x + 1):
             for y in range(0, board.size().y - snapshot_size.y + 1):
                 for read_style in [0, 1, 2, 3]:
+                    pos = Point(x, y)
                     results.append(CheckResult(
                         board.create_snapshot(Point(x, y), snapshot_size),
-                        Point(x, y),
+                        pos,
                         rotate_step,
                         read_style
                     ))
         board = board.rotate()
 
+    # to_one = check_results_to_one(results)
     filtered = [r for r in results if r.usable]
-    collection = CheckResultCollection(filtered)
-    print(filtered)
-    has_unique_result = True if 1 == len(set([s.solved_position.raw for s in filtered])) else False
-    if has_unique_result:
-        return filtered[0].solved_position, results
+    to_one, rotation = to_grid(filtered)
 
-    return Point(-1, -1), results
+    return to_one, rotation, results
 

@@ -109,9 +109,9 @@ def test_get_angle_points(
         print(a.txt, b.txt, c.txt, get_angle(c, b, a))
 
 
-@bp.cli.command('test_captcha_to_txt')
+@bp.cli.command('test_captcha')
 @inject
-def test_captcha_to_txt(
+def test_captcha(
         mockbots: MockBots = Provide[Container.mockbots],
         mockbot_tester: MockBotTester = Provide[Container.mockbot_tester],
 ):
@@ -119,28 +119,3 @@ def test_captcha_to_txt(
     result = [mockbot_tester.test_captcha(bot) for bot in mockbots.bots]
     dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html.j2', result=result))
 
-
-# @bp.cli.command('test_txt_to_position')
-# @inject
-# def test_txt_to_position(
-#         captcha_reader: CaptchaReader = Provide[Container.captcha_reader],
-#         captcha_resolver: CaptchaResolver = Provide[Container.captcha_resolver],
-# ):
-#     for bot in MockBots().bots:
-#         path = os.path.join('build/mockbot/', bot.picture())
-#         print(bot.picture())
-#         board, angle = captcha_reader.resolve(path)
-#         solutions, position, raw = captcha_resolver.resolve(board.txt())
-#         dbg = render_template('txt_to_pos.txt', solutions=solutions, result=position, raw=raw, bot=bot, board=board)
-#         dump_txt(path + '_board_.txt', board.txt())
-#         dump_txt(path + '_txt_to_pos.txt', dbg)
-#
-#         # solved = [p.solve() for p in solutions]¹
-#         # solved_set = list(set(solved))
-#         # if 1 == len(solved_set):
-#         #     solved_pos = solved_set[0]
-#         #     solved_pos = Point(solved_pos.y, solved_pos.x) # fix
-#         #     result = bot.pos == solved_pos
-#         #     print('compare bot:', result, bot.pos, solved_pos)
-#
-#         # print('bot:', bot.name, [[m.value, m.matching, m.position, m.snapshot.txt()] for m in position])        # print('position: ', bot.picture(), board.txt(), position)
