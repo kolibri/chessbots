@@ -3,9 +3,7 @@ from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
 from chessbots.lib.bot.mockbot import *
 from chessbots.lib.print_units import *
-from chessbots.lib.captcha.position import *
-from chessbots.lib.bot import BotManager
-from chessbots.lib.bot.data_collector import ChainDataCollector, RobotApiCollector, CaptchaReaderCollector
+from chessbots.lib.bot import *
 
 
 class Container(containers.DeclarativeContainer):
@@ -20,12 +18,8 @@ class Container(containers.DeclarativeContainer):
             'dpi': 600,
             'marker_size': 60
         },
-        'bots': {
-            'cache_dir': 'build/bots'
-        },
-        'mockbot': {
-            'cache_dir': 'build/mockbot'
-        }
+        'bots': {'cache_dir': 'build/bots'},
+        'mockbot': {'cache_dir': 'build/mockbot'}
 
     }
 
@@ -41,16 +35,9 @@ class Container(containers.DeclarativeContainer):
 
     )
 
-    board = Pattern8x8With4DataFields().create(800)
-
     mockbots = providers.Factory(
         MockBots,
-        board=board
-    )
-
-    mockbot_tester = providers.Factory(
-        MockBotTester,
-        base_path=config['mockbot']['cache_dir']
+        board=Pattern8x8With4DataFields().create(800)
     )
 
     mockbot_picture_creator = providers.Factory(
@@ -60,19 +47,13 @@ class Container(containers.DeclarativeContainer):
         mockbots=mockbots
     )
 
-    pattern_creator = providers.Factory(Pattern8x8With4DataFields)
-
-    collector = providers.Factory(
-        ChainDataCollector,
-        collectors=[
-            RobotApiCollector(config['bots']['cache_dir']),
-            CaptchaReaderCollector(),
-        ]
-    )
-
     bot_manager = providers.Factory(
         BotManager,
-        cache_dir=config['bots']['cache_dir'],
-        collector=collector
+        data_dir=config['bots']['cache_dir'],
+    )
+
+    bot_repository = providers.Factory(
+        BotRepository,
+        bot_manager=bot_manager,
     )
 

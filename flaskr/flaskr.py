@@ -3,9 +3,9 @@ from flask import (
     Flask, render_template, send_from_directory
 )
 
-from chessbots.board.blueprints import bots
-from chessbots.board.blueprints import tools
-from chessbots.board.blueprints import mockbot
+from flaskr.blueprints import bots
+from flaskr.blueprints import tools
+from flaskr.blueprints import mockbot
 
 
 from flask import Flask

@@ -166,4 +166,13 @@ pip3 install pyserial pyparsing
 .-....-..-....-..-....-..-....-..-....-..-....-.
 1......11......11......11......11......11......1
 
- 
+
+
+
+# Arduino setup:
+
+Arduino IDE Board manager settings:
+https://dl.espressif.com/dl/package_esp32_index.json
+
+Goto Tools -> Board -> Board manager
+    -> download esp32 expressif systems stuff

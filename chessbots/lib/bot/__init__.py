@@ -1,74 +1,199 @@
-from __future__ import annotations
-from werkzeug.datastructures import MultiDict
+from chessbots.lib.captcha import Captcha
+import requests
+from collections import namedtuple
 import os
-import hashlib
-from chessbots.lib.filesystem import read_json, dump_json
+from chessbots.lib.filesystem import *
+from chessbots.lib.point_helper import Point
+
+
+class BotHttpData:
+    def __init__(self, name, piece, pos_pic_url, pos_pic_path):
+        self.name = name
+        self.piece = piece
+        self.pos_pic_url = pos_pic_url
+        self.pos_pic_path = pos_pic_path
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'piece': self.piece,
+            'pos_pic_url': self.pos_pic_url,
+            'pos_pic_path': self.pos_pic_path,
+        }
+
+    @staticmethod
+    def from_json(data):
+        return BotHttpData(data['name'], data['piece'], data['pos_pic_url'], data['pos_pic_path'])
+
+
+class CaptchaData:
+    def __init__(self, pos: Point, rotation):
+        self.pos = pos
+        self.rotation = rotation
+
+    def to_json(self):
+        return {
+            'pos': self.pos.raw,
+            'rotation': self.rotation,
+        }
+
+    @staticmethod
+    def from_json(data):
+        return CaptchaData(Point(*data['pos']), data['rotation'])
+
+
+Filter = namedtuple('Filter', 'key value')
 
 
 class Bot:
-    def __init__(self, host_name: str, data=None):
-        self.host_name = host_name
-        self.id = self.host_name.replace('http://', '').replace('https://', '').replace(':', '+').replace('/', '_')
-        if data is None:
-            self.data = {}
-        else:
-            self.data = data
-        self.data['id'] = self.id
-        self.data['url'] = self.host_name
+    http_data: BotHttpData = None
+    captcha_data: CaptchaData = None
 
-    @staticmethod
-    def from_file(filename) -> Bot:
-        data = read_json(filename)
-        return Bot(data.get('url'), data)
+    def __init__(self, url: str):
+        self.url = url
 
-    def update(self, data) -> Bot:
-        return Bot(self.host_name, self.data | data)
+    def to_json(self):
+        return {
+            'url': self.url,
+            'slug': self.slug(),
+            'http_data': self.http_data.to_json() if self.http_data else {},
+            'name': self.http_data.name,
+            'piece': self.http_data.piece,
+            'pos_pic_url': self.http_data.pos_pic_url,
+            'pos_pic_path': self.http_data.pos_pic_path,
+            'captcha_data': self.captcha_data.to_json() if self.captcha_data else {},
+            'pos': self.captcha_data.pos.raw if self.captcha_data else {},
+            'pos_txt': self.captcha_data.pos.txt if self.captcha_data else {},
+            'rotation': self.captcha_data.rotation if self.captcha_data else {},
+        }
 
-    def save(self, path) -> Bot:
-        dump_json((path + '/' + self.id + '.json'), self.data)
-        return self
+    def slug(self) -> str:
+        return self.url \
+            .replace('https', '') \
+            .replace('http', '') \
+            .replace('://', '') \
+            .replace(':', '+') \
+            .replace('/', '_')  # todo: to regex
+
+    def filter(self, filters: [Filter]) -> bool:
+        for key, value in filters:
+            match key:
+                case 'name':
+                    if self.http_data.name != value:
+                        return False
+                case 'piece':
+                    if self.http_data.piece != value:
+                        return False
+        return True
 
 
 class BotManager:
-    def __init__(self, cache_dir: str, collector: BotDataCollector):
-        self.cache_dir = cache_dir
-        self.collectors = collector
-        self.bots = self.__load(self.cache_dir)
-        self.bots_file = os.path.join(self.cache_dir, 'bots.json')
+    URL_FILE = 'url.txt'
+    HTTP_FILE = 'http.json'
+    CAPTCHA_FILE = 'captcha.json'
+    POSPIC_FILE = 'position.jpeg'
+
+    def __init__(self, data_dir: str):
+        self.data_dir = data_dir
+        self.bots = []
+
+    def create(self, url: str) -> Bot:
+        bot = self.update(Bot(url))
+        self.__ensure_bot_dir(bot)
+        return bot
+
+    def load_from_cache(self, path: str) -> Bot:
+        base = self.data_dir
+
+        url_path = os.path.join(base, path, self.URL_FILE)
+        http_data_path = os.path.join(base, path, self.HTTP_FILE)
+        captcha_data_path = os.path.join(base, path, self.CAPTCHA_FILE)
+
+        bot = Bot(read_txt(url_path))
+        if os.path.isfile(http_data_path):
+            bot.http_data = BotHttpData.from_json(read_json(http_data_path))
+        if os.path.isfile(captcha_data_path):
+            bot.captcha_data = CaptchaData.from_json(read_json(captcha_data_path))
+        return bot
+
+    def update(self, bot: Bot) -> Bot:
+        try:
+            bot_dir = self.__get_bot_dir(bot)
+            self.__ensure_bot_dir(bot)
+
+            try:
+                data = requests.get(bot.url).json()
+            except requests.exceptions.RequestException as e:
+                return bot
+
+            http_pic_path = os.path.join(bot_dir, self.POSPIC_FILE)
+            try:
+                r = requests.get(data.get('pos_pic'))
+                dump_binary(http_pic_path, r.content)
+            except requests.exceptions.RequestException as e:
+                print('cannot retrieve image for bot:', bot.url, 'response:', data)
+
+            bot.http_data = BotHttpData(data.get('name'), data.get('piece'), data.get('pos_pic'), http_pic_path)
+
+            if os.path.isfile(bot.http_data.pos_pic_path):
+                captcha = Captcha(bot.http_data.pos_pic_path)
+                bot.captcha_data = CaptchaData(captcha.position, captcha.rotation)
+        except Exception as e:
+            print(e)
+
+        self.__save(bot)
+        return bot
+
+    def load_bots_from_cache(self) -> [Bot]:
+        def check_path(f: str):
+            base = self.data_dir
+            return os.path.isdir(os.path.join(base, f)) \
+                and f.startswith('bot_') \
+                and os.path.isfile(os.path.join(base, f, 'url.txt'))
+
+        bot_dirs = [f for f in os.listdir(self.data_dir) if check_path(f)]
+        return [self.load_from_cache(p) for p in bot_dirs]
+
+    def __save(self, bot: Bot):
+        bot_dir = self.__get_bot_dir(bot)
+        self.__ensure_bot_dir(bot)
+        dump_txt(os.path.join(bot_dir, self.URL_FILE), bot.url)
+        if bot.http_data:
+            dump_json(os.path.join(bot_dir, self.HTTP_FILE), bot.http_data.to_json())
+        if bot.captcha_data:
+            dump_json(os.path.join(bot_dir, self.CAPTCHA_FILE), bot.captcha_data.to_json())
+
+    def __ensure_bot_dir(self, bot: Bot):
+        bot_dir = self.__get_bot_dir(bot)
+        if os.path.isdir(bot_dir):
+            return
+        else:
+            if os.path.exists(bot_dir):
+                os.remove(bot_dir)
+        os.mkdir(self.__get_bot_dir(bot))
+
+    def __get_bot_dir(self, bot: Bot) -> str:
+        return os.path.join(self.data_dir, 'bot_' + bot.slug())
 
 
-    def add(self, urls: [str]) -> [Bot]:
-        bots = [Bot(url, {}) for url in urls]
-        # self.bots = self.bots + bots
-        for bot in bots:
-            bot.save(self.cache_dir)
-        return bots
+class BotRepository:
+    def __init__(self, bot_manager: BotManager):
+        self.bot_manager = bot_manager
+        self.bots = self.bot_manager.load_bots_from_cache()
 
-    def save(self, filters: "MultiDict[str, str]") -> [Bot]:
-        [bot.save(self.cache_dir) for bot in self.get_filtered(filters)]
+    def get(self, filter: [Filter] = None) -> [Bot]:
+        return self.__filtered(filter)
 
-    def update(self, filters: "MultiDict[str, str]") -> [Bot]:
-        self.bots = [bot.update(self.collectors.get_data(bot)) for bot in self.get_filtered(filters)]
-        self.save(filters)
+    def update(self, filter: [Filter] = None) -> [Bot]:
+        return [self.bot_manager.update(bot) for bot in self.__filtered(filter)]
+
+    def add_bots(self, urls: [str]) -> [Bot]:
+        for u in urls:
+            self.bots.append(self.bot_manager.create(u))
         return self.bots
 
-    def get_filtered(self, filters: "MultiDict[str, str]") -> [Bot]:
-        def compare(bot: Bot, asserts) -> bool:
-            for k, v in asserts.items():
-                if bot.data.get(k) != v:
-                    return False
-            return True
-
-        if 0 == len(filters):
-            return self.bots
-        return [bot for bot in self.bots if (compare(bot, filters))]
-
-    @staticmethod
-    def __load(base_dir: str) -> [Bot]:
-        files = [f for f in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, f)) and f.endswith('.json')]
-        return [Bot.from_file(os.path.join(base_dir, f)) for f in files]
-
-
-class BotDataCollector:
-    def get_data(self, bot: Bot) -> Bot:
-        pass
+    def __filtered(self, filters: [Filter] = None):
+        filters = list(filters)
+        if filters and 0 < len(filters):
+            return [bot for bot in self.bots if bot.filter(filters)]
+        return self.bots

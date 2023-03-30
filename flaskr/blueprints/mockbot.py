@@ -5,7 +5,7 @@ from flask import Flask
 
 from chessbots.lib.bot.mockbot import MockBots
 from dependency_injector.wiring import inject, Provide
-from chessbots.board.containers import Container
+from flaskr.containers import Container
 
 
 bp = Blueprint('mockbot', __name__, url_prefix='/mockbot')

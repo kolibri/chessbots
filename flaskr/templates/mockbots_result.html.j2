@@ -1,0 +1,83 @@
+{% macro position(bot, captcha) %}
+    <pre class="position">
+pos: {{ captcha.position }}
+{% for check in captcha.position_checks if check.usable %}
+{{ check.usable }} solved:{{ check.rs_position }} snpos:{{ check.snapshot_pos.txt }} r{{ check.rotation }} s{{ check.read_style }}
+{{ check.note }}
+
+{{ check.pattern.txt() }}
+
+bit values:
+{% for section in check.sections -%}
+{{ section.bit_raw }} {{ section.bit_value }} {{ section.bit_check }} {{ section.check_expect }} {{ section.bit_int }} {{ section.grid_value().txt }}
+{% endfor %}
+
+
+{% endfor %}
+        </div>
+</pre>
+
+{% endmacro %}
+
+{% macro print_board(board, name) %}
+    <div>
+        <span>{{ name }}</span>
+        <pre>{{ board|replace('2', '.')|replace('0', 'o') }}</pre>
+    </div>
+{% endmacro %}
+{% macro image_link(bot, name) %}
+    {% set img_path = bot.picture() ~ '_' ~ name ~ '.jpg' %}
+    {% if '' == name %}
+        {% set img_path = bot.picture() %}
+        {% set name = 'raw' %}
+    {% endif %}
+    <a href="{{ img_path }}" target="_blank">
+        <span>{{ name }}</span>
+        <img src="{{ img_path }}"/>
+    </a>
+{% endmacro %}
+
+
+<section class="result test-{{ 'pass' if res and ang_res else 'fail' }}">
+<span class="title">
+<span class="name">{{ bot.name }}:</span>
+<span class="test_result">{{ 'ok' if res else 'F' }}</span>
+<span class="test_result">{{ 'ok' if ang_res else 'F' }}</span>
+<span class="pos">cp:{{ captcha.position.txt }}</span>
+<span class="pos">tp:{{ target_pos.txt }}</span>
+<span class="pos">cc:{{ captcha.position_checks|length }}</span>
+<span class="angle">rot:{{ captcha.rotation }}</span>
+<span class="angle">ca:{{ captcha.angle }}</span>
+<span class="angle_points">ap:{{ captcha.angle_points[0].txt }} {{ captcha.angle_points[1].txt }} {{ captcha.angle_points[2].txt }}</span>
+</span>
+    <div class="content">
+
+        <div class="txt_grids">
+            {{ print_board(bot.pattern.txt(), 'target') }}
+            {{ print_board(captcha.board.txt(), 'result') }}
+            {{ print_board(captcha.board.rotate().txt(), 'r1') }}
+            {{ print_board(captcha.board.rotate().rotate().txt(), 'r2') }}
+            {{ print_board(captcha.board.rotate().rotate().rotate().txt(), 'r3') }}
+        </div>
+
+        <div class="pictures">
+            {{ image_link(bot, 'angle') }}
+            {{ image_link(bot, 'markers') }}
+            {{ image_link(bot, 'pos') }}
+            {{ image_link(bot, 'value') }}
+            {{ image_link(bot, 'grid') }}
+            {{ image_link(bot, 'grid_expect') }}
+            {{ image_link(bot, '') }}
+        </div>
+        {{ position(bot, captcha) }}
+
+        <div class="markers" style="display: none">
+            {% for m in captcha.markers %}
+                <span class="pos">{{ m.pos }}</span>
+                <span class="value">{{ m.valid_size }}</span>
+                <span class="value">{{ m.radius }}</span>
+                <span class="value">{{ m.value }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>

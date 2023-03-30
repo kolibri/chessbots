@@ -81,3 +81,5 @@ def find_inner_markers(img, original: int):
 
 def find_markers(img):
     return [Marker(contour, img) for contour in find_contours(img)]
+
+

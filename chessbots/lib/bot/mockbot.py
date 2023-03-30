@@ -5,7 +5,6 @@ from chessbots.tool.printer import PatternPrinter
 from chessbots.lib.filesystem import *
 import os
 from typing import NamedTuple
-from chessbots.lib.captcha import Captcha
 
 
 class MockBot(NamedTuple):
@@ -22,7 +21,7 @@ class MockBot(NamedTuple):
             'name': self.name,
             'state': 'online',
             'piece': self.piece,
-            'live_image': url_for('mockbot.get_picture', name=self.name, _external=True),
+            'pos_pic': url_for('mockbot.get_picture', name=self.name, _external=True),
         }
 
     def url(self):
@@ -30,28 +29,6 @@ class MockBot(NamedTuple):
 
     def picture(self):
         return 'mockbot_' + self.name + '.jpg'
-
-
-class MockBotTester:
-    def __init__(self, base_path: str):
-        self.base_path = base_path
-
-    def test_captcha(self, bot: MockBot):
-        captcha = Captcha(os.path.join(self.base_path, bot.picture()))
-        captcha.draw_debug_images()
-        # print('mockbot test', bot.name, captcha.board.txt(), captcha.position.txt)
-
-        board_pos = Point(bot.pos.x // 4, bot.pos.y // 4).add(Point(1, 1))
-        tolerance = Point(1, 1)
-        test_result_position = captcha.position.in_area([board_pos.sub(tolerance), board_pos.add(tolerance)])
-
-        ang_tol = 1
-        ang_act = captcha.rotation
-        ang_exp = bot.angle
-        test_result_angle = ang_exp - ang_tol < ang_act < ang_exp + ang_tol
-        print(test_result_position, test_result_angle, bot.name, board_pos, captcha.position, board_pos.sub(tolerance), board_pos.add(tolerance), 'a', ang_exp, ang_act)
-
-        return bot, captcha, test_result_position, test_result_angle, board_pos
 
 
 def create_mockbot(board: Pattern, name: str, piece: str, pos: Point, angle: int) -> MockBot:
@@ -66,12 +43,12 @@ class MockBots:
     def __init__(self, board: Pattern):
         self.board = board
 
-        rotations = range(0, 360, 15)
-        # rotations = [0, 45, 135]
-        x_range = range(0+16, 4+16, 1)
-        y_range = range(0+16, 4+16, 1)
-
-        points = [Point(18, 19)]
+        # rotations = range(0, 360, 45)
+        rotations = [0]
+        # x_range = range(0, 4, 1)
+        # y_range = range(0, 4, 1)
+        #
+        points = [Point(0, 0)]
         # points = []
         # for x in x_range:
         #     for y in y_range:

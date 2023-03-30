@@ -35,19 +35,19 @@ run_action() {
 
 board_actions() {
   action=$1
-  if [[ "serve" = "$action" ]]; then ## serve board on port 8031
-    docker run -ti --volume $(pwd)/:/app -p 8031:8031 "$IMAGE_NAME" flask --app chessbots.board.flaskr run -p 8031 -h 0.0.0.0 --reload
+  if [[ "serve" = "$action" ]]; then ## serve board app on port 8031
+    docker run -ti --volume $(pwd)/:/app -p 8031:8031 "$IMAGE_NAME" flask --app flaskr.flaskr run -p 8031 -h 0.0.0.0 --reload
 #    flask_cmd run -p 8031 -h 0.0.0.0 --reload
 
-  elif [[ "run" = "$action" ]]; then ## serve board on port 8031
+  elif [[ "run" = "$action" ]]; then ## run board script
     flask_cmd script "${@:2}"
 
-  elif [[ "print" = "$action" ]]; then ## serve board on port 8031
+  elif [[ "print" = "$action" ]]; then ## create print images
     rm -rf build/print/
     mkdir -p build/print/
     board_actions run board_print
 
-  elif [[ "debug" = "$action" ]]; then ## serve board on port 8031
+  elif [[ "debug" = "$action" ]]; then ## run debug script (kinda "tests")
     rm -rf build/bots/ build/mockbot/
     mkdir -p build/bots/ build/mockbot/
     board_actions run mockbot_pictures
@@ -97,7 +97,7 @@ bot_actions() {
 
 
 flask_cmd() {
-  docker_run flask --app chessbots.board.flaskr "$@"
+  docker_run flask --app flaskr.flaskr "$@"
 }
 
 
