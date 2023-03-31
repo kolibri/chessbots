@@ -2,6 +2,7 @@ from flask import (Blueprint, request, render_template, jsonify)
 from flask import Flask
 
 from chessbots.lib.bot import *
+from chessbots.lib.board import *
 from chessbots.lib.bot.mockbot import MockBots
 from dependency_injector.wiring import inject, Provide
 from flaskr.containers import Container
@@ -44,6 +45,22 @@ def post_register(bots: BotRepository = Provide[Container.bot_repository]):
     ["http://0.0.0.0:8037","http://0.0.0.0:8031/tools/mockbot"]
     """
     return jsonify([bot.to_json() for bot in bots.add_bots(request.json)]), 200
+
+
+@bp.route('/board', methods=['GET'])
+@inject
+def get_board(board: Board = Provide[Container.game_board]):
+    data = {
+        'fen': board.game.fen,
+        'playable': board.playable,
+        'board': {
+            'pieces': [p.to_json() for p in board.pieces],
+            'rest_bots': [b.to_json() for b in board.rest_bots],
+        },
+        'bots': [b.to_json() for b in board.bot_repo.get()]
+    }
+
+    return jsonify(data), 200
 
 
 @bp.route('/dashboard', methods=['GET'])

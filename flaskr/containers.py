@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from chessbots.lib.board import *
 from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
 from chessbots.lib.bot.mockbot import *
@@ -55,5 +56,11 @@ class Container(containers.DeclarativeContainer):
     bot_repository = providers.Factory(
         BotRepository,
         bot_manager=bot_manager,
+    )
+
+    game_board = providers.Factory(
+        Board,
+        bot_repo=bot_repository,
+        game=Game()
     )
 

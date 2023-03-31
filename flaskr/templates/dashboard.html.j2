@@ -6,29 +6,12 @@
 <main id="dashboard">
     <h1>Dashoard</h1>
     <nav>
-        <a href="#bots">Board</a>
+        <a href="#board">Board</a>
         <a href="#bots">Bots</a>
         <a href="#register">Register</a>
         <a href="#botrc">BotRC</a>
     </nav>
     <section id="board" data-show="1">
-        <h2>Board</h2>
-        <h3>Pieces</h3>
-        <dl>
-            <dt>WK</dt>
-            <dd>bot hk</dd>
-        </dl>
-        <div class="board-view">
-            {% for r in range(0,10) %}
-                <div class="column">
-                    {% for c in range(0,10) %}
-                        <div class="field">
-                        {{ r ~ 'x' ~ c }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-        </div>
     </section>
     <section id="bots" data-show="0">
         <h2>Filter Bots</h2>

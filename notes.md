@@ -176,3 +176,40 @@ https://dl.espressif.com/dl/package_esp32_index.json
 
 Goto Tools -> Board -> Board manager
     -> download esp32 expressif systems stuff
+
+
+
+# board json payload
+
+```json
+
+{
+  "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "bots": [],
+  "board": {
+    "pieces": [
+      {
+        "piece": "bq",
+        "field": [
+          "a",
+          "1"
+        ],
+        "bot_pos": [
+          300,
+          300
+        ]
+      }
+    ],
+    "rest_bots": [
+      {
+        "piece": "wk",
+        "pos": [
+          100,
+          100
+        ]
+      }
+    ]
+  }
+}
+
+```

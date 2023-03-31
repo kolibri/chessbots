@@ -57,14 +57,14 @@ class Bot:
             'url': self.url,
             'slug': self.slug(),
             'http_data': self.http_data.to_json() if self.http_data else {},
-            'name': self.http_data.name,
-            'piece': self.http_data.piece,
-            'pos_pic_url': self.http_data.pos_pic_url,
-            'pos_pic_path': self.http_data.pos_pic_path,
+            # 'name': self.http_data.name,
+            # 'piece': self.http_data.piece,
+            # 'pos_pic_url': self.http_data.pos_pic_url,
+            # 'pos_pic_path': self.http_data.pos_pic_path,
             'captcha_data': self.captcha_data.to_json() if self.captcha_data else {},
-            'pos': self.captcha_data.pos.raw if self.captcha_data else {},
-            'pos_txt': self.captcha_data.pos.txt if self.captcha_data else {},
-            'rotation': self.captcha_data.rotation if self.captcha_data else {},
+            # 'pos': self.captcha_data.pos.raw if self.captcha_data else {},
+            # 'pos_txt': self.captcha_data.pos.txt if self.captcha_data else {},
+            # 'rotation': self.captcha_data.rotation if self.captcha_data else {},
         }
 
     def slug(self) -> str:
@@ -192,7 +192,9 @@ class BotRepository:
             self.bots.append(self.bot_manager.create(u))
         return self.bots
 
-    def __filtered(self, filters: [Filter] = None):
+    def __filtered(self, filters: [Filter] = None) -> [Bot]:
+        if not filters:
+            return self.bots
         filters = list(filters)
         if filters and 0 < len(filters):
             return [bot for bot in self.bots if bot.filter(filters)]

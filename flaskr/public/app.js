@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (options['src'] !== undefined) {
                 element.src = options.src
             }
+
+            if (options['style'] !== undefined) {
+                element.style.cssText = options.style
+            }
             if (options['dataset'] !== undefined) {
                 for (d in options.dataset) {
                     element.dataset[d] = options.dataset[d]
@@ -207,9 +211,124 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function create_board_pieces_list_item(piece_data) {
+        // console.log('cb', piece_data)
+        var classList =  piece_data.found ? ['piece-item', 'found', piece_data.piece] : ['piece-item', piece_data.piece]
+
+        info = piece_data.found ? piece_data.bot.captcha_data.pos: 'Not found'
+
+        return createElement(
+            'div',
+            {
+                classes: classList,
+                children: [
+                    createElement('span', {classes: ['title'], txt: piece_data.piece}),
+                    createElement('span', {classes: ['field'], txt: piece_data.field})
+                ]
+            }
+        )
+    }
+
+    function add_board_bot(bot, found) {
+        console.log('add_board_bot', bot,  bot['name'])
+        var classes = ['bot']
+
+        if (found) {
+            classes.push('found')
+        }
+        if (bot['http_data']['piece']) {
+            classes.push(bot['http_data']['piece'])
+        }
+
+        var bot_el = createElement('span', {txt: bot.http_data.name, classes: classes})
+        if (0 < Object.keys(bot['captcha_data']).length) {
+            var pos = bot.captcha_data.pos
+            var mult = 5
+            var subt = 10
+
+            var pos_bott = (pos[1]*mult)-subt
+            var pos_left = (pos[0]*mult)-subt
+            var rot = bot.captcha_data.rotation
+            var css_test = 'bottom: ' + pos_bott + 'px; left: ' + pos_left + 'px; transform: rotate(' + rot + 'deg);'
+            bot_el.style.cssText = css_test
+        }
+        return bot_el
+    }
+
+    function build_board_data(data) {
+        function find_piece_for_field(field, pieces) {
+            for (var p of pieces) {
+                if (field[0] == p.field[0] && field[1] == p.field[1]) {
+                    return p
+                }
+            }
+            return false
+        }
+        var board_div = document.getElementById('board')
+        var files = ['z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'x']
+        var ranks = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].reverse()
+        var board_view = createElement('div', {classes: ['board-view']})
+        for (var r of ranks) {
+            var board_file = createElement('div', {classes: ['column']})
+            for (var f of files) {
+                var classes = ['field', f + 'x' + r]
+
+                if (piece = find_piece_for_field([f, r], data.board.pieces)) {
+                    classes.push('piece')
+                    classes.push(piece.piece)
+                    if (piece.found) {
+                        classes.push('found')
+                    }
+                }
+
+                var board_field = createElement('div', {classes: classes})
+
+                board_file.appendChild(board_field)
+            }
+            board_view.appendChild(board_file)
+        }
+
+        var board_bots = createElement('div', {classes: ['board-bots']})
+        for (var bot of data.board.rest_bots) {
+            board_bots.appendChild(add_board_bot(bot, false))
+        }
+        var pieces_list = createElement('div', {classes: ['pieces']})
+        for (var piece of data.board.pieces) {
+            pieces_list.appendChild(create_board_pieces_list_item(piece))
+            if (piece.found) {
+                board_bots.appendChild(add_board_bot(piece.bot, true))
+            }
+        }
+
+        var status_classes = ['status']
+        var status_text = 'Error. Not playable'
+        if (true == data.playable) {
+            status_classes.push('playable')
+            status_text = 'Playable :)'
+        }
+        var playable_status = createElement('div', {txt: status_text, classes: status_classes})
+
+        board_div.appendChild(playable_status)
+        board_div.appendChild(pieces_list)
+        board_div.appendChild(board_view)
+        board_div.appendChild(board_bots)
+    }
+
+    function update_board() {
+        var board_data = document.querySelectorAll('#board > :not(nav)');
+        board_data.forEach(function (data_element, idx) {
+            data_element.remove()
+        })
+
+        make_request('GET', '/bots/board', null, function (xhr) {
+            build_board_data(JSON.parse(xhr.response))
+        })
+    }
+
     attach_xhr()
     attach_dashboard_tabs()
     attach_filter_handler()
     attach_register_handler()
     attach_botrc_handler()
+    update_board()
 });
