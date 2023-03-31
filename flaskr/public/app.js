@@ -243,13 +243,13 @@ document.addEventListener("DOMContentLoaded", function () {
         var bot_el = createElement('span', {txt: bot.http_data.name, classes: classes})
         if (0 < Object.keys(bot['captcha_data']).length) {
             var pos = bot.captcha_data.pos
-            var mult = 5
-            var subt = 10
+            var mult = 0.5
+            var subt = 1
 
             var pos_bott = (pos[1]*mult)-subt
             var pos_left = (pos[0]*mult)-subt
             var rot = bot.captcha_data.rotation
-            var css_test = 'bottom: ' + pos_bott + 'px; left: ' + pos_left + 'px; transform: rotate(' + rot + 'deg);'
+            var css_test = 'bottom: ' + pos_bott + '%; left: ' + pos_left + '%; transform: rotate(' + rot + 'deg);'
             bot_el.style.cssText = css_test
         }
         return bot_el
