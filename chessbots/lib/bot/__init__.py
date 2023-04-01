@@ -75,12 +75,19 @@ class Bot:
             .replace('https', '') \
             .replace('http', '') \
             .replace('://', '') \
-            .replace(':', '+') \
+            .replace(':', '_') \
             .replace('/', '_')  # todo: to regex
 
     def filter(self, filters: [Filter]) -> bool:
         for key, value in filters:
             match key:
+                case 'url':
+                    if self.url != value:
+                        return False
+                case 'slug':
+                    print('here', key, value, self.slug())
+                    if self.slug() != value:
+                        return False
                 case 'name':
                     if self.http_data.name != value:
                         return False

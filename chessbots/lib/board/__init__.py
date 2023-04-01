@@ -44,7 +44,7 @@ class PieceCheckResult:
         self.multiple = False
         self.bot = None
         bots_on_field = [b for b in bots if b.captcha_data and b.captcha_data.pos.in_area(field.get_grid_area()) and b.http_data.piece == piece]
-        print('bof', piece, bots_on_field, bots, [f.txt for f in field.get_grid_area()])
+        # print('bof', piece, bots_on_field, bots, [f.txt for f in field.get_grid_area()])
         if 1 == len(bots_on_field):
             self.found = True
             self.bot = bots_on_field[0]

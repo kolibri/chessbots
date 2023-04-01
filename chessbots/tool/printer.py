@@ -21,7 +21,7 @@ class PatternPrinter:
     def save_to_file(self, pattern: Pattern, path: str):
         self._render(pattern).convert('RGB').save(path)
 
-    def _render(self, pattern: Pattern):
+    def _render(self, pattern: Pattern) -> Image:
         def render_digit(digit):
             p = int(self.point_size / 5)
             # color = (255, 0, 0, 255)

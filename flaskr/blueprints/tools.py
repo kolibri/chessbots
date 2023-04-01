@@ -1,20 +1,17 @@
 from flask import (render_template)
-import random
 
-import cv2
-import numpy as np
 from flask import Blueprint
+
+from chessbots.lib.mockbot import MockBots, MockBot
 from chessbots.tool.pattern_creator import Pattern8x8With4DataFields
 from chessbots.lib.pattern import *
 from chessbots.tool.printer import *
 from chessbots.lib.captcha import Captcha
 from chessbots.lib.captcha.grid import create_angel_points
-from chessbots.lib.captcha.position import *
 from dependency_injector.wiring import inject, Provide
 from flaskr.containers import Container
-from chessbots.lib.bot.mockbot import *
 from chessbots.lib.filesystem import *
-
+import os
 bp = Blueprint('script', __name__)
 
 
@@ -36,12 +33,17 @@ def board_print(
     printer.save_to_files(board, 10, 'build/print/board_print_')
 
 
-@bp.cli.command('mockbot_pictures')
+@bp.cli.command('create_mockbot')
 @inject
-def mockbot_pictures(
-        mock_picture_creator: MockbotPictureCreator = Provide[Container.mockbot_picture_creator],
+def create_mockbot(
+        mockbots: MockBots = Provide[Container.mockbots],
 ):
-    mock_picture_creator.create()
+    bot_set = [
+        ['test', 'wk', Point(0, 0), 0]
+    ]
+
+    for bot in bot_set:
+        mockbots.add(*bot)
 
 
 @bp.cli.command('test_get_angle_points')
@@ -107,53 +109,53 @@ def test_get_angle_points(
         print(a.txt, b.txt, c.txt, get_angle(c, b, a))
 
 
-@bp.cli.command('test_captcha')
-@inject
-def test_captcha(
-        mockbots: MockBots = Provide[Container.mockbots],
-):
-    def test_captcha(bot: MockBot):
-        result_filename = os.path.join('build/mockbot', 'a' + bot.name + '_position_result.html')
-
-        if os.path.isfile(result_filename):
-            print('Already calculated, skip')
-            return
-
-        captcha = Captcha(os.path.join('build/mockbot', bot.picture()))
-        captcha.draw_debug_images()
-        # print('mockbot test', bot.name, captcha.flaskr.txt(), captcha.position.txt)
-
-        exp_pos = Point(bot.pos.x // 4, bot.pos.y // 4).add(Point(1, 1))
-        pos_tol = Point(1, 1)
-        test_result_position = captcha.position.in_area([exp_pos.sub(pos_tol), exp_pos.add(pos_tol)])
-
-        ang_tol = 1
-        ang_act = captcha.rotation
-        ang_exp = bot.angle
-        test_result_angle = ang_exp - ang_tol < ang_act < ang_exp + ang_tol
-        print(test_result_position, test_result_angle, bot.name, exp_pos, captcha.position, exp_pos.sub(pos_tol), exp_pos.add(pos_tol), 'a', ang_exp, ang_act)
-
-        dump_txt(
-            result_filename,
-            render_template(
-                'mockbots_result.html.j2',
-                bot=bot,
-                captcha=captcha,
-                res=test_result_position,
-                ang_res=test_result_position,
-                target_pos=exp_pos
-            )
-        )
-
-        return bot, captcha, test_result_position, test_result_angle, exp_pos
-
-    for bot in mockbots.bots:
-        test_captcha(bot)
-
-    base_dir = 'build/mockbot'
-    files = [f for f in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, f)) and f.endswith('_position_result.html')]
-    files.sort()
-    print(files)
-    contents = [read_txt(os.path.join(base_dir, f)) for f in files]
-    dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html.j2', result=contents))
+# @bp.cli.command('test_captcha')
+# @inject
+# def test_captcha(
+#         mockbots: MockBots = Provide[Container.mockbots],
+# ):
+#     def test_captcha(bot: MockBot):
+#         result_filename = os.path.join('build/mockbot', 'a' + bot.name + '_position_result.html')
+#
+#         if os.path.isfile(result_filename):
+#             print('Already calculated, skip')
+#             return
+#
+#         captcha = Captcha(os.path.join('build/mockbot', bot.picture()))
+#         captcha.draw_debug_images()
+#         # print('mockbot test', bot.name, captcha.flaskr.txt(), captcha.position.txt)
+#
+#         exp_pos = Point(bot.pos.x // 4, bot.pos.y // 4).add(Point(1, 1))
+#         pos_tol = Point(1, 1)
+#         test_result_position = captcha.position.in_area([exp_pos.sub(pos_tol), exp_pos.add(pos_tol)])
+#
+#         ang_tol = 1
+#         ang_act = captcha.rotation
+#         ang_exp = bot.angle
+#         test_result_angle = ang_exp - ang_tol < ang_act < ang_exp + ang_tol
+#         print(test_result_position, test_result_angle, bot.name, exp_pos, captcha.position, exp_pos.sub(pos_tol), exp_pos.add(pos_tol), 'a', ang_exp, ang_act)
+#
+#         dump_txt(
+#             result_filename,
+#             render_template(
+#                 'mockbots_result.html.j2',
+#                 bot=bot,
+#                 captcha=captcha,
+#                 res=test_result_position,
+#                 ang_res=test_result_position,
+#                 target_pos=exp_pos
+#             )
+#         )
+#
+#         return bot, captcha, test_result_position, test_result_angle, exp_pos
+#
+#     for bot in mockbots.bots:
+#         test_captcha(bot)
+#
+#     base_dir = 'build/mockbot'
+#     files = [f for f in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, f)) and f.endswith('_position_result.html')]
+#     files.sort()
+#     print(files)
+#     contents = [read_txt(os.path.join(base_dir, f)) for f in files]
+#     dump_txt('build/mockbot/_test_result.html', render_template('mockbots.html.j2', result=contents))
 

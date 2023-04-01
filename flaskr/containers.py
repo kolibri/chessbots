@@ -1,8 +1,8 @@
 from dependency_injector import containers, providers
 from chessbots.lib.board import *
+from chessbots.lib.mockbot import *
 from chessbots.tool.printer import *
 from chessbots.tool.pattern_creator import *
-from chessbots.lib.bot.mockbot import *
 from chessbots.lib.print_units import *
 from chessbots.lib.bot import *
 
@@ -21,8 +21,9 @@ class Container(containers.DeclarativeContainer):
             'dpi': 600,
             'marker_size': 60
         },
-        'bots': {'cache_dir': 'build/bots'},
-        'mockbot': {'cache_dir': 'build/mockbot'}
+        'board_dir': 'build/bots',
+        'mockbot_dir': 'build/mockbot',
+        'print_dir': 'build/print', # <-- currently unused
 
     }
 
@@ -38,21 +39,27 @@ class Container(containers.DeclarativeContainer):
 
     )
 
+    mockbot_factory = providers.Factory(
+        MockbotFactory,
+        printer=pattern_printer,
+        base_board=Pattern8x8With4DataFields().create(800)
+    )
     mockbots = providers.Factory(
         MockBots,
-        board=Pattern8x8With4DataFields().create(800)
+        data_dir=config['mockbot_dir'],
+        factory=mockbot_factory,
     )
 
     mockbot_picture_creator = providers.Factory(
         MockbotPictureCreator,
-        path=config['mockbot']['cache_dir'],
+        path=config['mockbot_dir'],
         printer=pattern_printer,
         mockbots=mockbots
     )
 
     bot_manager = providers.Factory(
         BotManager,
-        data_dir=config['bots']['cache_dir'],
+        data_dir=config['board_dir'],
     )
 
     bot_repository = providers.Factory(

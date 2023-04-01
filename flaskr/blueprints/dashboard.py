@@ -1,7 +1,7 @@
 from flask import (Blueprint, render_template)
 from flask import Flask
 
-from chessbots.lib.bot.mockbot import MockBots
+from chessbots.lib.mockbot import MockBots
 from dependency_injector.wiring import inject, Provide
 from flaskr.containers import Container
 

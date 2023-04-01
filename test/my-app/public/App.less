@@ -1,4 +1,7 @@
-
+* {
+  margin: 0;
+  padding: 0;
+}
 .controls {
   //float: left;
 }
@@ -6,14 +9,15 @@
 .pieces-overview {
   font-family: monospace;
   font-size: 1.2em;
+  width: calc(~"100vw - 102vh ");
   float: left;
-  width: 25em;
 
   .pieces {
     display: flex;
     flex-flow: row wrap;
-    width: 25em;
+    width: 49%;
     border: black dotted 1px;
+    float: left;
 
     .piece {
       background: #ff5a08;
@@ -53,8 +57,10 @@
   }
 
   .rest-bots {
+    width: 49%;
+    float: right;
     .rest-bot {
-      display: block;
+      display: inline-block;
       > * {
         margin: 0.3em;
       }
@@ -65,9 +71,8 @@
   }
 
   .bot-display {
+    clear: both;
     border: solid #000000 1px;
-
-
     > * {
       border-bottom: dotted 1px #aabbcc;
       display: block;
@@ -159,7 +164,7 @@
 .bot-positions {
   float: right;
   position: relative;
-  top: -100vh;
+  margin-top: -100vh;
   width: 100vh;
   height: 100vh;
   .bot-position {
@@ -170,5 +175,48 @@
     height: 5vh;
     border-bottom: #ff5a08 solid 1px;
     border-left: #6495ed solid 1px;
+  }
+}
+
+.register-bot {
+    clear: both;
+
+}
+
+.create-mockbot {
+  clear: both;
+  height: 100vh;
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 9em;
+    input { display: block; margin: 0; padding: 0; border: none; outline: #6495ed dotted 1px; }
+    input.create-mockbot-name { width: 6em; }
+    input.create-mockbot-piece { width: 3em; }
+    input.create-mockbot-posx { width: 3em; }
+    input.create-mockbot-posy { width: 3em; }
+    input.create-mockbot-angle { width: 3em; }
+  }
+
+  > .mockbot-list {
+    > .mockbot {
+      display: block;
+
+      > * {
+        display: inline-block;
+        width: 2em;
+      }
+      > button {
+        display: inline-block;
+        width: auto;
+      }
+      > .name {
+        width: auto;
+      }
+      > .piece {}
+      > .pos { width: 4em;}
+      > .angle {}
+    }
   }
 }
