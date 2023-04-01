@@ -1,0 +1,23 @@
+{% extends 'base.html.j2' %}
+
+{% block head %}
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet/less" type="text/css" href="{{ url_for('static', filename='app.less') }}"/>
+    <script src="https://cdn.jsdelivr.net/npm/less"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel" src="{{ url_for('static', filename='dashboard.jsx') }}"></script>
+{% endblock %}
+
+
+
+{% block main %}
+    <main>
+    <section id="board">
+
+    </section>
+
+
+    </main>
+{% endblock %}

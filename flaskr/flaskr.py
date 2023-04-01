@@ -6,6 +6,8 @@ from flask import (
 from flaskr.blueprints import bots
 from flaskr.blueprints import tools
 from flaskr.blueprints import mockbot
+from flaskr.blueprints import board
+from flaskr.blueprints import dashboard
 
 
 from flask import Flask
@@ -37,6 +39,8 @@ def create_app(test_config=None):
     app.register_blueprint(bots.bp)
     app.register_blueprint(tools.bp)
     app.register_blueprint(mockbot.bp)
+    app.register_blueprint(board.bp)
+    app.register_blueprint(dashboard.bp)
 
     @app.route("/")
     def index():

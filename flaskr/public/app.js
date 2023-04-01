@@ -215,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // console.log('cb', piece_data)
         var classList =  piece_data.found ? ['piece-item', 'found', piece_data.piece] : ['piece-item', piece_data.piece]
 
-        info = piece_data.found ? piece_data.bot.captcha_data.pos: 'Not found'
 
         return createElement(
             'div',

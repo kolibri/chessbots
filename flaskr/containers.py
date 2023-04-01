@@ -12,6 +12,8 @@ class Container(containers.DeclarativeContainer):
         ".blueprints.bots",
         ".blueprints.mockbot",
         ".blueprints.tools",
+        ".blueprints.board",
+        ".blueprints.dashboard",
     ])
 
     config = {

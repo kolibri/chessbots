@@ -1,9 +1,9 @@
-from flask import (Blueprint, request, render_template, jsonify)
+import os
+
+from flask import (Blueprint, request, jsonify, send_file, send_from_directory)
 from flask import Flask
 
-from chessbots.lib.bot import *
 from chessbots.lib.board import *
-from chessbots.lib.bot.mockbot import MockBots
 from dependency_injector.wiring import inject, Provide
 from flaskr.containers import Container
 
@@ -37,6 +37,16 @@ def post_update(bots: BotRepository = Provide[Container.bot_repository]):
     return jsonify([bot.to_json() for bot in bots.update(request.args.items())]), 200
 
 
+@bp.route('/pic/<string:name>', methods=['GET'])
+@inject
+def get_cache_image(name: str):
+    pathname = os.path.join('/app/build/bots', 'bot_' + name, 'position.jpeg') # @todo: absolute path, move to config
+    print(pathname)
+    if os.path.isfile(pathname):
+        return send_file(pathname)
+
+    return 'not found', 404
+
 @bp.route('/register', methods=['POST'])
 @inject
 def post_register(bots: BotRepository = Provide[Container.bot_repository]):
@@ -45,26 +55,3 @@ def post_register(bots: BotRepository = Provide[Container.bot_repository]):
     ["http://0.0.0.0:8037","http://0.0.0.0:8031/tools/mockbot"]
     """
     return jsonify([bot.to_json() for bot in bots.add_bots(request.json)]), 200
-
-
-@bp.route('/board', methods=['GET'])
-@inject
-def get_board(board: Board = Provide[Container.game_board]):
-    data = {
-        'fen': board.game.fen,
-        'playable': board.playable,
-        'board': {
-            'pieces': [p.to_json() for p in board.pieces],
-            'rest_bots': [b.to_json() for b in board.rest_bots],
-        },
-        'bots': [b.to_json() for b in board.bot_repo.get()]
-    }
-
-    return jsonify(data), 200
-
-
-@bp.route('/dashboard', methods=['GET'])
-@inject
-def get_dashboard(mockbots: MockBots = Provide[Container.mockbots]):
-    return render_template('dashboard.html.j2', mockbots=[bot.url() for bot in mockbots.bots])
-

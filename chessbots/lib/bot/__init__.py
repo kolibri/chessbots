@@ -1,3 +1,4 @@
+from flask import (url_for)
 from chessbots.lib.captcha import Captcha
 import requests
 from collections import namedtuple
@@ -7,11 +8,12 @@ from chessbots.lib.point_helper import Point
 
 
 class BotHttpData:
-    def __init__(self, name, piece, pos_pic_url, pos_pic_path):
+    def __init__(self, name, piece, pos_pic_url, pos_pic_path, pos_pic_cache_url):
         self.name = name
         self.piece = piece
         self.pos_pic_url = pos_pic_url
         self.pos_pic_path = pos_pic_path
+        self.pos_pic_cache_url = pos_pic_cache_url
 
     def to_json(self):
         return {
@@ -19,11 +21,12 @@ class BotHttpData:
             'piece': self.piece,
             'pos_pic_url': self.pos_pic_url,
             'pos_pic_path': self.pos_pic_path,
+            'pos_pic_cache_url': self.pos_pic_cache_url,
         }
 
     @staticmethod
     def from_json(data):
-        return BotHttpData(data['name'], data['piece'], data['pos_pic_url'], data['pos_pic_path'])
+        return BotHttpData(data['name'], data['piece'], data['pos_pic_url'], data['pos_pic_path'], data['pos_pic_cache_url'])
 
 
 class CaptchaData:
@@ -133,7 +136,13 @@ class BotManager:
             except requests.exceptions.RequestException as e:
                 print('cannot retrieve image for bot:', bot.url, 'response:', data)
 
-            bot.http_data = BotHttpData(data.get('name'), data.get('piece'), data.get('pos_pic'), http_pic_path)
+            bot.http_data = BotHttpData(
+                data.get('name'),
+                data.get('piece'),
+                data.get('pos_pic'),
+                http_pic_path,
+                url_for('bots.get_cache_image', name=bot.slug(), _external=True)
+            )
 
             if os.path.isfile(bot.http_data.pos_pic_path):
                 captcha = Captcha(bot.http_data.pos_pic_path)
