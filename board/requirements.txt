@@ -1,0 +1,15 @@
+esptool
+adafruit-ampy
+flask~=2.2.2
+requests
+Pillow~=9.4.0
+matplotlib
+pytest
+opencv-python
+opencv-contrib-python
+dependency-injector
+pyyaml
+Werkzeug~=2.2.2
+numpy~=1.24.1
+chess
+reportlab

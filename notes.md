@@ -213,3 +213,56 @@ Goto Tools -> Board -> Board manager
 }
 
 ```
+
+
+
+
+
+todos:
+
+[] get rid of all '2' columns and rows in Pattern's after grid resolving
+[] make threshold_val2 and marker radius tolerances adjustable|self-defined|configurable, so photos as mockbots work...
+
+
+
+
+./
+
+board/
+    build/
+    chessbots/
+    flaskr
+    requirements.txt
+    Dockerfile
+bot/
+    chessbot.ino
+    Dockerfile
+frontend/
+    package.json
+    src/
+    public/
+    Dockerfile
+devblog/
+parts/
+    bot.scad
+
+README.md
+run.sh
+doto.yml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

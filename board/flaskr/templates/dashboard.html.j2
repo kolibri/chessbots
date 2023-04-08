@@ -1,0 +1,15 @@
+{% extends 'base.html.j2' %}
+
+{% block head %}
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet/less" type="text/css" href="{{ url_for('static', filename='app.less') }}"/>
+    <script src="https://cdn.jsdelivr.net/npm/less"></script>
+
+    <script defer="defer" src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <main>
+    <section id="dashboard"></section>
+    </main>
+{% endblock %}

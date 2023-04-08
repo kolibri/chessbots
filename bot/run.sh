@@ -2,48 +2,42 @@
 
 set -e
 
-DEV_PATH=/dev/ttyUSB0
-BAUD=115200
-sudo chown ko $DEV_PATH
+IMAGE_NAME='chessbots-bot'
 
-run_ampy () {
-  ampy --port $DEV_PATH -b$BAUD $@
-}
+BOT_TTY=/dev/ttyUSB0
+#BAUD=115200
+#sudo chown ko $DEV_PATH
 
-run_action () {
+
+bot_action () {
   ACTION=$1
-  if [[ "erase" = $ACTION ]]; then
-    echo "Will erase now"
+  if [[ "run" = "$ACTION" ]]; then
+    docker_run "${@:2}"
 
-    esptool.py --port $DEV_PATH erase_flash
-  elif [[ "flash" = $ACTION ]]; then
-    echo "Will flash now"
-    esptool.py --chip esp32 --port $DEV_PATH --baud 460800 write_flash -z 0x1000 micropython_esp32_camera_firmware.bin
+  elif [[ "compile" = "$ACTION" ]]; then
+   docker run -ti --volume `pwd`/:/app "$IMAGE_NAME" arduino-cli compile --dump-profile --fqbn esp32:esp32:esp32cam --build-path ./build chessbot
 
-    echo "Is the ground pin disconnected from io0 and usb cable replugged? "
-#    read -p "Is the ground pin disconnected from io0 and usb cable replugged? " -n 1 -r
-  elif [[ "upip" = $ACTION ]]; then
-    run_ampy put src/config.py
-    run_ampy run src/install.py
-  elif [[ "reset" = $ACTION ]]; then
-    echo "Will reset now"
-    run_ampy reset
-  elif [[ "copy" = $ACTION ]]; then
-    echo "Will copy now"
-    run_ampy put src/config.py
-    run_ampy put src/boot.py
-    #run_ampy put src/main.py
-    run_ampy ls
+  elif [[ "upload" = "$ACTION" ]]; then
+    echo "upload"
+   docker run -ti --volume `pwd`/:/app --device "$BOT_TTY:$BOT_TTY" "$IMAGE_NAME" arduino-cli upload -p $BOT_TTY --input-dir ./build --fqbn esp32:esp32:esp32cam chessbot
 
-  elif [[ "repl" = $ACTION ]]; then
+  elif [[ "repl" = "$ACTION" ]]; then
     echo "Will repl now"
-    picocom $DEV_PATH -b115200
+    sudo picocom $BOT_TTY -b115200
+  elif [[ "build" = "$ACTION" ]]; then
+#    docker build -t $IMAGE_NAME --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --no-cache .
+    docker build -t $IMAGE_NAME --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) .
   else
     echo "erase or flash"
     exit 1
   fi
 }
 
-run_action $@
+docker_run() {
+    set -x
+    docker run -ti --volume `pwd`/:/app --device "$BOT_TTY:$BOT_TTY" "$IMAGE_NAME" "$@"
+    set +x
+}
+bot_action "$@"
 
 

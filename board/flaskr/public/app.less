@@ -1,0 +1,358 @@
+// Variables
+@board-size: 70vh;
+@color-piece-overview-bg-not-found: #ff5a08;
+@color-piece-overview-bg-found: #69a972;
+@color-piece-overview-outline: #bab9be;
+@color-piece-detail-border: #aabbcc;
+
+@color-board-field-bg-white: #d7d7d7;
+@color-board-field-bg-black: #343434;
+@color-board-field-bg-rest: #366288;
+
+@color-board-field-fg-black: #d7d7d7;
+@color-board-field-fg-white: #343434;
+@color-board-field-fg-rest: #00000;
+@color-board-pos-box-border: #69776d;
+
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  overflow: hidden;
+}
+.dashboard {
+  display: flex;
+  flex-flow: row wrap;
+  font-family: monospace;
+  width: 100vw;
+  height: 100vh;
+}
+
+.pieces-overview {
+  order: 0;
+  font-size: 1.2em;
+  //width: calc(~"100vw - 102vh ");
+  width: 70vh;
+  height: 30vh;
+  //overflow: scroll;
+  //float: left;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+
+  .pieces {
+    display: flex;
+    flex-flow: row wrap;
+    min-width: 50vh;
+    border: black dotted 1px;
+    //float: left;
+
+    .piece {
+      background: @color-piece-overview-bg-not-found;
+      outline: @color-piece-overview-outline dotted 1px;
+      width: 25%;
+      flex-basis: 25%;
+      height: 12.5%;
+
+      > * {
+        //margin: 0.3em;
+        display: inline-block;
+      }
+      .title {
+        margin: 0;
+        width: 25%;
+        font-size: 1.5em;
+      }
+      .field {
+        width: 25%;
+        font-size: 0.8em;
+      }
+      .bot-name {
+        width: 50%;
+        overflow: hidden;
+        direction: rtl;
+      }
+      .bot-name:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .piece.wk, .piece.wq, .piece.wb, .piece.wn, .piece.wr, .piece.wp {
+      order: 1;
+    }
+
+    .piece.bk, .piece.bq, .piece.bb, .piece.bn, .piece.br, .piece.bp {
+      order: 2;
+    }
+
+    .piece[data-found='true'] {
+      background: @color-piece-overview-bg-found;
+    }
+  }
+
+  .rest-bots {
+    min-width: 20vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    display: flex;
+    flex-flow: nowrap column;
+    .rest-bot {
+      display: block;
+      > * {
+      }
+      .title:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.bot-display {
+    min-width: 10em;
+    width: calc(~"100vw - 70vh - 3em");
+    //width: calc(~"100vw - 70vh - 1em");
+    order: 4;
+    outline: black solid 1px;
+    overflow: scroll;
+    height: 70vh;
+    > * {
+      border-bottom: dotted 1px @color-piece-detail-border;
+      display: block;
+      margin: 0.3em;
+    }
+
+    > *:before {
+      display: inline-block;
+      width: 4em;
+    }
+
+    > .url {
+    }
+
+    > .url:before {
+      content: 'url';
+    }
+
+    > .name {
+    }
+
+    > .name:before {
+      content: 'name';
+    }
+
+    > .piece {
+    }
+
+    > .piece:before {
+      content: 'piece';
+    }
+
+    > .pos_pic_path {
+    }
+
+    > .pos_pic_path:before {
+      content: 'pic_path';
+    }
+
+    > .pos_pic_url {
+    }
+
+    > .pos_pic_url:before {
+      content: 'pic_url';
+    }
+
+    > .position {
+    }
+
+    > .position:before {
+      content: 'pos';
+    }
+
+    > .rotation {
+    }
+
+    > .rotation:before {
+      content: 'rot';
+    }
+
+    > .img-list {
+      display: block;
+      //width: 20em;
+    }
+    .pos_pic {
+      display: block;
+      width: 100%;
+      //height: 20em;
+      border: black solid 1px;
+    }
+  }
+
+.board {
+  order: 3;
+  .board-fields {
+    background: #53ff72;
+    width: @board-size;
+    height: @board-size;
+    display: flex;
+    flex-direction: column-reverse;
+    flex-wrap: wrap;
+
+    > .field {
+      outline: #851221 dotted 1px;
+      display: block;
+      width: 10%;
+      height: 10%;
+      margin: 0;
+      padding: 0;
+    }
+
+    > .field[data-name='a1'], > .field[data-name='c1'], > .field[data-name='e1'], > .field[data-name='g1'],
+    > .field[data-name='b2'], > .field[data-name='d2'], > .field[data-name='f2'], > .field[data-name='h2'],
+    > .field[data-name='a3'], > .field[data-name='c3'], > .field[data-name='e3'], > .field[data-name='g3'],
+    > .field[data-name='b4'], > .field[data-name='d4'], > .field[data-name='f4'], > .field[data-name='h4'],
+    > .field[data-name='a5'], > .field[data-name='c5'], > .field[data-name='e5'], > .field[data-name='g5'],
+    > .field[data-name='b6'], > .field[data-name='d6'], > .field[data-name='f6'], > .field[data-name='h6'],
+    > .field[data-name='a7'], > .field[data-name='c7'], > .field[data-name='e7'], > .field[data-name='g7'],
+    > .field[data-name='b8'], > .field[data-name='d8'], > .field[data-name='f8'], > .field[data-name='h8'] {
+      background-color: @color-board-field-bg-white;
+      color: @color-board-field-fg-white;
+    }
+
+    > .field[data-name='b1'], > .field[data-name='d1'], > .field[data-name='f1'], > .field[data-name='h1'],
+    > .field[data-name='a2'], > .field[data-name='c2'], > .field[data-name='e2'], > .field[data-name='g2'],
+    > .field[data-name='b3'], > .field[data-name='d3'], > .field[data-name='f3'], > .field[data-name='h3'],
+    > .field[data-name='a4'], > .field[data-name='c4'], > .field[data-name='e4'], > .field[data-name='g4'],
+    > .field[data-name='b5'], > .field[data-name='d5'], > .field[data-name='f5'], > .field[data-name='h5'],
+    > .field[data-name='a6'], > .field[data-name='c6'], > .field[data-name='e6'], > .field[data-name='g6'],
+    > .field[data-name='b7'], > .field[data-name='d7'], > .field[data-name='f7'], > .field[data-name='h7'],
+    > .field[data-name='a8'], > .field[data-name='c8'], > .field[data-name='e8'], > .field[data-name='g8'] {
+      background-color: @color-board-field-bg-black;
+      color: @color-board-field-fg-black;
+    }
+
+
+    > .field[data-rank='0'],
+    > .field[data-rank='9'],
+    > .field[data-file='x'],
+    > .field[data-file='z'] {
+      background-color: @color-board-field-bg-rest;
+      color: @color-board-field-fg-rest;
+    }
+
+  }
+
+  .bot-positions {
+    //display: none;
+    position: relative;
+    margin-top: -@board-size;
+    width: @board-size;
+    height: @board-size;
+
+    .bot-position {
+      display: block;
+      position: absolute;
+      font-size: 4vh;
+      width: 4vh;
+      height: 4vh;
+      margin-left: -2vh;
+      margin-bottom: -2vh;
+      border: @color-board-pos-box-border solid 1px;
+      //border-left: #6495ed solid 1px;
+    }
+  }
+}
+
+.register-dashboard {
+    order: 1;
+    min-width: 10em;
+    width: calc(~"100vw - 70vh - 3em");
+    height: 30vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+  form.register {
+    width: 100%;
+    padding: 0.5em;
+
+    textarea[name=bots] {
+      width: calc(~"100% - 4em ");
+      height: 5em;
+      display: inline-block;
+      border: none;
+      outline: black solid 1px;
+    }
+    button {
+      width: 3em;
+      margin-left: 1em;
+      height: 3em;
+      overflow: hidden;
+      vertical-align: top;
+
+    }
+  }
+
+  form.mockbot:before {
+    content: 'mockbot';
+    display: block;
+  }
+  form.mockbot {
+    padding: 0.5em;
+    input {
+      border: none;
+      outline: black solid 1px;
+      width: calc(~"(100% - 4em) / 5 ");
+      max-width: 5em;
+      min-width: 2em;
+    }
+    button { width: 3em; margin-left: 1em; }
+  }
+
+  .mockbot-list {
+    height: 100%;
+    .mockbot {
+      display: block;
+    }
+  }
+
+}
+
+.create-mockbot {
+  clear: both;
+  height: 100vh;
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 9em;
+    input { display: block; margin: 0; padding: 0; border: none; outline: #6495ed dotted 1px; }
+    input.create-mockbot-name { width: 6em; }
+    input.create-mockbot-piece { width: 3em; }
+    input.create-mockbot-posx { width: 3em; }
+    input.create-mockbot-posy { width: 3em; }
+    input.create-mockbot-angle { width: 3em; }
+  }
+
+  > .mockbot-list {
+    > .mockbot {
+      display: block;
+
+      > * {
+        display: inline-block;
+        width: 2em;
+      }
+      > button {
+        display: inline-block;
+        width: auto;
+      }
+      > .name {
+        width: auto;
+      }
+      > .piece {}
+      > .pos { width: 4em;}
+      > .angle {}
+    }
+  }
+}
+
