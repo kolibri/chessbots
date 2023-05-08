@@ -23,16 +23,21 @@
 
 // pin to whats on the board mapping for motor controls
 
-#define P_104 4
-#define P_102 2
-#define P_1014 14
-#define P_1015 15
-#define P_1013 13
-#define P_1012 12
+#define P_M1_S 15
+#define P_M1_A 13
+#define P_M1_B 12
+#define P_M2_S 16
+#define P_M2_A 2
+#define P_M2_B 14
 
 
 const char* ssid = "Trochilidae";
 const char* password = "humm!ngb!rd31";
+
+const int freq1 = 30000;
+const int freq2 = 20000;
+const int motor1Channel = 0;
+const int motor2Channel = 1;
 
 void startCameraServer();
 
@@ -90,6 +95,8 @@ void setup() {
   s->set_hmirror(s, 1);
 #endif
 
+  pinMode(4, OUTPUT); // flashlight for camera
+
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -104,66 +111,6 @@ void setup() {
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
-
-
-    // register
-  pinMode(P_104, OUTPUT); // purple pwm
-  pinMode(P_102, OUTPUT); // red
-  pinMode(P_1014, OUTPUT); // yellow
-
-  pinMode(P_1015, OUTPUT); // purple pwm
-  pinMode(P_1013, OUTPUT); // red
-  pinMode(P_1012, OUTPUT); // yellow
-
-    // setup all of
-  analogWrite(P_104, 0); // purple pwm
-  digitalWrite(P_102, LOW); // red
-  digitalWrite(P_1014, LOW); // yellow
-
-  analogWrite(P_1015, 0); // purple pwm
-  digitalWrite(P_1013, LOW); // red
-  digitalWrite(P_1012, LOW); // yellow
-
-    // run
-  analogWrite(P_104, 0); // purple pwm
-  digitalWrite(P_102, HIGH); // red
-  digitalWrite(P_1014, LOW); // yellow
-
-  analogWrite(P_1015, 0); // purple pwm
-  digitalWrite(P_1013, HIGH); // red
-  digitalWrite(P_1012, LOW); // yellow
-          delay(2000);
-
-    // setup all of
-  analogWrite(P_104, 0); // purple pwm
-  digitalWrite(P_102, LOW); // red
-  digitalWrite(P_1014, LOW); // yellow
-
-  analogWrite(P_1015, 0); // purple pwm
-  digitalWrite(P_1013, LOW); // red
-  digitalWrite(P_1012, LOW); // yellow
-          delay(2000);
-    // run
-  analogWrite(P_104, 0); // purple pwm
-  digitalWrite(P_102, HIGH); // red
-  digitalWrite(P_1014, LOW); // yellow
-
-  analogWrite(P_1015, 0); // purple pwm
-  digitalWrite(P_1013, HIGH); // red
-  digitalWrite(P_1012, LOW); // yellow
-          delay(4000);
-
-    // setup all of
-  analogWrite(P_104, 0); // purple pwm
-  digitalWrite(P_102, LOW); // red
-  digitalWrite(P_1014, LOW); // yellow
-
-  analogWrite(P_1015, 0); // purple pwm
-  digitalWrite(P_1013, LOW); // red
-  digitalWrite(P_1012, LOW); // yellow
-
-
-
 
 
 }

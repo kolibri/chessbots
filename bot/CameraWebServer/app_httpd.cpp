@@ -448,6 +448,90 @@ static esp_err_t stream_handler(httpd_req_t *req){
     last_frame = 0;
     return res;
 }
+static esp_err_t cmd_handler(httpd_req_t *req){
+    char*  buf;
+    size_t buf_len;
+    char motor1_dir[2] = {0,};
+    char motor2_dir[2] = {0,};
+    char speed[3] = {0,};
+    char duration[3] = {0,};
+
+    buf_len = httpd_req_get_url_query_len(req) + 1;
+    if (buf_len > 1) {
+        buf = (char*)malloc(buf_len);
+        if(!buf){
+            httpd_resp_send_500(req);
+            return ESP_FAIL;
+        }
+        if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
+            if (httpd_query_key_value(buf, "m1", motor1_dir, sizeof(variable)) == ESP_OK &&
+                httpd_query_key_value(buf, "m2", motor2_dir, sizeof(variable)) == ESP_OK &&
+                httpd_query_key_value(buf, "d", duration, sizeof(variable)) == ESP_OK &&
+                httpd_query_key_value(buf, "s", speed, sizeof(value)) == ESP_OK) {
+            } else {
+                free(buf);
+                httpd_resp_send_404(req);
+                return ESP_FAIL;
+            }
+        } else {
+            free(buf);
+            httpd_resp_send_404(req);
+            return ESP_FAIL;
+        }
+        free(buf);
+    } else {
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
+
+    int m1 = atoi(motor1_dir);
+    int m2 = atoi(motor2_dir);
+    int d = atoi(duration);
+    int s = atoi(speed);
+
+
+    ledcWrite(motor1Channel, speed);
+    if (m1 < 0) {
+      Serial.println("m1 backward");
+      digitalWrite(P_M1_A, HIGH);
+      digitalWrite(P_M1_B, LOW);
+
+    } else if (m1 > 0) {
+      Serial.println("m1 forward");
+      digitalWrite(P_M1_A, LOW);
+      digitalWrite(P_M1_B, HIGH)
+
+    } else {
+      Serial.println("m1 stop");
+      digitalWrite(P_M1_A, LOW);
+      digitalWrite(P_M1_B, LOW);
+    }
+
+    ledcWrite(motor2Channel, speed);
+    if (m2 < 0) {
+      Serial.println("m2 backward");
+      digitalWrite(P_M2_A, HIGH);
+      digitalWrite(P_M2_B, LOW);
+
+    } else if (m2 > 0) {
+      Serial.println("m2 forward");
+      digitalWrite(P_M2_A, LOW);
+      digitalWrite(P_M2_B, HIGH)
+
+    } else {
+      Serial.println("m2 stop");
+      digitalWrite(P_M2_A, LOW);
+      digitalWrite(P_M2_B, LOW);
+    }
+
+    delay(d);
+
+    Serial.println("timeout");
+    digitalWrite(P_M1_A, LOW);
+    digitalWrite(P_M1_B, LOW);
+    digitalWrite(P_M2_A, LOW);
+    digitalWrite(P_M2_B, LOW);
+}
 
 static esp_err_t cmd_handler(httpd_req_t *req){
     char*  buf;
