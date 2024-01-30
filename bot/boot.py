@@ -8,14 +8,43 @@ import machine
 import json
 import camera
 import picoweb
+import mcp23017
 
+class Logger:
+    def __init__(self):
+        self.msg = []
+
+    def log(self, msg: str):
+        self.msg.append(msg)
+
+    def get_log(self) -> str:
+        return '\n'.join(self.msg)
+
+class Motor:
+    def __init__(self, pins):
+        self.mapped_pins = pins #[machine.Pin(pin, machine.Pin.OUT) for pin in pins]
+        self.sequence = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
+
+    def move(self):
+        print('move)')
+        while True:
+            for step in self.sequence:
+                for i in range(len(self.mapped_pins)):
+                    self.mapped_pins[i].output(step[i])
+                    time.sleep(0.001)
 
 class Chessbot:
-    def __init__(self, config):
+    def __init__(self, config, mcp: MCP23017, log: Log):
+        print('INIT')
         self.wifi_ssid = config.wifi['ssid']
         self.wifi_pass = config.wifi['pass']
         self.data = config.bot
-        self.motors = Motors(config.motors)
+        self.log = log
+        self.mcp = mcp
+        self.log.log('inititialized')
+        self.motor1 = Motor([mcp[0], mcp[1], mcp[2], mcp[3]])
+        self.motor2 = Motor([mcp[4], mcp[5], mcp[6], mcp[7]])
+        #self.motor2 = Motor([12,16,3,1])
 
     def boot(self):
         connection = self.connect_wifi()
@@ -28,17 +57,19 @@ class Chessbot:
 
         self.data['url'] = connection[0]
         self.data['live_image'] = 'http://' + connection[0] + '/position.jpeg'
-        self.data['motors'] = {}
+        self.log.log('booted')
 
     def get_data(self):
         return self.data
 
-    def move(self, req):
-        raw = yield from req.reader.readexactly(int(req.headers[b"Content-Length"]))
-        raw = raw.decode('UTF-8')
-        sequence = json.loads(raw)
+    def move(self):
+        #self.motor1.move()
+        self.motor2.move()
+        return 'foo'
+#        raw = yield from req.reader.readexactly(int(req.headers[b"Content-Length"]))
+#        raw = raw.decode('UTF-8')
+#        sequence = json.loads(raw)
 
-        self.motors.move(sequence)
 
         # print('gise', sequence)
         # print('sese', self.sequence)
@@ -47,6 +78,7 @@ class Chessbot:
         return camera.capture()
 
     def connect_wifi(self):
+        print('connecting starts')
         sta_if = network.WLAN(network.STA_IF)
         start = utime.time()
         timed_out = False
@@ -71,47 +103,18 @@ class Chessbot:
             return False
 
 
-class Motor:
-    def __init__(self, pins):
-        print(pins)
-        self.pin_a = machine.Pin(pins[0], machine.Pin.OUT)
-        self.pin_b = machine.Pin(pins[1], machine.Pin.OUT)
-        self.pin_a.off()
-        self.pin_b.off()
-
-    def set_state(self, state: int):
-        self.pin_a.off()
-        self.pin_b.off()
-        if -1 == state:
-            self.pin_a.on()
-        elif 1 == state:
-            self.pin_b.on()
-
-
-class Motors:
-    def __init__(self, config):
-        self.left = Motor(config['left'])
-        self.right = Motor(config['right'])
-        self.speed = machine.Pin(config['speed'], machine.Pin.OUT)
-        self.speed.on()
-        # self.speed = machine.PWM(machine.Pin(config['speed']))
-        self.interval_duration = 5
-
-    def move(self, sequence):
-        for s in sequence:
-            self.set_state(s[0], s[1])
-            time.sleep(s[2] * self.interval_duration)
-        self.set_state(0, 0)
-
-    def set_state(self, lv, rv):
-        self.left.set_state(lv)
-        self.right.set_state(rv)
-
-
 '''
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 '''
-chessbot = Chessbot(config)
+print('Hello start')
+
+i2c = machine.SoftI2C(scl=machine.Pin(14), sda=machine.Pin(15))
+print(i2c.scan())
+mcp = mcp23017.MCP23017(i2c, 0x20)
+
+
+log = Logger()
+chessbot = Chessbot(config, mcp, log)
 chessbot.boot()
 app = picoweb.WebApp(__name__)
 
@@ -124,11 +127,12 @@ def index(req, resp):
         print('options -> empty')
     elif req.method == "POST":
         print('post -> move')
-        data = chessbot.move(req)
+        data = chessbot.move()
     else:
         print('!post -> data')
         data = chessbot.get_data()
         data['state'] = 'online'
+        chessbot.move()
 
     yield from picoweb.start_response(resp, 'application/json', headers={
         "Access-Control-Allow-Origin": "*",
@@ -143,11 +147,21 @@ def position(req, resp):
     yield from picoweb.start_response(resp, "image/jpeg")
     yield from resp.awrite(chessbot.picture())
 
+@app.route("/log")
+def position(req, resp):
+    yield from picoweb.start_response(resp, 'text/plain', headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+    })
+    yield from resp.awrite(log.get_log())
+
+
 
 # rtc = machine.RTC()
 # print(rtc.datetime())
 
-pin = machine.Pin(0, machine.Pin.OUT)
-pin.on()
+#pin = machine.Pin(0, machine.Pin.OUT)
+#pin.on()
+
 
 app.run(debug=True, host='0.0.0.0', port=80)

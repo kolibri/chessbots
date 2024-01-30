@@ -97,7 +97,6 @@ class Bot:
                     if self.url != value:
                         return False
                 case 'slug':
-                    print('here', key, value, self.slug())
                     if self.slug() != value:
                         return False
                 case 'name':

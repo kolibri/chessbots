@@ -2,21 +2,29 @@ FROM archlinux
 
 ARG USER_ID
 ARG GROUP_ID
+ENV VIRTUAL_ENV=/opt/venv
 
-RUN pacman -Syyu --noconfirm && pacman -S --noconfirm arduino-cli python python-pyserial
+RUN pacman -Syyu --noconfirm && pacman -S --noconfirm python python-pip python-pyserial picocom
 
-#RUN groupadd --gid $GROUP_ID chessbot
-#RUN useradd --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID chessbot
-#USER chessbot
+RUN groupadd --gid $GROUP_ID --force chessbot
+RUN useradd --uid $USER_ID --gid $GROUP_ID chessbot
 
-RUN arduino-cli core update-index --additional-urls https://dl.espressif.com/dl/package_esp32_index.json
-RUN arduino-cli core install esp32:esp32 --additional-urls https://dl.espressif.com/dl/package_esp32_index.json
+RUN mkdir $VIRTUAL_ENV
+RUN chown chessbot:chessbot $VIRTUAL_ENV
 
-RUN arduino-cli board list
-#RUN arduino-cli core install esp32:esp32
+USER chessbot
 
+
+
+
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install dependencies:
+RUN pip install esptool adafruit-ampy --no-cache-dir
 
 
 COPY . /app
 WORKDIR /app
 
+CMD ["esptool.py"]

@@ -104,6 +104,7 @@ class SectionAssertion:
             # to_text = invert_zero_one(to_text)
         return to_text
 
+    # @todo: should return bool
     def vote(self, given: ValueSection):
         expected = self.compute_expected_bin()
         given_bit = given.bit_value

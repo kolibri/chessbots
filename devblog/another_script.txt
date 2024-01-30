@@ -1,0 +1,138 @@
+How to navigate chessbots:
+
+Hello. 
+
+This will be an introduction into my pet project and my solution to it's first big milestone.
+
+
+#Project description
+
+...
+
+So, the first problem is, how do the bots navigate.
+Let's have a small increasing of drama by showing some failed ideas before revealing the solution:
+- Triangulation with some radio emitters and recievers: Way over my understanding of how these things work. Maybe for future versions.
+- Place RFID stickers on the board and readers on the bots. Did not work. And the more I think about it, the more silly it sounds to me.
+- A camera above the field, that runs some computer vision. But I do not want to film anyone, who just crosses the board. Also, you need to have a mount for this.
+- And we don'T talk about tracking movement, because the initial position is known at least. Does not work, even with the most accurate motors, wheels, etc. Just think about the case, someone picks a piece up and dos not place it in the exact way it was before.
+
+So, the solution is the following:
+We place an array of markers on the board, and a camera under each robot. By reading the markers, the bot is able to tell it's position on the board.
+
+
+How do these markers work:
+We use small rings and full dots: [img]
+They represent zeros and ones, so now we can store binary information in a raster.
+
+So let's rephrase our problem:
+We have a raster of binary markers on our board. each robot can scan a small section of this raster and should be able to tell, where it is on this raster.
+
+
+Which leads to: how small is this section, and how can it tell the robots position.
+To just throw some numbers, we go with a matrix of 800 by 800 binary markers for the whole board, so 80x80 markers for each field (remember the boarder fields). And following this divided by ten pattern, let's say, we use 8x8 as "how small is this section" as a starting point.
+
+
+And now to "how can it tell it's position"
+For this, lets take some steps backwards: There are two ways, I come up with to solve this: a non repeating pattern for the board, so we can simply "search" for the snapshot in our pattern. This was a nice to setup the first code with, this is of course the "brute force" idea of it.
+So, it would be nice, if the snapshot itself could say, where it is.
+The idea is, to divide the board into smaller grids of 8x8 marker squares to a subset of 100x100 squares. This where not particulary the numbers I started with, but this does not mean, that I more or less took them by accident and realised much later how well they fit in place.
+
+So, we got 100x100 = 10.000 fields to address. In binary, we need 14 markers for that (10000 = 0b10011100010000).
+
+Playing around with this, I quickly come around with: 
+
+max value to store:
+10011100010000
+
+10
+0111
+0001
+0000
+
+I only need ledd than a quarter to store this position. Maybe I can play around with the board dividing rules. But I spare that to you, as it got me to nothing other to the realizazion, I already got the solution laying on front of me.
+So how to deal with this. I thought about data redundancy, to avoid reading errors, as I got no experience with reading camera pictures.
+Wich lead to something like this:
+
+
+10  10   
+01110111 
+00010001 
+00000000 
+10  10   
+01110111 
+00010001 
+00000000 
+
+We repeat the stored value four times in our minimal section. And we have space left to play around with. So i come round with this layout:
+
+1f: which subsquare is this
+234567890abcde: binary position value
+
+
+
+1234 4321
+5678 8765
+90ab ba09
+cdef fedc
+
+cdef fedc
+90ab ba09
+5678 8765
+1234 4321
+
+
+example:
+
+0100 0010
+1110 0111
+0010 0100
+0000 1000
+
+0000 1000
+0010 0100
+1110 0111
+1100 0011
+
+
+
+
+
+
+1234 4321
+5678 8765
+90ab ba09
+cdef fedc
+
+cdef fedc
+90ab ba09
+5678 8765
+1234 4321
+
+
+
+
+
+Each robot can read appr. 10x10 markers best. To be safe and for nicer numbers, we go with 8x8 as a "this is what we must get an minimum from the camera".
+
+
+
+At this point, I highly recommend this video, by 3Blue1Brown. It does not explain my solution, and I hope I got a way of explaining it without you needing to watch is video, [...]
+
+
+
+
+Let's don't get to confused with dimensions now, just let's assume, we can read approximaly a gatter of 10 by 10 fields or so, if the robots camera is in ideal position. Keeping in mind, that the camera may rotate freely.
+
+So let's rephrase our problem:
+We have a raster of binary markers on our board. each robot can scan a small section of this raster and should be able to tell, where it is on this raster.
+Each robot can read appr. 10x10 markers best. To be safe and for nicer numbers, we go with 8x8 as a "this is what we must get an minimum from the camera".
+
+
+
+
+
+
+10
+0111
+0001
+0000

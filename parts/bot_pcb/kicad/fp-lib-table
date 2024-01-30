@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "ESP32-CAM")(type "KiCad")(uri "/home/ko/projects/chessbots/parts/bot_pcb/kicad")(options "")(descr ""))
+)
