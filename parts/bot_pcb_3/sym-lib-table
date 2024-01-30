@@ -1,4 +1,0 @@
-(sym_lib_table
-  (version 7)
-  (lib (name "esp32-cam")(type "KiCad")(uri "${KIPRJMOD}/ESP32-CAM.kicad_sym")(options "")(descr ""))
-)
